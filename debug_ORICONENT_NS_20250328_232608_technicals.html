@@ -1,0 +1,3273 @@
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self'; image-src https:*; child-src 'none';">-->
+  <meta property="og:site_name" content="Trendlyne.com">
+  
+    
+
+<meta name="description" content="Oricon Enterprises technical analysis - SMA, EMA, Price Change analysis, 52 Week high low, Beta and volume delivery analysis of end of the day">
+
+
+
+
+  <title>Oricon Enterprises Ltd. RSI, Moving Averages, Technical Analysis MACD, MFI, Stochastic and Candlesticks of end of the day</title>
+
+  
+  
+    <link href="//cdnjs.cloudflare.com/" rel="preconnect">
+  
+    <link href="//ajax.googleapis.com/" rel="preconnect">
+  
+    <link href="//www.googletagmanager.com/" rel="preconnect">
+  
+    <link href="//fonts.gstatic.com/" rel="preconnect">
+  
+    <link href="//www.google-analytics.com/" rel="preconnect">
+  
+    <link href="//trendlyne-media-mumbai-new.s3.amazonaws.com/" rel="preconnect">
+  
+    <link href="//s3-ap-south-1.amazonaws.com/" rel="preconnect">
+  
+    <link href="//cdn.datatables.net" rel="preconnect">
+  
+    <link href="//fonts.googleapis.com" rel="preconnect">
+  
+    <link href="https://cdn-static.trendlyne.com/static/" rel="preconnect">
+  
+
+  
+  
+    <link href="//cdnjs.cloudflare.com/" rel="dns-prefetch">
+  
+    <link href="//www.googletagmanager.com/" rel="dns-prefetch">
+  
+    <link href="//www.google-analytics.com/" rel="dns-prefetch">
+  
+    <link href="//trendlyne-media-mumbai-new.s3.amazonaws.com/" rel="dns-prefetch">
+  
+    <link href="//s3-ap-south-1.amazonaws.com/" rel="dns-prefetch">
+  
+    <link href="//cdn.datatables.net" rel="dns-prefetch">
+  
+
+  <link rel="apple-touch-icon-precomposed" sizes="57x57" href="https://cdn-static.trendlyne.com/static/favicons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://cdn-static.trendlyne.com/static/favicons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://cdn-static.trendlyne.com/static/favicons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://cdn-static.trendlyne.com/static/favicons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon-precomposed" sizes="60x60" href="https://cdn-static.trendlyne.com/static/favicons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon-precomposed" sizes="120x120" href="https://cdn-static.trendlyne.com/static/favicons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon-precomposed" sizes="76x76" href="https://cdn-static.trendlyne.com/static/favicons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://cdn-static.trendlyne.com/static/favicons/apple-touch-icon-152x152.png">
+  <link rel="icon" type="image/png" href="https://cdn-static.trendlyne.com/static/favicons/favicon-196x196.png" sizes="196x196">
+  <link rel="icon" type="image/png" href="https://cdn-static.trendlyne.com/static/favicons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="https://cdn-static.trendlyne.com/static/favicons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="https://cdn-static.trendlyne.com/static/favicons/favicon-16x16.png" sizes="16x16">
+  <link rel="icon" type="image/png" href="https://cdn-static.trendlyne.com/static/favicons/favicon-128.png" sizes="128x128">
+  <meta name="application-name" content="&nbsp;">
+  <meta name="msapplication-TileColor" content="#FFFFFF">
+  <meta name="msapplication-TileImage" content="https://cdn-static.trendlyne.com/static/favicons/mstile-144x144.png">
+  <meta name="msapplication-square70x70logo" content="https://cdn-static.trendlyne.com/static/favicons/mstile-70x70.png">
+  <meta name="msapplication-square150x150logo" content="https://cdn-static.trendlyne.com/static/favicons/mstile-150x150.png">
+  <meta name="msapplication-wide310x150logo" content="https://cdn-static.trendlyne.com/static/favicons/mstile-310x150.png">
+  <meta name="msapplication-square310x310logo" content="https://cdn-static.trendlyne.com/static/favicons/mstile-310x310.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.2/css/bootstrap.min.css">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Roboto:100,400,700,500|Droid+Sans:400,700|Lato:400,700,900&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,400,700,500|Droid+Sans:400,700|Lato:400,700,900&amp;display=swap">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+  
+  
+
+    <link rel="stylesheet" href="https://cdn-static.trendlyne.com/static/CACHE/css/output.d8076b72c12f.css" type="text/css">
+
+  <link rel="stylesheet" href="https://cdn-static.trendlyne.com/static/CACHE/css/output.9c202514fde5.css" type="text/css">
+
+  
+    
+  
+    
+        
+
+
+
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "Oricon Enterprises Ltd.",
+        
+        "url": "/equity/technical-analysis/ORICONENT/1752/oricon-enterprises-ltd/",
+        
+        "review": {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "worstRating": "0",
+            "bestRating": "5",
+            "ratingValue": "3.3"
+          },
+          "name": "Oricon Enterprises Ltd.",
+          "author": {
+            "@type": "Organization",
+            "name": "Trendlyne DVM scores"
+          },
+          "datePublished": "2025-03-28T10:01:00+00:00",
+          "reviewBody": "",
+          "publisher": {
+            "@type": "Organization",
+            "name": "Trendlyne DVM scores",
+            "sameAs": "https://trendlyne.com"
+          }
+        }
+      }
+</script>
+
+    
+
+
+  
+  
+
+
+  
+  
+
+
+
+
+
+<style type="text/css">:root {
+  --toastify-color-light: #fff;
+  --toastify-color-dark: #121212;
+  --toastify-color-info: #3498db;
+  --toastify-color-success: #07bc0c;
+  --toastify-color-warning: #f1c40f;
+  --toastify-color-error: #e74c3c;
+  --toastify-color-transparent: rgba(255, 255, 255, 0.7);
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-icon-color-error: var(--toastify-color-error);
+  --toastify-toast-width: 320px;
+  --toastify-toast-background: #fff;
+  --toastify-toast-min-height: 64px;
+  --toastify-toast-max-height: 800px;
+  --toastify-font-family: sans-serif;
+  --toastify-z-index: 9999;
+  --toastify-text-color-light: #757575;
+  --toastify-text-color-dark: #fff;
+  --toastify-text-color-info: #fff;
+  --toastify-text-color-success: #fff;
+  --toastify-text-color-warning: #fff;
+  --toastify-text-color-error: #fff;
+  --toastify-spinner-color: #616161;
+  --toastify-spinner-color-empty-area: #e0e0e0;
+  --toastify-color-progress-light: linear-gradient(
+    to right,
+    #4cd964,
+    #5ac8fa,
+    #007aff,
+    #34aadc,
+    #5856d6,
+    #ff2d55
+  );
+  --toastify-color-progress-dark: #bb86fc;
+  --toastify-color-progress-info: var(--toastify-color-info);
+  --toastify-color-progress-success: var(--toastify-color-success);
+  --toastify-color-progress-warning: var(--toastify-color-warning);
+  --toastify-color-progress-error: var(--toastify-color-error);
+}
+
+.Toastify__toast-container {
+  z-index: var(--toastify-z-index);
+  -webkit-transform: translate3d(0, 0, var(--toastify-z-index) px);
+  position: fixed;
+  padding: 4px;
+  width: var(--toastify-toast-width);
+  box-sizing: border-box;
+  color: #fff;
+}
+.Toastify__toast-container--top-left {
+  top: 1em;
+  left: 1em;
+}
+.Toastify__toast-container--top-center {
+  top: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.Toastify__toast-container--top-right {
+  top: 1em;
+  right: 1em;
+}
+.Toastify__toast-container--bottom-left {
+  bottom: 1em;
+  left: 1em;
+}
+.Toastify__toast-container--bottom-center {
+  bottom: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.Toastify__toast-container--bottom-right {
+  bottom: 1em;
+  right: 1em;
+}
+
+@media only screen and (max-width : 480px) {
+  .Toastify__toast-container {
+    width: 100vw;
+    padding: 0;
+    left: 0;
+    margin: 0;
+  }
+  .Toastify__toast-container--top-left, .Toastify__toast-container--top-center, .Toastify__toast-container--top-right {
+    top: 0;
+    transform: translateX(0);
+  }
+  .Toastify__toast-container--bottom-left, .Toastify__toast-container--bottom-center, .Toastify__toast-container--bottom-right {
+    bottom: 0;
+    transform: translateX(0);
+  }
+  .Toastify__toast-container--rtl {
+    right: 0;
+    left: initial;
+  }
+}
+.Toastify__toast {
+  position: relative;
+  min-height: var(--toastify-toast-min-height);
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 10px 0 rgba(0, 0, 0, 0.1), 0 2px 15px 0 rgba(0, 0, 0, 0.05);
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: justify;
+      justify-content: space-between;
+  max-height: var(--toastify-toast-max-height);
+  overflow: hidden;
+  font-family: var(--toastify-font-family);
+  cursor: pointer;
+  direction: ltr;
+}
+.Toastify__toast--rtl {
+  direction: rtl;
+}
+.Toastify__toast-body {
+  margin: auto 0;
+  -ms-flex: 1 1 auto;
+      flex: 1 1 auto;
+  padding: 6px;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+      align-items: center;
+}
+.Toastify__toast-body > div:last-child {
+  -ms-flex: 1;
+      flex: 1;
+}
+.Toastify__toast-icon {
+  -webkit-margin-end: 10px;
+          margin-inline-end: 10px;
+  width: 20px;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.Toastify--animate {
+  animation-fill-mode: both;
+  animation-duration: 0.7s;
+}
+
+.Toastify--animate-icon {
+  animation-fill-mode: both;
+  animation-duration: 0.3s;
+}
+
+@media only screen and (max-width : 480px) {
+  .Toastify__toast {
+    margin-bottom: 0;
+    border-radius: 0;
+  }
+}
+.Toastify__toast-theme--dark {
+  background: var(--toastify-color-dark);
+  color: var(--toastify-text-color-dark);
+}
+.Toastify__toast-theme--light {
+  background: var(--toastify-color-light);
+  color: var(--toastify-text-color-light);
+}
+.Toastify__toast-theme--colored.Toastify__toast--default {
+  background: var(--toastify-color-light);
+  color: var(--toastify-text-color-light);
+}
+.Toastify__toast-theme--colored.Toastify__toast--info {
+  color: var(--toastify-text-color-info);
+  background: var(--toastify-color-info);
+}
+.Toastify__toast-theme--colored.Toastify__toast--success {
+  color: var(--toastify-text-color-success);
+  background: var(--toastify-color-success);
+}
+.Toastify__toast-theme--colored.Toastify__toast--warning {
+  color: var(--toastify-text-color-warning);
+  background: var(--toastify-color-warning);
+}
+.Toastify__toast-theme--colored.Toastify__toast--error {
+  color: var(--toastify-text-color-error);
+  background: var(--toastify-color-error);
+}
+
+.Toastify__progress-bar-theme--light {
+  background: var(--toastify-color-progress-light);
+}
+.Toastify__progress-bar-theme--dark {
+  background: var(--toastify-color-progress-dark);
+}
+.Toastify__progress-bar--info {
+  background: var(--toastify-color-progress-info);
+}
+.Toastify__progress-bar--success {
+  background: var(--toastify-color-progress-success);
+}
+.Toastify__progress-bar--warning {
+  background: var(--toastify-color-progress-warning);
+}
+.Toastify__progress-bar--error {
+  background: var(--toastify-color-progress-error);
+}
+.Toastify__progress-bar-theme--colored.Toastify__progress-bar--info, .Toastify__progress-bar-theme--colored.Toastify__progress-bar--success, .Toastify__progress-bar-theme--colored.Toastify__progress-bar--warning, .Toastify__progress-bar-theme--colored.Toastify__progress-bar--error {
+  background: var(--toastify-color-transparent);
+}
+
+.Toastify__close-button {
+  color: #fff;
+  background: transparent;
+  outline: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: 0.3s ease;
+  -ms-flex-item-align: start;
+      align-self: flex-start;
+}
+.Toastify__close-button--light {
+  color: #000;
+  opacity: 0.3;
+}
+.Toastify__close-button > svg {
+  fill: currentColor;
+  height: 16px;
+  width: 14px;
+}
+.Toastify__close-button:hover, .Toastify__close-button:focus {
+  opacity: 1;
+}
+
+@keyframes Toastify__trackProgress {
+  0% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+.Toastify__progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  z-index: var(--toastify-z-index);
+  opacity: 0.7;
+  transform-origin: left;
+}
+.Toastify__progress-bar--animated {
+  animation: Toastify__trackProgress linear 1 forwards;
+}
+.Toastify__progress-bar--controlled {
+  transition: transform 0.2s;
+}
+.Toastify__progress-bar--rtl {
+  right: 0;
+  left: initial;
+  transform-origin: right;
+}
+
+.Toastify__spinner {
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border: 2px solid;
+  border-radius: 100%;
+  border-color: var(--toastify-spinner-color-empty-area);
+  border-right-color: var(--toastify-spinner-color);
+  animation: Toastify__spin 0.65s linear infinite;
+}
+
+@keyframes Toastify__bounceInRight {
+  from, 60%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  from {
+    opacity: 0;
+    transform: translate3d(3000px, 0, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(-25px, 0, 0);
+  }
+  75% {
+    transform: translate3d(10px, 0, 0);
+  }
+  90% {
+    transform: translate3d(-5px, 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes Toastify__bounceOutRight {
+  20% {
+    opacity: 1;
+    transform: translate3d(-20px, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(2000px, 0, 0);
+  }
+}
+@keyframes Toastify__bounceInLeft {
+  from, 60%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+    opacity: 0;
+    transform: translate3d(-3000px, 0, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(25px, 0, 0);
+  }
+  75% {
+    transform: translate3d(-10px, 0, 0);
+  }
+  90% {
+    transform: translate3d(5px, 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes Toastify__bounceOutLeft {
+  20% {
+    opacity: 1;
+    transform: translate3d(20px, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-2000px, 0, 0);
+  }
+}
+@keyframes Toastify__bounceInUp {
+  from, 60%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 3000px, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, -20px, 0);
+  }
+  75% {
+    transform: translate3d(0, 10px, 0);
+  }
+  90% {
+    transform: translate3d(0, -5px, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__bounceOutUp {
+  20% {
+    transform: translate3d(0, -10px, 0);
+  }
+  40%, 45% {
+    opacity: 1;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -2000px, 0);
+  }
+}
+@keyframes Toastify__bounceInDown {
+  from, 60%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -3000px, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, 25px, 0);
+  }
+  75% {
+    transform: translate3d(0, -10px, 0);
+  }
+  90% {
+    transform: translate3d(0, 5px, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes Toastify__bounceOutDown {
+  20% {
+    transform: translate3d(0, 10px, 0);
+  }
+  40%, 45% {
+    opacity: 1;
+    transform: translate3d(0, -20px, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 2000px, 0);
+  }
+}
+.Toastify__bounce-enter--top-left, .Toastify__bounce-enter--bottom-left {
+  animation-name: Toastify__bounceInLeft;
+}
+.Toastify__bounce-enter--top-right, .Toastify__bounce-enter--bottom-right {
+  animation-name: Toastify__bounceInRight;
+}
+.Toastify__bounce-enter--top-center {
+  animation-name: Toastify__bounceInDown;
+}
+.Toastify__bounce-enter--bottom-center {
+  animation-name: Toastify__bounceInUp;
+}
+
+.Toastify__bounce-exit--top-left, .Toastify__bounce-exit--bottom-left {
+  animation-name: Toastify__bounceOutLeft;
+}
+.Toastify__bounce-exit--top-right, .Toastify__bounce-exit--bottom-right {
+  animation-name: Toastify__bounceOutRight;
+}
+.Toastify__bounce-exit--top-center {
+  animation-name: Toastify__bounceOutUp;
+}
+.Toastify__bounce-exit--bottom-center {
+  animation-name: Toastify__bounceOutDown;
+}
+
+@keyframes Toastify__zoomIn {
+  from {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes Toastify__zoomOut {
+  from {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+  to {
+    opacity: 0;
+  }
+}
+.Toastify__zoom-enter {
+  animation-name: Toastify__zoomIn;
+}
+
+.Toastify__zoom-exit {
+  animation-name: Toastify__zoomOut;
+}
+
+@keyframes Toastify__flipIn {
+  from {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+  60% {
+    transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+    opacity: 1;
+  }
+  80% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+  }
+  to {
+    transform: perspective(400px);
+  }
+}
+@keyframes Toastify__flipOut {
+  from {
+    transform: perspective(400px);
+  }
+  30% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+    opacity: 1;
+  }
+  to {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    opacity: 0;
+  }
+}
+.Toastify__flip-enter {
+  animation-name: Toastify__flipIn;
+}
+
+.Toastify__flip-exit {
+  animation-name: Toastify__flipOut;
+}
+
+@keyframes Toastify__slideInRight {
+  from {
+    transform: translate3d(110%, 0, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__slideInLeft {
+  from {
+    transform: translate3d(-110%, 0, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__slideInUp {
+  from {
+    transform: translate3d(0, 110%, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__slideInDown {
+  from {
+    transform: translate3d(0, -110%, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__slideOutRight {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(110%, 0, 0);
+  }
+}
+@keyframes Toastify__slideOutLeft {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(-110%, 0, 0);
+  }
+}
+@keyframes Toastify__slideOutDown {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(0, 500px, 0);
+  }
+}
+@keyframes Toastify__slideOutUp {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(0, -500px, 0);
+  }
+}
+.Toastify__slide-enter--top-left, .Toastify__slide-enter--bottom-left {
+  animation-name: Toastify__slideInLeft;
+}
+.Toastify__slide-enter--top-right, .Toastify__slide-enter--bottom-right {
+  animation-name: Toastify__slideInRight;
+}
+.Toastify__slide-enter--top-center {
+  animation-name: Toastify__slideInDown;
+}
+.Toastify__slide-enter--bottom-center {
+  animation-name: Toastify__slideInUp;
+}
+
+.Toastify__slide-exit--top-left, .Toastify__slide-exit--bottom-left {
+  animation-name: Toastify__slideOutLeft;
+}
+.Toastify__slide-exit--top-right, .Toastify__slide-exit--bottom-right {
+  animation-name: Toastify__slideOutRight;
+}
+.Toastify__slide-exit--top-center {
+  animation-name: Toastify__slideOutUp;
+}
+.Toastify__slide-exit--bottom-center {
+  animation-name: Toastify__slideOutDown;
+}
+
+@keyframes Toastify__spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}</style><style type="text/css">.re-card {
+  padding: 1rem 0;
+  border-radius: 3px;
+  border: solid 1px #ebeef2;
+  background-color: #ffffff;
+}
+
+.re-card .re-card-title {
+  margin-bottom: 1.875rem;
+  padding: 0.5625rem 0.5rem 0.5rem 1.5rem;
+  border-radius: 3px;
+  background-color: #f5f6f8;
+  width: fit-content;
+  font-size: 0.6875rem;
+  font-weight: bold;
+  line-height: 1;
+  letter-spacing: 0.0094rem;
+  text-transform: uppercase;
+  color: #202020;
+}
+.react-tech-value {
+  color: #202020;
+}
+.react-tech-value.positive {
+  color: #31a745 !important;
+}
+.react-tech-value.negative {
+  color: #ff4f55 !important;
+}
+.react-tech-value.neutral {
+  color: #f9b233 !important;
+}
+.react-tech-value-with-back {
+  color: #7f8899;
+  background-color: #f3f4fa;
+  display: flex;
+  align-items: center;
+}
+.react-tech-value-with-back.positive {
+  background-color: rgba(0, 162, 91, 0.05);
+  color: #00a25b;
+}
+.react-tech-value-with-back.negative {
+  background-color: rgba(235, 59, 0, 0.05);
+  color: #eb3b00;
+}
+.react-tech-value-with-back.neutral {
+  color: #f7941e;
+  background-color: rgba(247, 148, 30, 0.05);
+}
+.react-trendlyne-technical {
+  position: relative;
+  font-family: "Lato";
+  column-count: 2;
+  column-gap: 1em;
+  padding: 0;
+}
+.tech-analysis-article{
+  display: inline-block;
+  padding: 0.5em;
+  width: 100%;
+}
+.re-loader-container {
+  position: absolute;
+  z-index: 1;
+  background: rgb(201 201 201 / 15%);
+  width: 98%;
+  height: 99%;
+  margin: 0 1rem;
+  color: #020202;
+  top: 0;
+  left: 0;
+}
+.tech-title {
+  font-size: 1.5rem;
+}
+.technical-page-description {
+  text-align: center;
+}
+
+/*Media Query*/
+@media only screen and (max-width: 768px){
+  .react-trendlyne-technical {
+      column-count: 1;
+  }
+}</style><style type="text/css">.react-technical-analysis .technical-card-parent {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(10.625rem, 1fr));
+  list-style-type: none;
+  margin: 0 !important;
+}
+.react-technical-analysis .tech-analysis-card {
+  padding: 0.75rem 0.25rem 0.25rem;
+  border-radius: 4px;
+  border: solid 0.5px var(--borderOpaque, #ebeef2) ;
+  display: grid;
+  grid-template-rows: 2.5rem 2.5rem auto;
+  grid-template-columns: 100%;
+  justify-content: start;
+}
+.react-technical-analysis .tech-analysis-card .card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 0.5rem;
+  margin-bottom: 1rem;
+}
+.react-technical-analysis .tech-analysis-card .card-heading > h3 {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: var(--contentPrimary,#1a1c3a);
+}
+.react-technical-analysis .tech-analysis-card .tech-card-score {
+  margin: 0 0 1rem 0.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 0.75;
+  letter-spacing: 0.0625rem;
+}
+.react-technical-analysis .information-banner {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  letter-spacing: 0.0031rem;
+  padding: 0.5rem 0.625rem 0.5rem 0.5rem;
+  border-radius: 3px;
+  margin-bottom: 0;
+  background-color: var(--red50,rgba(247, 148, 30, 0.05));
+}
+
+.last-updated {
+  color: #7f8899;
+  font-size: 0.85rem;
+  letter-spacing: 0.0031rem;
+  line-height: 1.6;
+  text-align: left;
+  padding-left: 0.5rem;
+}
+
+@media only screen and (max-width: 576px) {
+  .react-technical-analysis .technical-card-parent {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+
+
+@media only screen and (max-width: 1084px){
+  .react-technical-analysis .technical-card-parent {
+      grid-template-columns: repeat(2, minmax(9.625rem, 1fr)) !important;
+  }
+}</style><style type="text/css">.react-candlestick-indicator .re-legend-title {
+  margin-bottom: 1.875rem;
+  padding: 0.5625rem 0.5rem 0.5rem 1.5rem;
+  border-radius: 3px;
+  background-color: #f5f6f8;
+  width: fit-content;
+  font-size: 0.6875rem;
+  font-weight: bold;
+  line-height: 1;
+  letter-spacing: 0.0094rem;
+  text-transform: uppercase;
+  color: #202020;
+}
+
+.react-candlestick-indicator .re-legend-container,
+.react-candlestick-indicator .re-legend-indicator {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.react-candlestick-indicator .re-legend-container {
+  justify-content: flex-end;
+}
+
+.react-candlestick-indicator .re-legend-indicator {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.0313rem;
+}
+.react-candlestick-indicator .re-legend-indicator > div {
+  color:var(--contentPrimary,#0b0b0b);
+  margin-left: 0.5625rem;
+}
+
+.react-candlestick-indicator .re-positive-indicator {
+  background-color: #00a25b;
+  width: 0.8125rem;
+  height: 0.375rem;
+}
+.react-candlestick-indicator .re-negative-indicator {
+  background-color: #eb3b00;
+  width: 0.8125rem;
+  height: 0.375rem;
+}
+.react-candlestick-indicator .re-neutral-indicator {
+  background-color: #f7941e;
+  width: 0.8125rem;
+  height: 0.375rem;
+}
+</style><style type="text/css">
+.react-candlesticks .re-candlestick-list {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15.625rem, 1fr));
+  list-style-type: none;
+  margin: 0 !important;
+}
+.react-candlesticks .re-candlestick-list-item {
+  border-radius: 4px;
+  border: solid 0.5px var(--borderOpaque,#ebeef2);
+  padding: 1rem;
+}
+.react-candlesticks .re-candlestick-list-item-title {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color:var(--contentPrimary,#1a1c3a);
+  margin-bottom: 1rem;
+}
+
+.react-candlesticks .re-candlestick-item-content,
+.react-candlesticks .candlestick-name {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.0313rem;
+  color:var(--contentPrimary,#0b0b0b);
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+.react-candlesticks .re-candlestick-item-content .positive-indicator,
+.react-candlesticks .re-candlestick-item-content .negative-indicator {
+  width: 0.8125rem;
+  height: 0.375rem;
+}
+.react-candlesticks .positive-indicator {
+  background-color: #00a25b;
+}
+.react-candlesticks .negative-indicator {
+  background-color: #eb3b00;
+}
+.react-candlesticks .re-candlestick-item-content a {
+  color:var(--contentPrimary,#0b0b0b);
+  margin-left: 0.5625rem;
+  text-decoration: none;
+}
+.react-candlesticks .re-candle-stick-banner {
+  padding: 1rem 0.25rem 0.25rem;
+  border-radius: 3px;
+  text-align: left;
+}
+.react-candlesticks .re-info-banner {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  letter-spacing: 0.0031rem;
+  padding: 0.5rem 0.625rem 0.5rem 0.5rem;
+  border-radius: 3px;
+  margin-bottom: 0;
+  color: #7f8899;
+  background-color: #f3f4fa;
+}
+</style><style type="text/css">.react-ema-sma .information-banner {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  letter-spacing: 0.0031rem;
+  padding: 0.5rem 0.625rem 0.5rem 0.5rem;
+  border-radius: 3px;
+  margin: 0 0.25rem 0.5rem 0.25rem;
+}
+
+.react-ema-sma .ema-sma-table-container {
+  padding: 0 1.5rem !important;
+}
+.react-ema-sma .br-black {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.36;
+}
+
+.react-ema-sma .butterfly-chart-container {
+  border-right: solid 1px #ebeef2;
+}
+
+.react-ema-sma .relative {
+  position: relative;
+}
+
+.react-ema-sma .tech-pointer {
+  width: 100%;
+  height: 3rem;
+  position: absolute;
+  top: -5px;
+  left: -5px;
+}
+
+.react-ema-sma .img-pointer {
+  height: 60px !important;
+  width: auto !important;
+  position: absolute;
+  transition: all 0.5s;
+}
+
+.react-ema-sma .moving-average {
+  display: flex;
+  padding-top: 0.625rem;
+}
+
+.react-ema-sma .tag-block {
+  width: 1.375rem;
+  height: 1rem;
+  border-radius: 3px;
+}
+
+.react-ema-sma .tag-block.bg-positive {
+  background-color: #00a25b;
+}
+
+.react-ema-sma .tag-block.bg-negative {
+  background-color: #fc5a5a;
+}
+
+.react-ema-sma .moving-average .moving-average-heading {
+  margin: 0 auto 0 0.6875rem !important;
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color:var(--contentPrimary,#202020);
+}
+
+.react-ema-sma .bullish-span.pull-xs-right,
+.react-ema-sma .bearish-span.pull-xs-right {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  text-align: right;
+  color:var(--contentPrimary,#202020);
+}
+
+.react-ema-sma .ema-sma-btn {
+  letter-spacing: 0.56px;
+}
+
+.react-ema-sma .ema-sma-btn label.active {
+  background-color: #006aff;
+  color: #fff;
+}
+
+.react-ema-sma .ema-sma-btn label {
+  background-color:var(--backgroundSecondary,#f3f3f3);
+  color:var(--contentSecondary,#9ea6b7);
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.react-ema-sma .ema-sma-btn label:first-child {
+  border-radius: 20px 0 0 20px;
+}
+
+.react-ema-sma .ema-sma-btn label:last-child {
+  border-radius: 0 20px 20px 0;
+}
+
+.react-ema-sma .ema-sma-section {
+  font-size: 0.85rem;
+  line-height: 2.5;
+  color:var(--contentPrimary,#202020) ;
+}
+.react-ema-sma .two-column-container {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f5f6f8;
+}
+.two-column-container .technical-param {
+  line-height: 1.5;
+  padding: 0.5rem 0.5rem 0.5rem 0;
+}
+.react-ema-sma .two-column-container:last-child {
+  border: none;
+}
+@media screen and (max-width: 425px) {
+  .react-stock-oscillator .oscillator-table-container,
+  .react-ema-sma .ema-sma-table-container {
+    margin-top: 1.5rem;
+  }
+}
+</style><style type="text/css">
+.react-pivot-card .pivot-value {
+  text-align: center;
+}
+.react-pivot-card .pivot-point {
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+.react-pivot-card .pivot-section-headings {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.035rem;
+  color: var(--contentPrimary,#202020);
+}
+
+.react-pivot-card .pivot-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.react-pivot-card .pivot-row span:nth-child(1) {
+  font-size: 0.75rem;
+  line-height: 1.1;
+  color: var(--contentPrimary,#202020);
+  font-weight: 550;
+}
+.react-pivot-card .pivot-row span:nth-child(2) {
+  line-height: 1.33;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.react-pivot-card .pivot-banner {
+  padding: 1rem 0.25rem 0.25rem;
+  border-radius: 3px;
+  text-align: left;
+}
+
+.react-pivot-card .information-banner {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  letter-spacing: 0.0031rem;
+  padding: 0.5rem 0.625rem 0.5rem 0.5rem;
+  border-radius: 3px;
+  margin-bottom: 0;
+}
+
+.react-pivot-card .br-black {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.36;
+}</style><style type="text/css">:root {
+    --price-change-margin: 0.75rem;
+}
+
+.re-price-change-analysis .price-change-section {
+    display: grid;
+    gap: 2rem 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    list-style-type: none;
+}
+.re-price-change-analysis .price-change-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.35rem;
+    margin-bottom: var(--price-change-margin);
+}
+.re-price-change-analysis .price-change-section .priceChange {
+    color: #202020;
+    text-align: center;
+    font-weight: 700;
+}
+.re-price-change-analysis .positive > i,
+.re-price-change-analysis .negative > i {
+    margin-right: 5px;
+}
+.re-price-change-analysis .price-change-section .subtitle {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    margin-bottom: 0rem !important;
+    text-align: center;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.re-price-change-analysis .current-price-wrapper {
+    position: relative;
+    margin-bottom: calc(2.45rem + var(--price-change-margin));
+}
+.re-price-change-analysis .current-ltp {
+    position: absolute;
+    font-size: 0.75rem;
+}
+.re-price-change-analysis .price-change-section .progress-indicator {
+    max-width: 95%;
+    margin: auto;
+}
+
+.re-price-change-analysis .price-change-section .new-indicator {
+    height: 5px;
+    border-radius: 4px;
+    background: #c8d9f7;
+    position: relative;
+}
+.re-price-change-analysis .price-change-section .indicator-circle {
+    background: #006aff;
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    position: absolute;
+    left: 10%;
+    top: -2px;
+}
+.re-price-change-analysis .price-change-section .indicator-circle::before {
+    content: '';
+    background: #c5cee0;
+    width: 2px;
+    height: 16px;
+    position: absolute;
+    top: -16px;
+    left: 4px;
+}
+
+.re-price-change-analysis
+    .price-change-section
+    .progress-indicator
+    .tl-progress-text {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    letter-spacing: 0.0031rem;
+    color: #000;
+}
+.re-price-change-analysis
+    .price-change-section
+    .progress-indicator
+    .tl-progress-text.tl-progress-hl {
+    color: #7f8899;
+}
+.re-price-change-analysis .price-change-section .tl-progress-se {
+    margin-top: 0.5rem;
+}
+
+.re-price-change-analysis .list-group {
+    list-style: none;
+    padding: 0.25rem;
+}
+
+.list-group .card-banner {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    letter-spacing: 0.0031rem;
+    padding: 0.5rem 0.625rem 0.5rem 0.5rem;
+    border-radius: 3px;
+    margin-bottom: 0;
+    margin-top: 0.25rem;
+}
+</style><style type="text/css">.react-beta-section .beta-table {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  margin: 0 !important;
+  list-style-type: none;
+}
+.react-beta-section  .beta-card {
+  border-radius: 3px;
+  border: solid 1px #ebeef2;
+  background-color: #ffffff;
+  padding: 1rem;
+}
+
+.react-beta-section .time-period {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #1a1c3a;
+  margin-bottom: 1.875rem;
+}
+.react-beta-section .beta-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 0.75;
+  letter-spacing: 0.0625rem;
+}
+
+.react-beta-section .beta-banner {
+  padding: 1rem 0.25rem 0.25rem;
+  border-radius: 3px;
+  text-align: left;
+}
+
+
+.react-beta-section .information-banner {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  letter-spacing: 0.0031rem;
+  padding: 0.5rem 0.625rem 0.5rem 0.5rem;
+  border-radius: 3px;
+  margin-bottom: 0;
+}
+
+.react-beta-section .info-disclaimer {
+  font-size: 0.825rem;
+  padding: 0.75rem;
+  border-radius: 3px;
+  text-align: right;
+  color: #6e6e6e;
+}</style><style type="text/css">
+.react-volume-analysis .information-banner {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  letter-spacing: 0.0031rem;
+  padding: 0.5rem 0.625rem 0.5rem 0.5rem;
+  border-radius: 3px;
+  margin-bottom: 0;
+  width: 100%;
+  background-color: rgba(0, 162, 91, 0.05);
+  color: #00a25b;
+}
+.react-volume-analysis .volume-analysis-chart {
+  overflow: hidden;
+}
+.react-volume-analysis > a {
+  color: #7f8899;
+  font-size: 0.85rem;
+  letter-spacing: 0.0031rem;
+  line-height: 1.6;
+  text-align: right;
+}
+
+.price-change-section .progress-indicator progress[value]::-webkit-progress-bar {
+    background: #eee;
+    border-radius: 7px;
+}
+
+.price-change-section .progress-indicator progress[value].positive::-webkit-progress-value {
+    background: #00a25b;
+    border-radius: 7px;
+}
+
+.price-change-section .progress-indicator progress[value].negative::-webkit-progress-value {
+    background: #eb3b00;
+    border-radius: 7px;
+}
+
+.price-change-section .progress-indicator progress[value].positive::-moz-progress-bar {
+    background: #00a25b;
+    border-radius: 7px;
+}
+
+.price-change-section .progress-indicator progress[value].negative::-moz-progress-bar {
+    background: #eb3b00;
+    border-radius: 7px;
+}
+
+/* ---------------- delivery data below chart ----------------*/
+.react-volume-analysis .delivery-content {
+    background: #f3f8ff;
+    padding: 1rem 1.5rem;
+    margin: 0 1rem 0.75rem;
+    color: #202020;
+}
+
+.react-volume-analysis .dt-caption {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.56px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-top: 0;
+}
+
+.react-volume-analysis .dt-center {
+    text-align: center;
+}
+
+.react-volume-analysis .dt-right {
+    text-align: right;
+}
+
+.react-volume-analysis .delivery-table-head th,
+.react-volume-analysis .delivery-table-body td {
+    border: 0;
+    padding: 0;
+    width: 33.33%;
+}
+
+.react-volume-analysis .delivery-table-body td {
+    font-size: 1.125rem;
+}
+
+.react-volume-analysis .delivery-table-head th {
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+/* ---------------- end of delivery data below chart ---------------- */</style><style type="text/css">:root {
+  --toastify-color-light: #fff;
+  --toastify-color-dark: #121212;
+  --toastify-color-info: #3498db;
+  --toastify-color-success: #07bc0c;
+  --toastify-color-warning: #f1c40f;
+  --toastify-color-error: #e74c3c;
+  --toastify-color-transparent: rgba(255, 255, 255, 0.7);
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-icon-color-error: var(--toastify-color-error);
+  --toastify-toast-width: 320px;
+  --toastify-toast-background: #fff;
+  --toastify-toast-min-height: 64px;
+  --toastify-toast-max-height: 800px;
+  --toastify-font-family: sans-serif;
+  --toastify-z-index: 9999;
+  --toastify-text-color-light: #757575;
+  --toastify-text-color-dark: #fff;
+  --toastify-text-color-info: #fff;
+  --toastify-text-color-success: #fff;
+  --toastify-text-color-warning: #fff;
+  --toastify-text-color-error: #fff;
+  --toastify-spinner-color: #616161;
+  --toastify-spinner-color-empty-area: #e0e0e0;
+  --toastify-color-progress-light: linear-gradient(
+    to right,
+    #4cd964,
+    #5ac8fa,
+    #007aff,
+    #34aadc,
+    #5856d6,
+    #ff2d55
+  );
+  --toastify-color-progress-dark: #bb86fc;
+  --toastify-color-progress-info: var(--toastify-color-info);
+  --toastify-color-progress-success: var(--toastify-color-success);
+  --toastify-color-progress-warning: var(--toastify-color-warning);
+  --toastify-color-progress-error: var(--toastify-color-error);
+}
+
+.Toastify__toast-container {
+  z-index: var(--toastify-z-index);
+  -webkit-transform: translate3d(0, 0, var(--toastify-z-index) px);
+  position: fixed;
+  padding: 4px;
+  width: var(--toastify-toast-width);
+  box-sizing: border-box;
+  color: #fff;
+}
+.Toastify__toast-container--top-left {
+  top: 1em;
+  left: 1em;
+}
+.Toastify__toast-container--top-center {
+  top: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.Toastify__toast-container--top-right {
+  top: 1em;
+  right: 1em;
+}
+.Toastify__toast-container--bottom-left {
+  bottom: 1em;
+  left: 1em;
+}
+.Toastify__toast-container--bottom-center {
+  bottom: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.Toastify__toast-container--bottom-right {
+  bottom: 1em;
+  right: 1em;
+}
+
+@media only screen and (max-width : 480px) {
+  .Toastify__toast-container {
+    width: 100vw;
+    padding: 0;
+    left: 0;
+    margin: 0;
+  }
+  .Toastify__toast-container--top-left, .Toastify__toast-container--top-center, .Toastify__toast-container--top-right {
+    top: 0;
+    transform: translateX(0);
+  }
+  .Toastify__toast-container--bottom-left, .Toastify__toast-container--bottom-center, .Toastify__toast-container--bottom-right {
+    bottom: 0;
+    transform: translateX(0);
+  }
+  .Toastify__toast-container--rtl {
+    right: 0;
+    left: initial;
+  }
+}
+.Toastify__toast {
+  position: relative;
+  min-height: var(--toastify-toast-min-height);
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 10px 0 rgba(0, 0, 0, 0.1), 0 2px 15px 0 rgba(0, 0, 0, 0.05);
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: justify;
+      justify-content: space-between;
+  max-height: var(--toastify-toast-max-height);
+  overflow: hidden;
+  font-family: var(--toastify-font-family);
+  cursor: pointer;
+  direction: ltr;
+}
+.Toastify__toast--rtl {
+  direction: rtl;
+}
+.Toastify__toast-body {
+  margin: auto 0;
+  -ms-flex: 1 1 auto;
+      flex: 1 1 auto;
+  padding: 6px;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+      align-items: center;
+}
+.Toastify__toast-body > div:last-child {
+  -ms-flex: 1;
+      flex: 1;
+}
+.Toastify__toast-icon {
+  -webkit-margin-end: 10px;
+          margin-inline-end: 10px;
+  width: 20px;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.Toastify--animate {
+  animation-fill-mode: both;
+  animation-duration: 0.7s;
+}
+
+.Toastify--animate-icon {
+  animation-fill-mode: both;
+  animation-duration: 0.3s;
+}
+
+@media only screen and (max-width : 480px) {
+  .Toastify__toast {
+    margin-bottom: 0;
+    border-radius: 0;
+  }
+}
+.Toastify__toast-theme--dark {
+  background: var(--toastify-color-dark);
+  color: var(--toastify-text-color-dark);
+}
+.Toastify__toast-theme--light {
+  background: var(--toastify-color-light);
+  color: var(--toastify-text-color-light);
+}
+.Toastify__toast-theme--colored.Toastify__toast--default {
+  background: var(--toastify-color-light);
+  color: var(--toastify-text-color-light);
+}
+.Toastify__toast-theme--colored.Toastify__toast--info {
+  color: var(--toastify-text-color-info);
+  background: var(--toastify-color-info);
+}
+.Toastify__toast-theme--colored.Toastify__toast--success {
+  color: var(--toastify-text-color-success);
+  background: var(--toastify-color-success);
+}
+.Toastify__toast-theme--colored.Toastify__toast--warning {
+  color: var(--toastify-text-color-warning);
+  background: var(--toastify-color-warning);
+}
+.Toastify__toast-theme--colored.Toastify__toast--error {
+  color: var(--toastify-text-color-error);
+  background: var(--toastify-color-error);
+}
+
+.Toastify__progress-bar-theme--light {
+  background: var(--toastify-color-progress-light);
+}
+.Toastify__progress-bar-theme--dark {
+  background: var(--toastify-color-progress-dark);
+}
+.Toastify__progress-bar--info {
+  background: var(--toastify-color-progress-info);
+}
+.Toastify__progress-bar--success {
+  background: var(--toastify-color-progress-success);
+}
+.Toastify__progress-bar--warning {
+  background: var(--toastify-color-progress-warning);
+}
+.Toastify__progress-bar--error {
+  background: var(--toastify-color-progress-error);
+}
+.Toastify__progress-bar-theme--colored.Toastify__progress-bar--info, .Toastify__progress-bar-theme--colored.Toastify__progress-bar--success, .Toastify__progress-bar-theme--colored.Toastify__progress-bar--warning, .Toastify__progress-bar-theme--colored.Toastify__progress-bar--error {
+  background: var(--toastify-color-transparent);
+}
+
+.Toastify__close-button {
+  color: #fff;
+  background: transparent;
+  outline: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: 0.3s ease;
+  -ms-flex-item-align: start;
+      align-self: flex-start;
+}
+.Toastify__close-button--light {
+  color: #000;
+  opacity: 0.3;
+}
+.Toastify__close-button > svg {
+  fill: currentColor;
+  height: 16px;
+  width: 14px;
+}
+.Toastify__close-button:hover, .Toastify__close-button:focus {
+  opacity: 1;
+}
+
+@keyframes Toastify__trackProgress {
+  0% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+.Toastify__progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  z-index: var(--toastify-z-index);
+  opacity: 0.7;
+  transform-origin: left;
+}
+.Toastify__progress-bar--animated {
+  animation: Toastify__trackProgress linear 1 forwards;
+}
+.Toastify__progress-bar--controlled {
+  transition: transform 0.2s;
+}
+.Toastify__progress-bar--rtl {
+  right: 0;
+  left: initial;
+  transform-origin: right;
+}
+
+.Toastify__spinner {
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border: 2px solid;
+  border-radius: 100%;
+  border-color: var(--toastify-spinner-color-empty-area);
+  border-right-color: var(--toastify-spinner-color);
+  animation: Toastify__spin 0.65s linear infinite;
+}
+
+@keyframes Toastify__bounceInRight {
+  from, 60%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  from {
+    opacity: 0;
+    transform: translate3d(3000px, 0, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(-25px, 0, 0);
+  }
+  75% {
+    transform: translate3d(10px, 0, 0);
+  }
+  90% {
+    transform: translate3d(-5px, 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes Toastify__bounceOutRight {
+  20% {
+    opacity: 1;
+    transform: translate3d(-20px, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(2000px, 0, 0);
+  }
+}
+@keyframes Toastify__bounceInLeft {
+  from, 60%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+    opacity: 0;
+    transform: translate3d(-3000px, 0, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(25px, 0, 0);
+  }
+  75% {
+    transform: translate3d(-10px, 0, 0);
+  }
+  90% {
+    transform: translate3d(5px, 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes Toastify__bounceOutLeft {
+  20% {
+    opacity: 1;
+    transform: translate3d(20px, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-2000px, 0, 0);
+  }
+}
+@keyframes Toastify__bounceInUp {
+  from, 60%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 3000px, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, -20px, 0);
+  }
+  75% {
+    transform: translate3d(0, 10px, 0);
+  }
+  90% {
+    transform: translate3d(0, -5px, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__bounceOutUp {
+  20% {
+    transform: translate3d(0, -10px, 0);
+  }
+  40%, 45% {
+    opacity: 1;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -2000px, 0);
+  }
+}
+@keyframes Toastify__bounceInDown {
+  from, 60%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -3000px, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, 25px, 0);
+  }
+  75% {
+    transform: translate3d(0, -10px, 0);
+  }
+  90% {
+    transform: translate3d(0, 5px, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes Toastify__bounceOutDown {
+  20% {
+    transform: translate3d(0, 10px, 0);
+  }
+  40%, 45% {
+    opacity: 1;
+    transform: translate3d(0, -20px, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 2000px, 0);
+  }
+}
+.Toastify__bounce-enter--top-left, .Toastify__bounce-enter--bottom-left {
+  animation-name: Toastify__bounceInLeft;
+}
+.Toastify__bounce-enter--top-right, .Toastify__bounce-enter--bottom-right {
+  animation-name: Toastify__bounceInRight;
+}
+.Toastify__bounce-enter--top-center {
+  animation-name: Toastify__bounceInDown;
+}
+.Toastify__bounce-enter--bottom-center {
+  animation-name: Toastify__bounceInUp;
+}
+
+.Toastify__bounce-exit--top-left, .Toastify__bounce-exit--bottom-left {
+  animation-name: Toastify__bounceOutLeft;
+}
+.Toastify__bounce-exit--top-right, .Toastify__bounce-exit--bottom-right {
+  animation-name: Toastify__bounceOutRight;
+}
+.Toastify__bounce-exit--top-center {
+  animation-name: Toastify__bounceOutUp;
+}
+.Toastify__bounce-exit--bottom-center {
+  animation-name: Toastify__bounceOutDown;
+}
+
+@keyframes Toastify__zoomIn {
+  from {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes Toastify__zoomOut {
+  from {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+  to {
+    opacity: 0;
+  }
+}
+.Toastify__zoom-enter {
+  animation-name: Toastify__zoomIn;
+}
+
+.Toastify__zoom-exit {
+  animation-name: Toastify__zoomOut;
+}
+
+@keyframes Toastify__flipIn {
+  from {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+  60% {
+    transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+    opacity: 1;
+  }
+  80% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+  }
+  to {
+    transform: perspective(400px);
+  }
+}
+@keyframes Toastify__flipOut {
+  from {
+    transform: perspective(400px);
+  }
+  30% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+    opacity: 1;
+  }
+  to {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    opacity: 0;
+  }
+}
+.Toastify__flip-enter {
+  animation-name: Toastify__flipIn;
+}
+
+.Toastify__flip-exit {
+  animation-name: Toastify__flipOut;
+}
+
+@keyframes Toastify__slideInRight {
+  from {
+    transform: translate3d(110%, 0, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__slideInLeft {
+  from {
+    transform: translate3d(-110%, 0, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__slideInUp {
+  from {
+    transform: translate3d(0, 110%, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__slideInDown {
+  from {
+    transform: translate3d(0, -110%, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes Toastify__slideOutRight {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(110%, 0, 0);
+  }
+}
+@keyframes Toastify__slideOutLeft {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(-110%, 0, 0);
+  }
+}
+@keyframes Toastify__slideOutDown {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(0, 500px, 0);
+  }
+}
+@keyframes Toastify__slideOutUp {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(0, -500px, 0);
+  }
+}
+.Toastify__slide-enter--top-left, .Toastify__slide-enter--bottom-left {
+  animation-name: Toastify__slideInLeft;
+}
+.Toastify__slide-enter--top-right, .Toastify__slide-enter--bottom-right {
+  animation-name: Toastify__slideInRight;
+}
+.Toastify__slide-enter--top-center {
+  animation-name: Toastify__slideInDown;
+}
+.Toastify__slide-enter--bottom-center {
+  animation-name: Toastify__slideInUp;
+}
+
+.Toastify__slide-exit--top-left, .Toastify__slide-exit--bottom-left {
+  animation-name: Toastify__slideOutLeft;
+}
+.Toastify__slide-exit--top-right, .Toastify__slide-exit--bottom-right {
+  animation-name: Toastify__slideOutRight;
+}
+.Toastify__slide-exit--top-center {
+  animation-name: Toastify__slideOutUp;
+}
+.Toastify__slide-exit--bottom-center {
+  animation-name: Toastify__slideOutDown;
+}
+
+@keyframes Toastify__spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}</style><style type="text/css">.tl__dropdownContainer--1idvD {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    background: #006aff0d;
+    column-gap: 2.5rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    padding: 1.25rem 1rem;
+}
+
+.tl__dropdownContainer--1idvD .tl__dropdownOption--3cYFq {
+    width: 170px;
+}
+
+.tl__dropdownContainer--1idvD .tl__dropdownLabel--2jDeJ {
+    font-size: 0.85rem;
+    color: #6e7687;
+    margin-left: .1875rem;
+    margin-bottom: .1rem;
+}
+
+.tl__dropdownContainer--1idvD .tl__submitButton--3i3zp {
+    font-size: 1.05rem;
+    border: none;
+    font-weight: bold;
+    line-height: 1.54;
+    letter-spacing: .0525rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.3125rem;
+    color: white;
+    box-shadow: 0.25rem 0.25rem 0.625rem 0 rgba(1, 106, 255, 0.25);
+    background-image: linear-gradient(268deg, #3086ff 189%, #0061ea -57%);
+}
+
+.tl__dropdownContainer--1idvD .tl__submitButton--3i3zp:hover {
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+
+.tl__dropdownContainer--1idvD .tl__submitButton--3i3zp:focus {
+    outline: none;
+}
+
+.tl__dropdownContainer--1idvD .tl__submitButton--3i3zp:focus {
+    outline: none;
+}
+
+@media only screen and (max-width: 800px) {
+    .tl__dropdownContainer--1idvD {
+        flex-wrap: wrap;
+    }
+}
+
+@media only screen and (max-width: 425px) {
+    .tl__dropdownContainer--1idvD {
+        flex-direction: column;
+        align-items: center;
+        flex-wrap: nowrap;
+        row-gap: 0.5rem;
+    }
+
+    .tl__dropdownContainer--1idvD .tl__dropdownOption--3cYFq {
+        width: 90%;
+    }
+
+    .tl__dropdownContainer--1idvD .tl__submitButton--3i3zp {
+        display: block;
+        margin: 0.5rem auto 0;
+    }
+}</style><style type="text/css">.tech-analysis-article .pivot-table th {
+    color: #202020;
+}
+
+.tech-analysis-article .pivot-table td:first-child,
+.tech-analysis-article .pivot-table th:first-child {
+    min-width: 130px;
+    width: 130px;
+    max-width: 130px;
+    position: sticky;
+    left: -1px;
+    z-index: 1;
+    background: #ffffff;
+}
+
+.tech-analysis-article .pivot-table td:not(:first-child),
+.tech-analysis-article .pivot-table th:not(:first-child) {
+    text-align: right;
+}
+
+.tech-analysis-article .pivot-toolbar {
+    display: flex;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.tech-analysis-article .pt-block {
+    flex: 1;
+    border-right: 1px solid #cbcbcb;
+    padding: 0 0.75rem ;
+}
+
+.tech-analysis-article .pt-block:last-child {
+    border-right: unset;
+}
+
+.tech-analysis-article .pivot-label {
+    margin-bottom: 0;
+    color: #202020;
+    line-height: 1.67;
+    text-transform: capitalize;
+}
+
+.tech-analysis-article .pivot-text {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+</style></head>
+<body class="" data-disableajaxcache="">
+    <!-- Below script to include theme mode in the mobile webview e.g. #theme-dark -->
+<script>
+    (function(){
+        var hashId = window.location.hash;
+        if (hashId && hashId.startsWith('#theme-')) {
+            var theme = hashId.split('-')[1]; if (theme) document.body.classList.add("theme-mode", theme);
+        }
+    })()
+</script>
+
+
+<script>var TrendlyneApp =  TrendlyneApp || {};TrendlyneApp.shaon = false; TrendlyneApp.galoaded = false; TrendlyneApp.gaon = true;</script>
+
+
+
+
+
+
+
+
+<div id="switch-country-banner" class="hidden"></div><nav class="container-fluid"><div class="row " id="tl-navbar"><div id="tl-navbar-big-menu"></div><div id="tl-navbar-side-menu"></div><div class="navbar navbar-inverse navbar-fixed-top tl-navbar nobdr m0 p0 side-nav-color " role="navigation" id="tl-navbar-div"><div class="col-xl-9 col-lg-8 col-md-7 col-sm-2 col-xs-2 p-r-0 p-l-0"><div class="hidden-md-up p-x-0 tl-navbar-body "><div class="tl-navbar-brand navbar-brand hidden-md-up sidebar-left-menu-icon m-r-0 p-x-1 pointer mt05r"><i class="sprite-side-menu sprite-side-menu-menu-icon"></i><i class="sprite-side-menu sprite-side-menu-close-icon hidden"></i></div></div><div class="hidden-sm-down p-x-0 tl-navbar-body "><ul id="navbarmoremenu" class="nav navbar-nav"><li class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link p-a-0" style="display: block; width: auto;"><a class="tl-navbar-brand navbar-brand hidden-sm-down sidebar-left-menu-name p-y-0 m-r-0 pl05rem pointer" href="/features/" style="max-width:21rem;"><img class="img-fluid" src="https://cdn-static.trendlyne.com/static/TL-logomark-v1.webp" alt="Trendlyne logo" height="34" width="34" style="height:34px; margin-top:10px;"></a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link   " href="/markets-today/" data-toggle="collapse1" data-target="#marketsCollapsingNavbar" aria-controls="marketsCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Markets
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link starfolio_subnavbar" href="https://starfolio.trendlyne.com/" target="_blank" style="padding-top:1.2rem;padding-bottom:0.8rem;"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-starfolio-light"></i></a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/alerts/portfolio-real-time-alerts/" data-toggle="collapse1" data-target="#alertCollapsingNavbar" aria-controls="alertCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+							    Alerts
+						    </a></li><li class="" style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/futures-options/dashboard/options/" data-toggle="collapse1" data-target="#fnoCollapsingNavbar" aria-controls="fnoCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                    F&amp;O
+                                </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/mutual-fund/mf-all/?category=Multi-Cap&amp;active=multicap" data-toggle="collapse1" data-target="#mfCollapsingNavbar" aria-controls="mfCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                    MF
+                                </a></li><li class="" style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/research-reports/all/" data-toggle="collapse1" data-target="#reportsCollapsingNavbar" aria-controls="reportsCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                    Reports
+                                </a></li><li class="" style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/stock-screeners/by-type/" data-toggle="collapse1" data-target="#screenerCollapsingNavbar" aria-controls="screenerCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Screeners
+                            </a></li><li class="hiddenforenterprise" style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link fw500
+													   " style="color:#ed9f40 !important;" href="/subscription/plans/" data-parent="#tl-navbar">
+                                Subscribe
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/portfolio/superstar-shareholders/index/" data-toggle="collapse1" data-target="#superstarsCollapsingNavbar" aria-controls="superstarsCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Superstars
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link   " href="/portfolio/holdings/" data-toggle="collapse1" data-target="#portfolioCollapsingNavbar" aria-controls="portfolioCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Portfolio
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link loginModal modal-trigger replace-url " href="/visitor/loginmodal.html?next=/portfolio/show/Watchlist/default/" data-url="/portfolio/show/Watchlist/default/" data-toggle="collapse1" data-target="#watchlistCollapsingNavbar" aria-controls="watchlistCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Watchlist
+                            </a></li><li style="display: none; width: 0px;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/equity/group-insider-trading-sast/" data-url="/equity/group-insider-trading-sast/" data-toggle="collapse1" data-target="#trading_SAST_CollapsingNavbar" aria-controls="trading_SAST_CollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Insider Trades
+                            </a></li><li style="display: none; width: 0px;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/dashboard/results/industry/" data-toggle="collapse1" data-target="#resultsCollapsingNavbar" aria-controls="resultsCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Results
+                            </a></li><li style="display: none; width: 0px;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link" href="/tools/data-downloader/stock-data-downloader/" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Data Downloader
+                            </a></li><li style="display: none; width: 0px;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/equity/calendar/all/all/" data-toggle="collapse1" data-target="#eventscalendar" aria-controls="eventscalendar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Events Calendar
+                            </a></li><li style="display: none; width: 0px;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/faq/articles/84000392527-what-s-new-at-trendlyne-" data-toggle="collapse1" data-target="#whatsnewCollapsingNavbar" aria-controls="whatsnewCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                    What's New
+                                </a></li><li style="display: none; width: 0px;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/features/" data-toggle="collapse1" data-target="#exploreCollapsingNavbar" aria-controls="exploreCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Explore
+                            </a></li><li style="display: none; width: 0px;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link" href="/faq/" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                FAQs
+                            </a></li><li style="display: none; width: 0px;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link" href="/web-widget/showcase" aria-label="Toggle navigation" data-parent="#tl-navbar" target="_blank">
+                                Widgets
+                            </a></li></ul><span class="ib navbar-nav posrelative collect" style="display: inline-block;"><a role="button" href="#" data-toggle="dropdown" class="dropdown-toggle-tl ib ttn-item">
+                              More 
+                        </a><ul id="submenu" class="dropdown-menu"><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/equity/group-insider-trading-sast/" data-url="/equity/group-insider-trading-sast/" data-toggle="collapse1" data-target="#trading_SAST_CollapsingNavbar" aria-controls="trading_SAST_CollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Insider Trades
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/dashboard/results/industry/" data-toggle="collapse1" data-target="#resultsCollapsingNavbar" aria-controls="resultsCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Results
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link" href="/tools/data-downloader/stock-data-downloader/" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Data Downloader
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/equity/calendar/all/all/" data-toggle="collapse1" data-target="#eventscalendar" aria-controls="eventscalendar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Events Calendar
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/faq/articles/84000392527-what-s-new-at-trendlyne-" data-toggle="collapse1" data-target="#whatsnewCollapsingNavbar" aria-controls="whatsnewCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                    What's New
+                                </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link " href="/features/" data-toggle="collapse1" data-target="#exploreCollapsingNavbar" aria-controls="exploreCollapsingNavbar" aria-expanded="false" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                Explore
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link" href="/faq/" aria-label="Toggle navigation" data-parent="#tl-navbar">
+                                FAQs
+                            </a></li><li style="display: block; width: auto;"><a class="nav-item ttn-item text-xs-center point tl-collapsing-nav-link" href="/web-widget/showcase" aria-label="Toggle navigation" data-parent="#tl-navbar" target="_blank">
+                                Widgets
+                            </a></li></ul></span></div></div><div class="col-xl-3 col-lg-4 col-md-5 col-sm-10 col-xs-10 p-l-0 p-r-0" id="topnav-right-col"><div class="tl-navbar-search-wrapper"><div class="tl-navbar-search-btn mb05r hidden-sm-up"><a class="nav-link btn p-b-0 p-x-1"><sub><i class="sprite-side-menu sprite-side-menu-search-icon posrelative" style="top: 3px;"></i><span class="p-l-1">
+                                      Search stocks
+                                    </span></sub></a></div><div class="topnav-right pull-sm-down-right"><div class="hidden-xs-down pt0" id="top-nav-search"><div class=""><form class="navbar-form navbar-input-group input-group p0 tl-navbar-search-form tl-navbar-search" data-bind="enterkey: submit"><div class="input-group-addon nobdr tl-navbar-search-addon"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-search-Icon"></i></div><input name="search" type="text" autocomplete="off" id="navbar-desktop-search" class="navbar-topsearch form-inline form-control mform-control navbar-ac tl-navbar-search-input tl-navbar-search ui-autocomplete-input" data-searchurl="/member/api/ac_snames/stock/" placeholder=" Search Stock, Index, MF "></form></div></div><div class="hidden-sm-down"><div class="tl-country-switch color202020"><div class="btn-group full-width hidden-sm-down" role="group"><div><div class="pointer dropdown dropdown-toggle-tl" id="countryDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-IND img-rounded"></i></div><div class="dropdown-menu pa05r" aria-labelledby="countryDropdown"><a class="dropdown-item point p-a-0 mx05r country-switcher country-option option active" rel="noopener noreferrer" href="/switch-country/IND/" data-country-code="IND"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-IND img-rounded mr4"></i>
+                        IND
+                    </a><a class="dropdown-item point p-a-0 mx05r country-switcher country-option option " rel="noopener noreferrer" href="/switch-country/USA/" data-country-code="USA"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-USA img-rounded mr4"></i>
+                        USA
+                    </a></div></div></div><div class="hidden-md-up full-width"><div data-toggle="modal" data-target="#selectCountyModal" class="modal-trigger"><div class="selected-country"><div class="country-option nobdr"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-IND img-rounded"></i><span class="vr"></span><span class="pl6"> 
+                        
+                            
+                                IND
+                            
+                        
+                            
+                        
+                    </span></div><i class="sprite-side-menu sprite-side-menu-arrow-icon"></i></div></div><div class="modal fade noclearOnclose" id="selectCountyModal" tabindex="-1" role="dialog" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header p-a-0"><div class="selected-country"><div class="country-option nobdr p-a-0"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-IND img-rounded"></i><span class="vr"></span><span class="color202020 pl6">
+                                
+                                
+                                    
+                                        IND
+                                    
+                                
+                                    
+                                
+                            </span></div><button type="button" class="close" data-dismiss="modal"><div aria-hidden="true">×</div><span class="sr-only">Close</span></button></div></div><div class="modal-body"><a href="/switch-country/IND/" class="col-inh"><div class="option "><div class="country-option active"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-IND img-rounded"></i><span class="pl6">IND</span></div></div></a><a href="/switch-country/USA/" class="col-inh"><div class="option "><div class="country-option "><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-USA img-rounded"></i><span class="pl6">USA</span></div></div></a></div></div></div></div></div></div></div><div style="margin-left:auto"><span class="ib pull-xs-right">
+            <a id="login-signup-btn" href="/visitor/loginmodal/?next=/equity/technical-analysis/ORICONENT/1752/oricon-enterprises-ltd/" style="padding-top:7px; padding-bottom:7px;" class="modal-trigger loginModal btn btn-sm bgactiveblue white jNeedsNext">
+                Login / Sign up
+            </a>
+        </span></div></div></div></div><div id="navbar-xs-search"><form class="form-inline navbar-form navbar-input-group input-group navbar-xs-search-form " data-bind="enterkey: submit"><div class="input-group-btn "><button type="button" class="norbdr btn dropdown-toggle tl-navbar-search-dd" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button><ul class="dropdown-menu ddselect" data-function="searchValueChange"><li class="dropdown-item"><span data-context="stock" data-placeholder="stocks" data-searchurl="/member/api/ac_snames/stock/" class="active">Stocks</span></li><li class="dropdown-item"><span data-context="FNO" data-placeholder="Futures &amp; Options" data-searchurl="/futures-options/search/">Futures &amp; Options<sup><i class="fa fa-asterisk negative fs04rem"></i></sup></span></li><li class="dropdown-item"><span data-context="mutualfund" data-placeholder="Mutual Funds" data-searchurl="/mutual-fund/search/">Mutual Funds</span></li><li class="dropdown-item"><span data-context="news" data-placeholder="news" data-searchurl="/member/api/ac_snames/news/">News</span></li><li class="dropdown-item"><span data-context="news" data-placeholder="Fundamentals Data" data-searchurl="/member/api/ac_snames/fundamental/">Fundamentals</span></li><li class="dropdown-item"><span data-context="research" data-placeholder="research reports" data-searchurl="/research-reports/search/">Reports</span></li><li class="dropdown-item"><span data-context="corpactions" data-placeholder="corporate actions" data-searchurl="/member/api/ac_snames/corpactions/">Corporate Actions</span></li><li class="dropdown-item"><span data-context="alerts" data-placeholder="alerts" data-searchurl="/member/api/ac_snames/alerts/">Alerts</span></li><li class="dropdown-item"><span data-context="shareholding" data-placeholder="shareholding" data-searchurl="/member/api/ac_snames/shareholding/">Shareholding</span></li></ul></div><input id="navbar-mobile-search" class="navbar-topsearch form-control mform-control navbar-ac tl-navbar-search-input pt075r ui-autocomplete-input" name="search" placeholder="Search for a stock" data-searchurl="/member/api/ac_snames/stock/" type="text" autocomplete="off"><div class="input-group-addon nobdr tl-navbar-close-addon p-x-2"><i class="fa fa-times  "></i></div></form></div></div></div></nav><!-- Fixed navbar -->
+
+
+
+
+
+  <script rel="preconnect" crossorigin="" src="https://unpkg.com/react@16.8.4/umd/react.production.min.js"></script>
+  <script rel="preconnect" crossorigin="" src="https://unpkg.com/react-dom@16.8.4/umd/react-dom.production.min.js"></script>
+
+
+  <script rel="preconnect" src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.32.4/react-bootstrap.min.js" crossorigin=""></script>
+
+
+
+
+
+<div class="clearfix"></div>
+<main class="container-fluid m-b-2 tbdre5e5 bgwhite p-x-0-sm-down p-x-2-md-up p-y-1 overflowxhidden">
+    
+        
+
+
+
+
+    <div class="stock-info-bg-light-blue"></div>
+    <div class="stock-info-card p-b-0 LpriceTop stock-info-card-v2" data-myid="1752">
+        <div class="row">
+            <div class="col-sm-12 col-lg-12">
+                
+                <div class="mfbreadcrumb">
+                    <ol class="breadcrumb p-x-0 mb05r" vocab="https://schema.org/" typeof="BreadcrumbList">
+                        <li class="breadcrumb-item" property="itemListElement" typeof="ListItem">
+                            <a href="/markets-today/" property="item" typeof="WebPage">
+                                <span property="name">MARKETS</span>
+                            </a>
+                            <meta property="position" content="1">
+                        </li>
+                        
+                            <li class="breadcrumb-item" property="itemListElement" typeof="ListItem">
+                                <a href="/equity/sector/25/commercial-services-supplies/" property="item" typeof="WebPage">
+                                    <span property="name">SECTOR : COMMERCIAL SERVICES &amp; SUPPLIES</span>
+                                </a>
+                                <meta property="position" content="2">
+                            </li>
+                        
+                        
+                            <li class="breadcrumb-item" property="itemListElement" typeof="ListItem">
+                                <a href="/equity/industry/30/containers-packaging/" property="item" typeof="WebPage">
+                                    <span property="name">INDUSTRY : CONTAINERS &amp; PACKAGING</span>
+                                </a>
+                                <meta property="position" content="3">
+                            </li>
+                        
+                        
+                        
+                            <li class="breadcrumb-item" property="itemListElement" typeof="ListItem">
+                                <a href="/equity/1752/ORICONENT/oricon-enterprises-ltd/" property="item" typeof="WebPage">
+                                    <span property="name">ORICON ENTERPRISES LTD.</span>
+                                </a>
+                                <meta property="position" content="4">
+                            </li>
+                        
+                    </ol>
+                </div>
+                
+            </div>
+            <div class="col-sm-12 col-lg-8">
+                <p class="m0 p0">
+                    <span class="stock-info-heading stock-info-ho fw700" style="line-height: 1;">
+                        Oricon Enterprises Ltd. 
+                    </span>
+                    
+                        <sup>
+                            <a class="modal-trigger" href="/equity/about/1752/ORICONENT/oricon-enterprises-ltd/">
+                                <i class="sprite-navbar sprite-information-circle-blue-16x16"></i>
+                            </a>
+                        </sup>
+                    
+                    <span class="m-l-1 fs075rem gr stock-info-details" style="min-height: 15px;">
+                        
+                            NSE: ORICONENT
+                        
+                        
+                            <span class="pl05r">|</span>
+                            BSE: 513121
+                        
+                        
+                        
+
+                        
+
+
+
+                    </span>
+                </p>
+                
+            
+            
+            
+            <div class="ib" style="min-height: 1.5rem;">
+                
+                
+
+                    <div class="fs08rem m0 p0 ib">
+                        
+                            
+
+<span class="showForSubscriber hidden">
+    
+    <span data-toggle="tooltip" data-title="
+    Durability Score : 60 <span class='fs06rem'>/100</span><br/>
+    Valuation Score : 81 <span class='fs06rem'>/100</span> <br/>
+    Momentum Score : 65 <span class='fs06rem'>/100</span>">
+    
+        <span class="responsive-square tbcell positive"></span>
+    
+    
+        <span class="responsive-square tbcell positive"></span>
+    
+    
+        <span class="responsive-square tbcell positive"></span>
+    
+    
+    </span>
+
+    
+    
+</span>
+<span class="hideForSubscriber">
+    <span data-toggle="tooltip" data-title="Subscribe to view DVM scores">
+        <span class="dvm-empty responsive-square tbcell"></span>
+        <span class="dvm-empty responsive-square tbcell"></span>
+        <span class="dvm-empty responsive-square tbcell"></span>
+    </span>
+</span>
+
+
+                        
+                    </div>
+                    <div class="m0 p0 stock-info-ho ls09px ib">
+                        
+    
+        
+            <a href="/fundamentals/stock-screener/by-name/strong-performer/" class="pointer">
+                <span class="positive">Strong Performer</span>
+            </a>
+        
+    
+    
+        <a class="positive classification_icon modal-trigger" href="/equity/dvm-help-modal/" style="padding: 0.6rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M.375 6a5.625 5.625 0 1 0 11.25 0A5.625 5.625 0 0 0 .375 6z" fill="#fff" stroke="currentColor" stroke-width=".75"></path>
+                <path d="M7.197 8.764a.375.375 0 1 0 0-.75v.75zM5.049 4.196a.375.375 0 0 0 0 .75v-.75zm.835-.446a.375.375 0 1 0 0-.75v.75zm0-.75a.375.375 0 0 0 0 .75V3zm1.313 5.014H6.48v.75h.716v-.75zm-.716 0a.102.102 0 0 1-.102-.103h-.75c0 .471.381.853.852.853v-.75zm-.102-.103V4.81h-.75v3.102h.75zm0-3.102a.614.614 0 0 0-.614-.613v.75a.136.136 0 0 1-.136-.137h.75zm-.614-.613h-.716v.75h.716v-.75zM5.884 3a.494.494 0 0 0-.495.494h.75a.256.256 0 0 1-.255.256V3zm-.495.494c0 .273.222.495.495.495v-.75c.141 0 .255.114.255.255h-.75zm.495.495a.494.494 0 0 0 .494-.495h-.75c0-.14.115-.255.256-.255v.75zm.494-.495A.494.494 0 0 0 5.884 3v.75a.256.256 0 0 1-.256-.256h.75z" fill="currentColor"></path>
+            </svg>
+        </a>
+    
+
+                    </div>
+                
+            </div>
+            </div>
+
+            
+
+
+    
+        <div class="col-sm-12 col-lg-4 p-x-0-sm-down m-y-1">
+            <div class="text-md-right text-xs-center">
+                
+                <a class="btn sr-btn-container" href="/equity/stock-report/1752/ORICONENT/oricon-enterprises-ltd/"> 
+                    <span class="sr-btn-overview-page-content">
+                        <span>Download real time</span>
+                        <i class="sprite-stock sprite-stock-report-whitemode-md"></i>
+                    </span>
+                    <i class="sprite-stock sprite-sr-btn-bg-img sr-btn-bg-img"></i>
+                </a>
+            </div>
+        </div>
+    
+
+
+
+            <!-- <div class="col-xs-12 col-md-6 hidden-md-down">
+                
+                    <a class="btn bg-colorTLblue white pull-right fs08rem upcase fw500 check-buy-sell-btn"
+                    href="/tools/buy-sell-zone/1752/ORICONENT/oricon-enterprises-ltd/">Check Buy or Sell
+                    </a>
+                
+            </div> -->
+        </div>
+        <div class="row m-y-1">
+            <div class="col-xs-12  col-lg-8  stock-price-change">
+                
+                    
+
+
+
+
+
+
+
+
+
+
+<div class="col-xs-12 col-lg-4 p0 pull-left pr05r m-r-1-md-up pt05r" style="line-height:1;">
+    <p class="positive" style="min-height: 1.5rem;">
+        <span class="fs1p5rem fw700 LpriceCP stock-info-ho" data-toggle="tooltip" data-title="Current Price updated on: 28 Mar, 2025  3:31 PM (IST)">
+            39.94
+        </span>
+        <span class="pl05rem priceChange LpriceNP"></span>
+        <span class="LpriceCh">
+            <span>0.31</span>
+        </span>
+        <span class="">
+            (<span class="LpriceChP">0.78</span>%)
+        </span>
+    </p>
+    <p class="ib" style="min-height: 1.3125rem;">
+        
+            
+                <i class="sprite-navbar sprite-arrow-up-2x"></i>
+                </p><h6 class="ib fs085rem fw400">
+                
+                
+                    <a href="/fundamentals/stock-screener/4901/highest-recovery-from-52-week-low/index/NIFTY500/nifty-500/">
+                        <span class="fs085rem pt025r ls09px positive" data-toggle="tooltip" data-title="Oricon Enterprises Ltd. has gained 49.76% from 52 week low of 26.7">
+                            49.76% Gain from 52W Low
+                        </span>
+                    </a>
+                
+                    
+                </h6>
+            
+        
+    <p></p>
+    
+</div>
+
+<div class="col-xs-12 col-lg-5 p0 pull-left pl2p5rem-md-up lbdrcfd4dc-md-up m-x-0-lg-up pt05r" style="line-height:1;">
+    <p style="min-height: 1.5rem;" class="ib">
+        <span class="fs1p5rem fw700 stock-info-ho LpriceVol">
+            
+             507.5K
+        </span>
+        <span class="stock-info-lo fs09rem m-l-1">
+            NSE+BSE Volume
+            
+                
+            
+        </span>
+    </p>
+    <p class="fs09rem stock-info-lo" style="min-height: 0.9375rem;">
+        <span class="exchange"> NSE</span>
+        <span class="LpriceTimezone pl5">28 Mar, 2025  3:31 PM (IST) </span>
+        
+        
+    </p>
+</div>
+
+
+
+                
+            </div>
+            <div class="col-xs-12  col-lg-4  p-t-1-md-down p-x-0 m-t-1">
+                
+                    
+
+<style type="text/css">
+    .sprite-stock {
+        display: inline-block !important;
+    }
+</style>
+
+<div class="stock-toolbar-v2 stock-toolbar-excel-connect pull-right posrelative full-width">
+    
+        
+            <span id="MF-1752" class="pointer wlddJS" data-toggle="tooltip" data-title="Add to watchlist" data-url="/portfolio/getwldd/1752">
+                <div data-toggle="dropdown">
+                    <i class="sprite-stock sprite-Add zoomtoolbar"></i>
+                    <p class="ls09px">Watchlist</p>
+                </div>
+            </span>
+        
+    
+    
+    <span class="modal-trigger pointer" href="/portfolio/addHoldingForm/1752" data-code="1752" data-toggle="tooltip" data-original-title="Add to portfolio">
+        <i class="sprite-stock sprite-Portfolio zoomtoolbar"></i>
+        <p class="ls09px">Portfolio</p>
+    </span>
+    
+    
+    
+    <span class="modal-trigger pointer noCloseOutside" href="/alerts/modal/stockAlert/1752/" data-toggle="tooltip" data-original-title="Set alert">
+        <i class="sprite-stock sprite-Alert zoomtoolbar"></i>
+        <p class="ls09px">Alert</p>
+    </span>
+    
+    <span class="pointer" data-toggle="dropdown" data-placement="bottom" data-original-title="Share">
+        <i class="sprite-stock sprite-Share zoomtoolbar"></i>
+        <p class="ls09px">Share</p>
+    </span>
+    <div class="dropdown-menu dropdown-menu-right social-share-dropdown-menu" aria-labelledby="btnGroupDrop1">
+        <div class="dropdown-item p-x-1 p-y-0 no-bg-active">
+            <div class="social-share">
+    <ul class="share-buttons">
+        <li class="social-fb">
+            <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftrendlyne.com&amp;t=" target="_blank" title="Share on Facebook" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=' +
+               
+               encodeURIComponent(document.URL)
+               
+                + '&amp;t=' +
+               
+               encodeURIComponent(document.URL)
+               
+                 );return false;">
+                <i class="fa fa-facebook" aria-hidden="true"></i>
+                <span class="sr-only">Share on Facebook</span>
+            </a>
+        </li>
+        <li class="social-twitter">
+            <a href="https://twitter.com/intent/tweet?source=https%3A%2F%2Ftrendlyne.com&amp;text=:%20https%3A%2F%2Ftrendlyne.com&amp;via=trendlyne" target="_blank" title="Tweet" onclick="window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(document.title) + ':%20' +
+               
+               encodeURIComponent(document.URL)
+               
+               ); return false;">
+                <i class="fa fa-twitter" aria-hidden="true"></i>
+                <span class="sr-only">Tweet</span></a>
+		</li>
+		
+        <li class="social-linkedin">
+            <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Ftrendlyne.com&amp;title=&amp;summary=&amp;source=https%3A%2F%2Ftrendlyne.com" target="_blank" title="Share on LinkedIn" onclick="window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=' +
+               
+               encodeURIComponent(document.URL)
+               
+               + '&amp;title=' +  encodeURIComponent(document.title)); return false;"><i class="fa fa-linkedin" aria-hidden="true"></i><span class="sr-only">Share on LinkedIn</span></a></li>
+        <li class="social-whatsapp hidden-md-up">
+            <a href="whatsapp://send?text=" onclick="window.open('whatsapp://send?text=' + encodeURIComponent(document.title) + ':%20' +
+               
+               encodeURIComponent(document.URL)
+               
+               + '&amp;title=' +  encodeURIComponent(document.title)); return false;" data-action="share/whatsapp/share" title="Share via Whatsapp">
+
+                <i class="fa fa-whatsapp" aria-hidden="true"></i>
+                
+                <span class="sr-only">Share via Whatsapp</span></a></li>
+
+        
+    </ul>
+</div>
+
+        </div>
+    </div>
+    
+
+    
+    <a class="modal-trigger" href="/member/diary/modal/1752/ORICONENT/oricon-enterprises-ltd/">
+        <span data-toggle="tooltip" data-placement="top" title="" data-original-title="Add notes" class="pointer" aria-expanded="false">
+            <i class="sprite-stock sprite-Note zoomtoolbar"></i>
+            <p class="ls09px">My Notes</p>
+            </span>
+        </a>
+    
+
+    
+    <a href="/tools/data-downloader/trendlyne-excel-connect/">
+        <span data-toggle="tooltip" data-placement="top" title="" data-original-title="Excel Connect" class="pointer posrelative" aria-expanded="false">
+            <i class="sprite-stock sprite-excel-connect zoomtoolbar"></i>
+            <p class="ls09px ml6">Excel Connect</p>
+            <div class="circle pulse posabsolute"></div>
+        </span>
+    </a>
+    
+    
+</div>
+
+
+                
+            </div>
+        </div>
+        
+            
+                
+                        
+                            
+
+
+
+
+    <div class="tl_carousel row">
+        <div class="scroll-dots">
+            
+                
+                    <div class="tl_carousel_dot active"></div>
+                
+            
+                
+            
+                
+                    <div class="tl_carousel_dot"></div>
+                
+            
+                
+            
+                
+                    <div class="tl_carousel_dot"></div>
+                
+            
+                
+            
+        </div>
+        
+        <div class="stock-indicator-tile-container m0 p0 scrolling-wrapper">
+            <div class="row  mauto ">
+                
+            
+                    
+                        <div class="col-xs-12 col-lg-4 p-x-0 scroll-card">
+                    
+                    
+                        <div class="col-xs-6 nolb pa025r" style="zoom:80%;">
+                            
+                                
+                                    
+                                        <a href="/equity/swot-buy-or-sell/1752/ORICONENT/oricon-enterprises-ltd/strengths/" data-toggle="tooltip" data-title="" class="modal-trigger nolb">
+    <div class="col-xs-6 swot-col swot-s positive rbdre5 dbdr">
+        <span class="swot-value">20</span><span class="label bg-positive">S</span>
+    </div>
+</a>
+<a href="/equity/swot-buy-or-sell/1752/ORICONENT/oricon-enterprises-ltd/weakness/" data-toggle="tooltip" data-title="" class="modal-trigger nolb">
+    <div class="col-xs-6 swot-col swot-w neutral dbdr">
+        <span class="swot-value">2</span><span class="label bg-neutral">W</span>
+    </div>
+</a>
+<div class="clearfix"></div>
+<a href="/equity/swot-buy-or-sell/1752/ORICONENT/oricon-enterprises-ltd/opportunity/" data-toggle="tooltip" data-title="" class="modal-trigger nolb">
+    <div class="col-xs-6 swot-col swot-o colorTLblue rbdre5">
+        <span class="swot-value">1</span><span class="label bgactiveblue">O</span>
+    </div>
+</a>
+<a href="/equity/swot-buy-or-sell/1752/ORICONENT/oricon-enterprises-ltd/threats/" data-toggle="tooltip" data-title="" class="modal-trigger nolb">
+    <div class="col-xs-6 swot-col swot-t negative nobdr">
+        <span class="swot-value">0</span><span class="label bg-negative">T</span>
+    </div>
+</a>
+                                    
+                                
+                            
+                        </div>
+                    
+
+                    
+                
+            
+                    
+                    
+
+                        
+                            <span class="col-xs-6 nolb  modal-chart-param pointer  " data-parameter="rsi" data-toggle="tooltip" data-stockpk="1752" data-title="Click to see historical chart ">
+                                
+                                <div class="stock-indicator-tile  tile-hover ">
+                                    <div class="value stock-info-ho disflex ">
+                                        
+                                            <span>
+                                                52.7
+                                            </span>
+                                        
+                                        <span class="px025r pt025r hidden icon-wrapper just-cont-start">
+                                            <i class="sprite-navbar sprite-performance-increase-1-18x18"></i>
+                                        </span>
+                                    </div>
+                                    
+                                        <p class="stock-info-ho fs07rem shrink-text text-ellipsis">
+                                            Day RSI
+                                        </p>
+
+                                    
+                                        <p class="fs07rem neutral">RSI is mid-range</p>
+                                    
+                                </div>
+                               
+                            </span>
+                        
+
+                    
+
+                    
+                        </div>
+                    
+                
+            
+                    
+                        <div class="col-xs-12 col-lg-4 p-x-0 scroll-card">
+                    
+                    
+
+                        
+                            <span class="col-xs-6 nolb  modal-chart-param pointer  " data-parameter="mfi" data-toggle="tooltip" data-stockpk="1752" data-title="Click to see historical chart ">
+                                
+                                <div class="stock-indicator-tile  tile-hover ">
+                                    <div class="value stock-info-ho disflex ">
+                                        
+                                            <span>
+                                                40.1
+                                            </span>
+                                        
+                                        <span class="px025r pt025r hidden icon-wrapper just-cont-start">
+                                            <i class="sprite-navbar sprite-performance-increase-1-18x18"></i>
+                                        </span>
+                                    </div>
+                                    
+                                        <p class="stock-info-ho fs07rem shrink-text text-ellipsis">
+                                            Day MFI
+                                        </p>
+
+                                    
+                                        <p class="fs07rem neutral">MFI is mid-range</p>
+                                    
+                                </div>
+                               
+                            </span>
+                        
+
+                    
+
+                    
+                
+            
+                    
+                    
+
+                        
+                            <span class="col-xs-6 nolb  " data-parameter="beta_1Y" data-toggle="tooltip" data-stockpk="1752" data-title="">
+                                
+                                <div class="stock-indicator-tile ">
+                                    <div class="value stock-info-ho disflex ">
+                                        
+                                            <span>
+                                                1.1
+                                            </span>
+                                        
+                                        <span class="px025r pt025r hidden icon-wrapper just-cont-start">
+                                            <i class="sprite-navbar sprite-performance-increase-1-18x18"></i>
+                                        </span>
+                                    </div>
+                                    
+                                        <p class="stock-info-ho fs07rem shrink-text text-ellipsis">
+                                            Beta 1Year
+                                        </p>
+
+                                    
+                                        <p class="fs07rem orangered">High Volatility</p>
+                                    
+                                </div>
+                               
+                            </span>
+                        
+
+                    
+
+                    
+                        </div>
+                    
+                
+            
+                    
+                        <div class="col-xs-12 col-lg-4 p-x-0 scroll-card">
+                    
+                    
+
+                        
+                            <span class="col-xs-6 nolb  modal-chart-param pointer  " data-parameter="sma_50" data-toggle="tooltip" data-stockpk="1752" data-title="Click to see historical chart ">
+                                
+                                <div class="stock-indicator-tile  tile-hover ">
+                                    <div class="value stock-info-ho disflex ">
+                                        
+                                            <span>
+                                                39.7
+                                            </span>
+                                        
+                                        <span class="px025r pt025r hidden icon-wrapper just-cont-start">
+                                            <i class="sprite-navbar sprite-performance-increase-1-18x18"></i>
+                                        </span>
+                                    </div>
+                                    
+                                        <p class="stock-info-ho fs07rem shrink-text text-ellipsis">
+                                            50Day SMA
+                                        </p>
+
+                                    
+                                        <p class="fs07rem positive">Price above SMA 39.7</p>
+                                    
+                                </div>
+                               
+                            </span>
+                        
+
+                    
+
+                    
+                
+            
+                    
+                    
+
+                        
+                            <span class="col-xs-6 nolb  modal-chart-param pointer  " data-parameter="sma_200" data-toggle="tooltip" data-stockpk="1752" data-title="Click to see historical chart ">
+                                
+                                <div class="stock-indicator-tile  tile-hover ">
+                                    <div class="value stock-info-ho disflex ">
+                                        
+                                            <span>
+                                                38.1
+                                            </span>
+                                        
+                                        <span class="px025r pt025r hidden icon-wrapper just-cont-start">
+                                            <i class="sprite-navbar sprite-performance-increase-1-18x18"></i>
+                                        </span>
+                                    </div>
+                                    
+                                        <p class="stock-info-ho fs07rem shrink-text text-ellipsis">
+                                            200Day SMA
+                                        </p>
+
+                                    
+                                        <p class="fs07rem positive">Price above SMA 38.1</p>
+                                    
+                                </div>
+                               
+                            </span>
+                        
+
+                    
+
+                    
+                        </div>
+                    
+                
+               
+            </div>
+        
+    </div>
+</div>
+
+                        
+                
+            
+        
+        
+
+
+    
+
+
+    </div>
+    
+
+
+    
+
+
+
+
+<div class="stock-navbar-placeholder" style="height: 42px; display: none;"></div><nav class="stock-navbar stock-navbar-v2">
+    <ul class="nav navbar-nav stocknav scroll">
+        
+            
+            
+            <li class="nav-item m-l-0">
+                <a class="nav-link " href="/equity/1752/ORICONENT/oricon-enterprises-ltd/">Overview</a>
+            </li>
+            
+            
+            
+            
+            
+                
+                    <li class="nav-item">
+                        <a class="nav-link " href="/equity/stock-report/1752/ORICONENT/oricon-enterprises-ltd/">
+                            <i class="sprite-stock sprite-stock-report-whitemode-sm"></i>
+                        </a>
+                    </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link " href="/tools/buy-sell-zone/1752/ORICONENT/oricon-enterprises-ltd/">
+                        Buy Sell Zone
+                    </a>
+                </li>
+            
+            
+
+            
+            
+            <li class="nav-item">
+                
+                <a class="nav-link " href="/fundamentals/financials/1752/ORICONENT/oricon-enterprises-ltd/">Financials</a>
+                
+            </li>
+            
+            
+            
+            <li class="nav-item navs-heading-pills">
+                <div class="dropdown">
+                <a class="nav-link  dropdown-toggle fixeddp" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="/latest-news/1752/ORICONENT/oricon-enterprises-ltd/">News</a>
+                <div class="dropdown-menu dropdown-menu-full titlecase p-y-0" aria-labelledby="" style="position:fixed">
+                    <a href="/latest-news/1752/ORICONENT/oricon-enterprises-ltd/" class="dropdown-item gray6e">All</a>
+                    <a href="/latest-news/only-news/1752/ORICONENT/oricon-enterprises-ltd/" class="dropdown-item gray6e">News</a>
+                    
+                        <a href="/latest-news/analyst-calls/1752/ORICONENT/oricon-enterprises-ltd/" class="dropdown-item gray6e">Earnings Calls</a>
+                    
+                    
+                        <a href="/latest-news/BSE-Announcements/1752/ORICONENT/oricon-enterprises-ltd/" class="dropdown-item gray6e">Corporate Announcements</a>
+                    
+                    <a href="/research-reports/post/ORICONENT/1752/oricon-enterprises-ltd/" class="dropdown-item gray6e">Research Reports</a>
+                </div>
+                <div>
+            </div></div></li>
+            
+            
+            
+                <li class="nav-item navs-heading-pills">
+                    
+                    
+                        <div class="dropdown">
+                            <a class="nav-link  dropdown-toggle   fixeddp active " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href=" # ">
+                                Technicals
+                            </a>
+                            
+                                <div class="dropdown-menu dropdown-menu-full titlecase p-y-0" aria-labelledby="" style="position:fixed">
+                                    <a class="dropdown-item gray6e activeblue" href="/equity/technical-analysis/ORICONENT/1752/oricon-enterprises-ltd/">
+                                        Technicals
+                                    </a>
+                                    <a class="dropdown-item gray6e p-r-2-md-up posrelative " href="/share-price/performance/1752/ORICONENT/oricon-enterprises-ltd/">
+                                        Share Price History
+                                        <sup class="posabsolute">
+                                            <i class="sprite-navbar sprite-new-blue-icon mt025rem ml3"></i>
+                                        </sup>
+                                    </a>
+                                    <a class="dropdown-item gray6e " href="/equity/delivery-analysis/1752/ORICONENT/oricon-enterprises-ltd/">
+                                        Delivery
+                                    </a>
+                                </div>
+                            
+                        </div>
+                    
+                </li>
+
+                
+                
+                
+            
+            
+            
+            <li class="nav-item">
+                <div class="dropdown">
+                    <a class="nav-link  dropdown-toggle  fixeddp " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href=" # ">   
+                        
+                            Shareholding
+                        
+                    </a>
+                    
+                        <div class="dropdown-menu dropdown-menu-full titlecase p-y-0" aria-labelledby="" style="position:fixed">
+                            <a class="dropdown-item gray6e " href="/equity/share-holding/1752/ORICONENT/latest/oricon-enterprises-ltd/">
+                                Shareholding
+                            </a>
+
+                            <a class="dropdown-item gray6e " href="/equity/monthly-mutual-fund-share-holding/1752/ORICONENT/latest/oricon-enterprises-ltd/">
+                                Monthly MF Holdings
+                            </a>
+
+                            <a class="dropdown-item gray6e
+                                " href="/equity/bulk-block-deals/ORICONENT/1752/oricon-enterprises-ltd/">
+                                Bulk Block Deals
+                            </a>
+
+                            <a class="dropdown-item gray6e
+                                " href="/equity/insider-trading-sast/all/ORICONENT/1752/oricon-enterprises-ltd/">
+                                Insider Trading &amp; SAST
+                            </a>
+                        </div>
+                    
+                </div>
+            </li>
+            
+            
+            
+            <li class="nav-item">
+                <div class="dropdown">
+                    <a class="nav-link  dropdown-toggle  fixeddp " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href=" # ">
+                         Deals 
+                    </a>
+                    
+                        <div class="dropdown-menu dropdown-menu-full titlecase p-y-0" aria-labelledby="" style="position:fixed">
+                                <a class="dropdown-item gray6e
+                                    " href="/equity/bulk-block-deals/ORICONENT/1752/oricon-enterprises-ltd/">
+                                    Bulk Block Deals
+                                </a>
+                                <a class="dropdown-item gray6e
+                                    " href="/equity/insider-trading-sast/all/ORICONENT/1752/oricon-enterprises-ltd/">
+                                    Insider Trading &amp; SAST
+                                </a>
+                        </div>
+                    
+                </div>
+            </li>
+            
+            
+            
+            <li class="nav-item">
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle fixeddp " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#">
+                        Corporate Actions
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-full titlecase p-y-0" aria-labelledby="" style="position:fixed">
+                        <a class="dropdown-item gray6e " href="/equity/corporate-actions/ORICONENT/1752/oricon-enterprises-ltd/">All</a>
+                        <a class="dropdown-item gray6e
+                            " href="/equity/Dividend/ORICONENT/1752/oricon-enterprises-ltd-dividend/">Dividend</a>
+
+                        
+                            <a class="dropdown-item gray6e
+                                " href="/equity/Bonus/ORICONENT/1752/oricon-enterprises-ltd-bonus/">
+                                Bonus
+                            </a>
+                        
+
+                        <a class="dropdown-item gray6e
+                            " href="/equity/Split/ORICONENT/1752/oricon-enterprises-ltd-split/">Split</a>
+
+                        
+                            <a class="dropdown-item gray6e
+                                " href="/equity/rights/ORICONENT/1752/oricon-enterprises-ltd-rights/">Rights</a>
+                        
+
+                        <a class="dropdown-item gray6e
+                            " href="/equity/board-meeting/ORICONENT/1752/oricon-enterprises-ltd-board_meeting/">Board Meetings</a>
+                    </div>
+                </div>
+            </li>
+            
+            
+            
+            <li class="nav-item">
+                <a class="nav-link " href="/alerts/stock-alerts/ORICONENT/1752/oricon-enterprises-ltd/">
+                    Alerts
+                    
+                        
+                            <sup class="text-primary">
+                            
+                            </sup>
+                        
+                    
+                </a>
+            </li>
+            
+            
+                <li class="nav-item posrelative">
+                    <a class="nav-link " href="/equity/about/1752/ORICONENT/oricon-enterprises-ltd/">
+                        About
+                    </a>
+                </li>
+            
+        
+    </ul>
+</nav>
+
+
+
+    
+
+    
+    <section class="row">
+        
+            <div class="col-xl-12 col-md-12 col-sm-12 col-xs-12" style="overflow-x: hidden;">
+                <!-- End of Stock header row -->
+                <div class="p-y-2 m-y-1">
+                    <div class="technical-page-description cen">
+                        <h1 id="technical-page-title" class="m-y-1 tech-title fs1p5rem">Oricon Enterprises Ltd. RSI, Moving Averages, Technical Analysis MACD, MFI, Stochastic and Candlesticks of end of the day</h1>
+                        <h2 id="technical-page-description" class="fs1p0rem mb15 fw400 tech-description">Oricon Enterprises technical analysis - SMA, EMA, Price Change analysis, 52 Week high low, Beta and volume delivery analysis of end of the day</h2>
+                    </div>
+                    <div id="technical-analysis-react" data-stock-name="Oricon Enterprises Ltd." data-stock-code="1752" data-nse="ORICONENT" data-stock-short-name="Oricon Enterprises" data-src="stock" data-show-beta="true" data-returns-analysis-url="/share-price/performance/1752/ORICONENT/oricon-enterprises-ltd/" data-available-freq="[24, 7, 31, 5, 10, 15, 30, 60, 120]"><div class="react-technical-analysis-container"><div class="Toastify"></div><div class="row p-x-1"><div class="change-selector"><div class="change-options-container"><div class="change-option-parent"><a data-option-key="24" data-option-value="End of day" class="change-option active" alt="End of day" href="/equity/technical-analysis/ORICONENT/1752/oricon-enterprises-ltd/">End of day</a></div><div class="change-option-parent"><a data-option-key="5" data-option-value="5 Min" class="change-option " alt="5 Min" href="/equity/technical-analysis-5min/ORICONENT/1752/oricon-enterprises-ltd/">5 Min</a></div><div class="change-option-parent"><a data-option-key="10" data-option-value="10 Min" class="change-option " alt="10 Min" href="/equity/technical-analysis-10min/ORICONENT/1752/oricon-enterprises-ltd/">10 Min</a></div><div class="change-option-parent"><a data-option-key="15" data-option-value="15 Min" class="change-option " alt="15 Min" href="/equity/technical-analysis-15min/ORICONENT/1752/oricon-enterprises-ltd/">15 Min</a></div><div class="change-option-parent"><a data-option-key="30" data-option-value="30 Min" class="change-option " alt="30 Min" href="/equity/technical-analysis-30min/ORICONENT/1752/oricon-enterprises-ltd/">30 Min</a></div><div class="change-option-parent"><a data-option-key="60" data-option-value="1 Hr" class="change-option " alt="1 Hr" href="/equity/technical-analysis-1hr/ORICONENT/1752/oricon-enterprises-ltd/">1 Hr</a></div><div class="change-option-parent"><a data-option-key="120" data-option-value="2 Hr" class="change-option " alt="2 Hr" href="/equity/technical-analysis-2hr/ORICONENT/1752/oricon-enterprises-ltd/">2 Hr</a></div><div class="change-option-parent"><a data-option-key="7" data-option-value="1 Week" class="change-option " alt="1 Week" href="/equity/technical-analysis-1week/ORICONENT/1752/oricon-enterprises-ltd/">1 Week</a></div><div class="change-option-parent"><a data-option-key="31" data-option-value="1 Month" class="change-option " alt="1 Month" href="/equity/technical-analysis-1month/ORICONENT/1752/oricon-enterprises-ltd/">1 Month</a></div></div></div></div><div class="row m-t-2"><div class="col-md-6 col-xs-12"><div class="last-updated"><span>Last Updated:28 Mar, 2025  3:31 PM (IST)</span></div></div><div class="col-md-6 col-xs-12"><div class="react-candlestick-indicator"><div class="re-legend-container"><div class="re-legend-indicator"><div class="re-positive-indicator"></div><div>Positive Indicator</div></div><div class="re-legend-indicator"><div class="re-neutral-indicator"></div><div>Neutral Indicator</div></div><div class="re-legend-indicator"><div class="re-negative-indicator"></div><div>Negative Indicator</div></div></div></div></div></div><div class="row react-trendlyne-technical m-t-1"><article class="tech-analysis-article"><div class="col-xs-12 p-x-0 react-technical-analysis re-card"><h2 class="col-xs-12 technical-card-heading re-card-title">Oricon Enterprises Ltd. Day TECHNICAL ANALYSIS</h2><ul class="col-xs-12 technical-card-parent"><li class="tech-analysis-card"><div class="card-heading"><h3>Day Trendlyne Momentum Score</h3></div><div class="tech-card-score react-tech-value positive">65.1</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color positive">Score is 65.08, stock is technically moderately strong. Stocks with score between 60 and 70
+                    are considered as technically Moderately Strong</h4></li><li class="tech-analysis-card"><div class="card-heading"><h3>Day RSI(14)</h3></div><div class="tech-card-score react-tech-value neutral">52.7</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color neutral">RSI is 52.7, RSI below 30 is considered oversold and above 70 overbought</h4></li><li class="tech-analysis-card"><div class="card-heading"><h3>Day MFI</h3></div><div class="tech-card-score react-tech-value neutral">40.1</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color neutral">MFI is 40.1, MFI below 30 is considered oversold and above 70 overbought</h4></li><li class="tech-analysis-card"><div class="card-heading"><h3>Day MACD(12, 26, 9)</h3></div><div class="tech-card-score react-tech-value positive">0.0</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color positive">MACD is above its center and signal Line, this is a bullish indicator.</h4></li><li class="tech-analysis-card"><div class="card-heading"><h3>Day MACD Signal</h3></div><div class="tech-card-score react-tech-value positive">0.0</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color positive">MACD is above its center and signal Line, this is a bullish indicator.</h4></li><li class="tech-analysis-card"><div class="card-heading"><h3>Day ATR</h3></div><div class="tech-card-score react-tech-value neutral">1.4</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color neutral">Oricon Enterprises Ltd. is currently at 1.39 Day ATR</h4></li><li class="tech-analysis-card"><div class="card-heading"><h3>Day ADX</h3></div><div class="tech-card-score react-tech-value neutral">15.7</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color neutral">Oricon Enterprises Ltd. is currently at 15.65 Day ADX</h4></li><li class="tech-analysis-card"><div class="card-heading"><h3>Day ROC(21)</h3></div><div class="tech-card-score react-tech-value neutral">-0.4</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color neutral">Oricon Enterprises Ltd. is currently at -0.42 Day ROC(21)</h4></li><li class="tech-analysis-card"><div class="card-heading"><h3>Day ROC(125)</h3></div><div class="tech-card-score react-tech-value neutral">6.0</div><h4 class="card-banner information-banner react-tech-value-with-back tl_insights_color neutral">Oricon Enterprises Ltd. is currently at 6.05 Day ROC(125)</h4></li></ul></div></article><article class="tech-analysis-article"><div class="col-xs-12 p-x-0 p-b-0 re-price-change-analysis re-card"><h2 class="col-xs-12 price-card-heading re-card-title">Oricon Enterprises Ltd. Day PERFORMANCE ANALYSIS</h2><div class="col-xs-12  p-x-0"><ul class="col-xs-12 m-b-2 price-change-section p-x-1"><li><div class="price-change-info"><h3 class="subtitle ">1 Day Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>0.31 (0.78%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 44%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 44%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">39.5</span><span class="pull-xs-right">40.5</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li><li><div class="price-change-info"><h3 class="subtitle ">1 Week Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>0.5 (1.27%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 53%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 53%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">37.97</span><span class="pull-xs-right">41.7</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li><li><div class="price-change-info"><h3 class="subtitle ">1 Month Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>0.41 (1.04%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 45%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 45%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">37.97</span><span class="pull-xs-right">42.35</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li><li><div class="price-change-info"><h3 class="subtitle ">3 Months Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>0.94 (2.41%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 59%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 59%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">36.25</span><span class="pull-xs-right">42.5</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li><li><div class="price-change-info"><h3 class="subtitle ">6 Months Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>2.28 (6.05%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 65%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 81%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">26.67</span><span class="pull-xs-right">43</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li><li><div class="price-change-info"><h3 class="subtitle ">1 Year Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>1.69 (4.42%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 62%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 62%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">26.67</span><span class="pull-xs-right">48.15</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li><li><div class="price-change-info"><h3 class="subtitle ">2 Year Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>24.09 (151.99%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 2%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 2%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">-</span><span class="pull-xs-right">-</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li><li><div class="price-change-info"><h3 class="subtitle ">3 Year Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>6.79 (20.48%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 65%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 73%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">15.15</span><span class="pull-xs-right">49.3</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li><li><div class="price-change-info"><h3 class="subtitle ">5 Year Range</h3><div class="priceChange"><span class="positive"><i class="fa fa-long-arrow-up fs095rem" data-nosnippet="true"></i><span>30.44 (320.42%)</span></span></div></div><div class="current-price-wrapper"><div class="current-ltp" style="left: 65%;">39.94 (LTP)</div></div><div class="progress-indicator"><div class="new-indicator"><div class="indicator-circle bg-positive" style="left: 77%;"></div></div><div class="tl-progress-text tl-progress-se"><span class="">9.2</span><span class="pull-xs-right">49.3</span></div><div class="tl-progress-text tl-progress-hl"><span class="fs075rem pull-xs-left">Low</span><span class="fs075rem">&nbsp;</span><span class="fs075rem pull-xs-right">High</span></div></div></li></ul><ul class="col-xs-12 list-group"><li><a href="/fundamentals/stock-screener/4901/highest-recovery-from-52-week-low/index/NIFTY500/nifty-500/" class="card-banner react-tech-value-with-back col-xs-12 tl_insights_color positive" data-toggle="tooltip" data-title="View all stocks with maximum recovery from their year lows"><i class="sprite-navbar sprite-graph-stats-ascend-1x mr05r"></i>Oricon Enterprises Ltd. has gained 49.76% from 52 week low of 26.7.</a></li></ul><div class="col-xs-12"><div class="align-items-center cen disflex justify-content-space-between p-y-1"><a href="/share-price/performance/1752/ORICONENT/oricon-enterprises-ltd/" class="lazyload-btn fs085rem">View full Share Price History</a></div></div></div></div></article><article class="tech-analysis-article"><div class="col-xs-12 p-x-0 react-volume-analysis re-card"><h2 class="col-xs-12 technical-card-heading re-card-title">Oricon Enterprises Ltd. Day VOLUME ANALYSIS</h2><div class="volume-analysis-chart col-xs-12"><div data-highcharts-chart="0" style="overflow: hidden;"><div id="highcharts-6ig4baq-0" dir="ltr" class="highcharts-container " style="position: relative; overflow: hidden; width: 550px; height: 187px; text-align: left; line-height: normal; z-index: 0; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;"><svg version="1.1" class="highcharts-root" style="font-family:&quot;Roboto&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;font-size:12px;height:13rem;" xmlns="http://www.w3.org/2000/svg" width="550" height="187" viewBox="0 0 550 187"><desc>Created with Highcharts 7.2.2</desc><defs><clipPath id="highcharts-6ig4baq-1-"><rect x="0" y="0" width="85" height="474" fill="none"></rect></clipPath></defs><rect fill="#ffffff" class="highcharts-background" x="0" y="0" width="550" height="187" rx="0" ry="0"></rect><rect fill="none" class="highcharts-plot-background" x="66" y="10" width="474" height="85"></rect><g class="highcharts-grid highcharts-xaxis-grid" data-z-index="1"><path fill="none" data-z-index="1" class="highcharts-grid-line" d="M 66 38.5 L 540 38.5" opacity="1"></path><path fill="none" data-z-index="1" class="highcharts-grid-line" d="M 66 67.5 L 540 67.5" opacity="1"></path><path fill="none" data-z-index="1" class="highcharts-grid-line" d="M 66 95.5 L 540 95.5" opacity="1"></path><path fill="none" data-z-index="1" class="highcharts-grid-line" d="M 66 10.5 L 540 10.5" opacity="1"></path></g><g class="highcharts-grid highcharts-yaxis-grid" data-z-index="1"><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 65.5 10 L 65.5 95" opacity="1"></path><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 124.5 10 L 124.5 95" opacity="1"></path><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 184.5 10 L 184.5 95" opacity="1"></path><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 243.5 10 L 243.5 95" opacity="1"></path><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 302.5 10 L 302.5 95" opacity="1"></path><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 361.5 10 L 361.5 95" opacity="1"></path><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 421.5 10 L 421.5 95" opacity="1"></path><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 480.5 10 L 480.5 95" opacity="1"></path><path fill="none" stroke="#e6e6e6" stroke-width="1" data-z-index="1" class="highcharts-grid-line" d="M 540.5 10 L 540.5 95" opacity="1"></path></g><rect fill="none" class="highcharts-plot-border" data-z-index="1" x="66" y="10" width="474" height="85"></rect><g class="highcharts-axis highcharts-xaxis" data-z-index="2"><path fill="none" class="highcharts-axis-line" stroke="#ccd6eb" stroke-width="1" data-z-index="7" d="M 65.5 10 L 65.5 95"></path></g><g class="highcharts-axis highcharts-yaxis" data-z-index="2"><text x="303" data-z-index="7" text-anchor="middle" transform="translate(0,0)" class="highcharts-axis-title" style="color:#666666;fill:#666666;" y="132.82136821746826"><tspan>Values</tspan></text><path fill="none" class="highcharts-axis-line" data-z-index="7" d="M 66 95 L 540 95"></path></g><g class="highcharts-series-group" data-z-index="3"><g data-z-index="0.1" class="highcharts-series highcharts-series-0 highcharts-bar-series highcharts-tracker" transform="translate(540,95) rotate(90) scale(-1,1) scale(1 1)" clip-path="url(#highcharts-6ig4baq-1-)" width="474" height="85"><rect x="61" y="174" width="20" height="301" fill="#e9f2ff" rx="3" ry="3" opacity="1" class="highcharts-point"></rect><rect x="33" y="53" width="20" height="422" fill="#e9f2ff" rx="3" ry="3" opacity="1" class="highcharts-point"></rect><rect x="4" y="64" width="20" height="411" fill="#e9f2ff" rx="3" ry="3" opacity="1" class="highcharts-point"></rect></g><g data-z-index="0.1" class="highcharts-markers highcharts-series-0 highcharts-bar-series" transform="translate(540,95) rotate(90) scale(-1,1) scale(1 1)" clip-path="none"></g><g data-z-index="0.1" class="highcharts-series highcharts-series-1 highcharts-bar-series highcharts-tracker" transform="translate(540,95) rotate(90) scale(-1,1) scale(1 1)" clip-path="url(#highcharts-6ig4baq-1-)" width="474" height="85"><rect x="66" y="298" width="10" height="177" fill="#016aff" rx="3" ry="3" opacity="1" class="highcharts-point"></rect><rect x="38" y="177" width="10" height="298" fill="#016aff" rx="3" ry="3" opacity="1" class="highcharts-point"></rect><rect x="9" y="148" width="10" height="327" fill="#016aff" rx="3" ry="3" opacity="1" class="highcharts-point"></rect></g><g data-z-index="0.1" class="highcharts-markers highcharts-series-1 highcharts-bar-series" transform="translate(540,95) rotate(90) scale(-1,1) scale(1 1)" clip-path="none"></g></g><text x="275" text-anchor="middle" class="highcharts-title" data-z-index="4" style="color:#333333;font-size:18px;fill:#333333;" y="24"></text><text x="275" text-anchor="middle" class="highcharts-subtitle" data-z-index="4" style="color:#666666;fill:#666666;" y="24"></text><text x="10" text-anchor="start" class="highcharts-caption" data-z-index="4" style="color:#666666;fill:#666666;" y="184"></text><g data-z-index="6" class="highcharts-data-labels highcharts-series-0 highcharts-bar-series highcharts-tracker" transform="translate(66,10) scale(1 1)" opacity="1"><g class="highcharts-label highcharts-data-label highcharts-data-label-color-undefined" data-z-index="1" transform="translate(300,3)"><text x="5" data-z-index="1" style="font-size:11px;font-weight:bold;color:#000000;fill:#000000;" y="16">507.5K</text></g><g class="highcharts-label highcharts-data-label highcharts-data-label-color-undefined" data-z-index="1" transform="translate(421,31)"><text x="5" data-z-index="1" style="font-size:11px;font-weight:bold;color:#000000;fill:#000000;" y="16">712.2K</text></g><g class="highcharts-label highcharts-data-label highcharts-data-label-color-undefined" data-z-index="1" transform="translate(410,60)"><text x="5" data-z-index="1" style="font-size:11px;font-weight:bold;color:#000000;fill:#000000;" y="16">694.1K</text></g></g><g data-z-index="6" class="highcharts-data-labels highcharts-series-1 highcharts-bar-series highcharts-tracker" transform="translate(66,10) scale(1 1)" opacity="1"><g class="highcharts-label highcharts-data-label highcharts-data-label-color-undefined" data-z-index="1" transform="translate(176,3)"><text x="5" data-z-index="1" style="font-size:11px;font-weight:bold;color:#000000;fill:#000000;" y="16">299.3K</text></g><g class="highcharts-label highcharts-data-label highcharts-data-label-color-undefined" data-z-index="1" transform="translate(297,31)"><text x="5" data-z-index="1" style="font-size:11px;font-weight:bold;color:#000000;fill:#000000;" y="16">502.7K</text></g><g class="highcharts-label highcharts-data-label highcharts-data-label-color-undefined" data-z-index="1" transform="translate(326,60)"><text x="5" data-z-index="1" style="font-size:11px;font-weight:bold;color:#000000;fill:#000000;" y="16">551.7K</text></g></g><g class="highcharts-legend" data-z-index="7" transform="translate(175,146)"><rect fill="none" class="highcharts-legend-box" rx="0" ry="0" x="0" y="0" width="364" height="26" visibility="visible"></rect><g data-z-index="1"><g><g class="highcharts-legend-item highcharts-bar-series highcharts-color-undefined highcharts-series-1" data-z-index="1" transform="translate(8,3)"><text x="21" style="color:#666666;cursor:pointer;font-size:12px;font-weight:bold;fill:#666666;" text-anchor="start" data-z-index="2" y="15"><tspan>Combined Delivery Volume</tspan></text><rect x="2" y="4" width="12" height="12" fill="#016aff" rx="3" ry="3" class="highcharts-point" data-z-index="3"></rect></g><g class="highcharts-legend-item highcharts-bar-series highcharts-color-undefined highcharts-series-0" data-z-index="1" transform="translate(198.70486450195312,3)"><text x="21" y="15" style="color:#666666;cursor:pointer;font-size:12px;font-weight:bold;fill:#666666;" text-anchor="start" data-z-index="2"><tspan>NSE+BSE Traded Volume</tspan></text><rect x="2" y="4" width="12" height="12" fill="#e9f2ff" rx="3" ry="3" class="highcharts-point" data-z-index="3"></rect></g></g></g></g><g class="highcharts-axis-labels highcharts-xaxis-labels" data-z-index="7"><text x="51" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="end" transform="translate(0,0)" y="29" opacity="1">Day</text><text x="51" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="end" transform="translate(0,0)" y="57" opacity="1">Week</text><text x="51" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="end" transform="translate(0,0)" y="85" opacity="1"><tspan>1 Month</tspan></text></g><g class="highcharts-axis-labels highcharts-yaxis-labels" data-z-index="7"><text x="66" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">0</text><text x="125.25" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">100k</text><text x="184.5" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">200k</text><text x="243.75" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">300k</text><text x="303" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">400k</text><text x="362.25" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">500k</text><text x="421.5" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">600k</text><text x="480.75" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">700k</text><text x="527.5352811813354" style="color:#666666;cursor:default;font-size:11px;fill:#666666;" text-anchor="middle" transform="translate(0,0)" y="114" opacity="1">800k</text></g></svg></div></div></div><div class="clearfix"></div><div class="delivery-content"><div class="dt-caption">Delivery Volume %</div><table id="deliveryTable" class="table delivery-table mb0"><thead class="delivery-table-head"><tr><th class="text-uppercase">Day</th><th class="text-uppercase dt-center">Week</th><th class="text-uppercase dt-right">1 Month</th></tr></thead><tbody class="delivery-table-body"><tr><td class="">58.98%</td><td class="dt-center">70.58%</td><td class="dt-right">79.49%</td></tr></tbody></table></div><a class="col-xs-12 p-b-1" href="/equity/delivery-analysis/1752/ORICONENT/oricon-enterprises-ltd/">View Detailed Delivery Volume Analysis</a><div class="col-xs-12 volume-analysis-banner"><h4 class="information-banner tl_insights_color ">Oricon Enterprises Ltd. weekly average delivery volume is 70.58%.</h4></div></div></article><article class="tech-analysis-article"><div class="col-xs-12 p-x-0 react-candlesticks re-card"><article class="col-xs-12 p-x-0 active-candlesticks"><div class="col-xs-12 re-candle-stick-title re-card-title">Oricon Enterprises Ltd. Day ACTIVE CANDLESTICKS</div><ul class="col-xs-12 re-candlestick-list"><li class="re-candlestick-list-item"><h3 class="re-candlestick-list-item-title">Bullish Candlestick Patterns</h3><div class="re-candlestick-item-content"><div class="positive-indicator"></div><a>Engulfing Uptrend</a></div><div class="re-candlestick-item-content"><div class="positive-indicator"></div><a>Belt Hold Uptrend</a></div><div class="re-candlestick-item-content"><div class="positive-indicator"></div><a>Inside Uptrend</a></div><div class="re-candlestick-item-content"><div class="positive-indicator"></div><a>Long Line Uptrend</a></div></li><li class="re-candlestick-list-item"><h3 class="re-candlestick-list-item-title">Bearish Candlestick Patterns</h3><div class="candlestick-name">No Active Candlesticks.</div></li></ul><div class="col-xs-12 re-candle-stick-banner"><h4 class="re-info-banner">Oricon Enterprises Ltd. has 4 bullish and no bearish candles active.</h4></div></article></div></article><article class="tech-analysis-article"><div class="col-xs-12 p-x-0 ema-sma react-ema-sma re-card"><h2 class="col-xs-12 technical-card-heading re-card-title">Oricon Enterprises Ltd. Day SMA/EMA (Moving Average) Analysis</h2><div class="row"><div class="col-xs-12"><h4 class="information-banner react-tech-value-with-back ema-insight-h4 tl_insights_color positive" style="display: block;">Oricon Enterprises Ltd. is trading above 8 out of 8 SMAs.</h4></div><div class="col-xs-12"><div class="col-xs-12 col-sm-5 p-x-2 p-t-1 butterfly-chart-container"><div class="text-xs-center"><span class="tech-lg-head tech-current-price br-black" data-price="39.94">39.94</span></div><div class="news-sm-head text-xs-center">CURRENT PRICE</div><div class="m-y-2 relative"><img class="img-fluid" src="https://cdn-static.trendlyne.com/static/img/brokerwebview/bar-shape.png" alt="Insight Bar" width="313" height="53"><div class="tech-pointer"><img class="img-fluid img-pointer light-pointer" src="https://cdn-static.trendlyne.com/static/img/brokerwebview/pointer.png" alt="Pointer Indicator" style="left: 100%;"><img class="img-fluid img-pointer dark-pointer hidden" src="https://cdn-static.trendlyne.com/static/img/brokerwebview/pointer-dark-mode-v2.png" alt="Pointer Indicator" style="left: 100%;"></div></div><div class="fs0p75rem"><div class="p-y-0p25 moving-average"><div class="tag-block bg-positive"></div><span class="m-l-2 moving-average-heading">Bullish Moving Averages</span><span class="bullish-span pull-xs-right">8</span></div><div class="p-y-0p25 moving-average"><div class="tag-block bg-negative"></div><span class="m-l-2 moving-average-heading">Bearish Moving Averages</span><span class="bearish-span pull-xs-right">0</span></div></div></div><div class="col-xs-12 col-sm-7 ema-sma-table-container"><div class="col-xs-12 p-a-0"><div class="col-xs-12 p-x-0 text-xs-center"><div class="o-switch btn-group ema-sma-btn" data-toggle="buttons" role="group"><label class="btn active"><input type="radio" name="ema-sma-switch" class="tech-sma" autocomplete="off" readonly="" checked="">SMA</label><label class="btn "><input type="radio" name="ema-sma-switch" class="tech-ema" autocomplete="off" readonly="">EMA</label></div></div></div><div class="col-xs-12 p-x-0 p-t-1 br-black ema-sma-section"><div class="col-xs-12 p-a-0 tech-ema-section"><div class="col-xs-12 p-a-0"><div class="col-xs-6 p-l-0"><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="5 Day">5 Day SMA</span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">39.9</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="10 Day">10 Day SMA</span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">39.7</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="20 Day">20 Day SMA</span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">39.7</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="30 Day">30 Day SMA</span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">39.9</span></div></div><div class="col-xs-6 p-r-0"><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="50 Day">50 Day SMA</span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">39.7</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="100 Day">100 Day SMA</span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">38.1</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="150 Day">150 Day SMA</span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">37.7</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="200 Day">200 Day SMA</span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">38.1</span></div></div></div></div></div></div></div></div></div></article><article class="tech-analysis-article"><div class="col-xs-12 p-x-0 ema-sma react-ema-sma re-card"><h2 class="col-xs-12 technical-card-heading re-card-title">Oricon Enterprises Ltd. Day OSCILLATOR TREND</h2><div class="row"><div class="col-xs-12"><h4 class="information-banner react-tech-value-with-back ema-insight-h4 tl_insights_color positive">Oricon Enterprises Ltd. is trading above 6 out of 9 Oscillators in bullish zone.</h4></div><div class="col-xs-12"><div class="col-xs-12 col-sm-5 p-x-2 p-t-1 butterfly-chart-container"><div class="m-y-2 relative"><img class="img-fluid" src="https://cdn-static.trendlyne.com/static/img/brokerwebview/bar-shape.png" alt="Insight Bar" width="313" height="53"><div class="tech-pointer"><img class="img-fluid img-pointer light-pointer" src="https://cdn-static.trendlyne.com/static/img/brokerwebview/pointer.png" alt="Pointer Indicator" style="left: 85.7143%;"><img class="img-fluid img-pointer dark-pointer hidden" src="https://cdn-static.trendlyne.com/static/img/brokerwebview/pointer-dark-mode-v2.png" alt="Pointer Indicator" style="left: 85.7143%;"></div></div><div class="fs0p75rem"><div class="p-y-0p25 moving-average"><div class="tag-block bg-positive"></div><span class="m-l-2 moving-average-heading">Bullish Oscillator Averages</span><span class="bullish-span pull-xs-right">6</span></div><div class="p-y-0p25 moving-average"><div class="tag-block bg-negative"></div><span class="m-l-2 moving-average-heading">Bearish Oscillator Averages</span><span class="bearish-span pull-xs-right">1</span></div></div></div><div class="col-xs-12 col-sm-7 ema-sma-table-container"><div class="col-xs-12 p-x-0 p-t-1 br-black ema-sma-section"><div class="col-xs-12 p-a-0 tech-ema-section"><div class="col-xs-12 p-a-0"><div class="col-xs-6 p-l-0"><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="RSI(14)">RSI(14) </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 neutral">52.7</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="Stochastic Oscillator">Stochastic Oscillator </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">39.4</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="CCI 20">CCI 20 </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">54.0</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="Awesome Oscillator">Awesome Oscillator </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">0.2</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="Momentum Oscillator">Momentum Oscillator </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">0.1</span></div></div><div class="col-xs-6 p-r-0"><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="MACD(12, 26, 9)">MACD(12, 26, 9) </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">0.0</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="Stochastic RSI">Stochastic RSI </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 negative">72.1</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="William">William </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 undefined">-55.0</span></div><div class="two-column-container p-y-0p6"><span class="fs0p625rem technical-param" title="Ultimate Oscillator">Ultimate Oscillator </span><span class="fs0p75rem font-weight-600 span-value pull-xs-right ml6 positive">42.6</span></div></div></div></div></div></div></div></div></div></article><article class="tech-analysis-article"><div class="col-xs-12 p-x-0 react-pivot-card re-card"><div><h2 class="technical-card-heading pivot-title re-card-title">Oricon Enterprises Ltd. PIVOT LEVEL</h2></div><div class="pivot-toolbar"><div class="pt-block"><label class="pivot-label">current price</label><div class="pivot-text">39.94</div></div><div class="pt-block"><label class="pivot-label">Open</label><div class="pivot-text">39.51</div></div><div class="pt-block"><label class="pivot-label">High</label><div class="pivot-text">40.5</div></div><div class="pt-block"><label class="pivot-label">Low</label><div class="pivot-text">39.5</div></div><div class="pt-block"><label class="pivot-label">Close</label><div class="pivot-text">39.94</div></div></div><div class="table-responsive mb0"><table class="table pivot-table"><thead><tr><th></th><th>Classic</th><th>Woodie's</th><th>Camarilla</th><th>Fibonacci</th></tr></thead><tbody><tr><td>Resistance 3</td><td class="negative">41.46</td><td class="negative">41.01</td><td class="negative">40.21</td><td class="negative">40.98</td></tr><tr><td>Resistance 2</td><td class="negative">40.98</td><td class="negative">40.76</td><td class="negative">40.12</td><td class="negative">40.6</td></tr><tr><td>Resistance 1</td><td class="negative">40.46</td><td class="negative">40.01</td><td class="negative">40.03</td><td class="negative">40.36</td></tr><tr><td>Pivot Point</td><td class="negative">39.98</td><td class="positive">39.76</td><td class="negative">39.98</td><td class="negative">39.98</td></tr><tr><td>Support 1</td><td class="positive">39.46</td><td class="positive">39.01</td><td class="positive">39.85</td><td class="positive">39.6</td></tr><tr><td>Support 2</td><td class="positive">38.98</td><td class="positive">38.76</td><td class="positive">39.76</td><td class="positive">39.36</td></tr><tr><td>Support 3</td><td class="positive">38.46</td><td class="positive">38.01</td><td class="positive">39.66</td><td class="positive">38.98</td></tr></tbody></table></div></div></article><article class="tech-analysis-article"><div class="col-xs-12 p-x-0 p-b-0 react-beta-section re-card"><h2 class="col-xs-12 beta-title re-card-title">Oricon Enterprises Ltd. Day BETA</h2><ul class="col-xs-12 m-b-1 beta-table"><li class="beta-card"><h3 class="time-period">1 Month</h3><div class="beta-value react-tech-value positive">0.19</div></li><li class="beta-card"><h3 class="time-period">3 Month</h3><div class="beta-value react-tech-value positive">0.55</div></li><li class="beta-card"><h3 class="time-period">1 Year</h3><div class="beta-value react-tech-value negative">1.11</div></li><li class="beta-card"><h3 class="time-period">3 Year</h3><div class="beta-value react-tech-value positive">0.8</div></li></ul><div class="col-xs-12 beta-banner"><h4 class="information-banner react-tech-value-with-back tl_insights_color positive">Oricon Enterprises Ltd. Beta for 3 months is 0.55.</h4></div><div class="col-xs-12 info-disclaimer"><i class="sprite-stock sprite-info-bulb mr4"></i>Beta is calculated against NIFTY 50</div></div></article></div><div id="react-modal-container"></div></div></div>
+                    
+                    <div class="row" id="technical-screener-all-posts">
+                        <div class="col-xs-12">
+                            
+                            
+
+
+<div class="sc-tag-container" style="margin-top:1.5rem;margin-bottom:4rem;">
+	<a class="clearfix" href="/stock-screeners/by-type/?tag=technical">
+		<h6 class="lazyload-btn floatR fs1p1rem">Technical Stock Screeners</h6>
+	</a>
+</div>
+
+
+
+
+                            
+                        </div>
+    
+                    </div>
+                </div>
+            </div>
+        
+    </section>
+</main>
+
+
+    
+    <script src="https://cdn-static.trendlyne.com/static/CACHE/js/output.67199f1d9f9f.js"></script>
+
+  
+    
+  
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.2/js/bootstrap.min.js"></script>
+
+
+<div id="basemodal" class="modal" role="dialog" aria-hidden="true"></div><div id="loginmodal" class="modal login_modal_v2" role="dialog" aria-hidden="true"></div><div id="datamodal" class="modal" role="dialog" aria-hidden="true"></div><div id="bottom-modal" class="modal fade" role="dialog" aria-hidden="true"></div><link rel="stylesheet" href="https://cdn-static.trendlyne.com/static/CACHE/css/output.12b781e8c997.css" type="text/css"><footer class="notvisible tl-footer" style="margin-top: 0.25rem;"><div class="footer-nav-container"><div class="col-lg-5 col-md-12 vert-disflex gap-3"><div class="disflex align-items-center gap-3 footer-heading"><img src="https://cdn-static.trendlyne.com/static/TL-logomark-v1.webp" class="logo" alt="Logo" aria-label="Trendlyne Logo" height="80" width="80" style="margin: -15px;">
+                Trendlyne
+            </div><p class="footer-tagline">Stay ahead of the market</p></div><div class="col-lg-7 col-md-12 p-t-3 p-a-0-lg-up"><div class="col-md-12 col-lg-7 p0"><div class="row"><p class="nav-header col-md-12">Company</p><a class="col-xs-6 p-b-1" href="/privacy/">Privacy</a><a class="col-xs-6 p-b-1" href="/disclaimer/">Disclaimer</a><a class="col-xs-6 p-b-1" href="/terms/">Terms of Use</a><a class="col-xs-6 p-b-1" href="/contact/"> Contact Us </a></div></div><div class="col-md-12 col-lg-5 p-t-3 p-a-0-lg-up p0"><div class="row"><p class="nav-header col-md-12">Resources</p><a class="col-xs-6 p-b-1" href="/news-by-trendlyne/"> Blog </a><a class="col-xs-6 p-b-1" href="/faq/">FAQs</a><a class="col-xs-12 p-b-1" href="/web-widget/showcase">Stock Market Widgets</a></div></div></div><div class="col-xs-12 p-t-1"><hr></div><div class="col-xs-12 p-t-1 copyright gap-3"><p class="copyright-text">
+
+Copyright © 2025 Giskard Datatech Pvt Ltd
+</p><span itemscope="" itemtype="http://schema.org/Organization"><link itemprop="url" href="https://trendlyne.com"><div class="social-icons"><a target="_blank" href="https://twitter.com/Trendlyne" title="Twitter" itemprop="sameAs"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-twitter-icon"></i></a><a target="_blank" href="https://in.linkedin.com/company/trendlyne" title="Linkedin" itemprop="sameAs"><i class="sprite-navbar-subnavbar sprite-navbar-subnavbar-linkedin-icon sprite-scale-75 "></i></a></div></span></div></div></footer><div class="tl-noticebox"></div>
+<div id="infomodal" class="modal" role="dialog" aria-hidden="true"></div>
+<span id="google_signin_provider" data-google-login-url="/accounts/google/login/?process=login" class="hide"></span>
+
+<div id="gdpr_cookie_loader"></div>
+
+
+
+    <script src="https://cdn-static.trendlyne.com/static/CACHE/js/output.17055de82ad7.js"></script><style id="tl-notice-styles">
+            .tl-noticebox {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .notice-content {
+                padding: 12px 20px;
+                border-radius: 6px;
+                color: #fff;
+                font-size: 1rem;
+                font-weight: normal;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                opacity: 0.9;
+                transition: opacity 0.3s ease-in-out;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-width: 200px;
+            }
+
+            .notice-content.success {
+                background-color: #202020;
+                color:#fff;
+            }
+
+            .notice-content.warning {
+                background-color: #202020;
+                color:#fff;
+            }
+
+            .notice-content.danger {
+                background-color: #202020;
+                color:#fff;            
+            }
+
+            .notice-content.info {
+                background-color: #202020;
+                color:#fff;            
+            }
+
+            .notice-content .close-btn {
+                margin-left: 10px;
+                cursor: pointer;
+                font-weight: bold;
+                background: none;
+                border: none;
+                color: #fff;
+                font-size: 16px;
+                padding: 0 10px;
+            }
+        </style>
+
+    <script>
+    // Resolve name collision between jQuery UI and Twitter Bootstrap
+    $.widget.bridge('uitooltip', $.ui.tooltip);
+    </script>
+
+
+
+<script src="https://cdn-static.trendlyne.com/static/CACHE/js/output.5778b5f842ae.js"></script>
+
+
+
+
+
+
+
+
+
+<ul id="ui-id-1" tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front navbar-autocomplete" style="display: none;"></ul><div role="status" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><ul id="ui-id-2" tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front navbar-autocomplete" style="display: none;"></ul><div role="status" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div></body></html>

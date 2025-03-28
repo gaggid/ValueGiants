@@ -1,0 +1,66 @@
+To plot the annual returns on a Highcharts line chart using JavaScript, you can use the following code:
+
+```javascript
+// Import necessary modules and libraries
+const Highcharts = require('highcharts');
+require('highcharts/mapcds3.js'); // For mapCDS integration (optional)
+
+// Data from the given JSON object
+const data = [...]; 
+
+Highcharts.chart('container', { // Define chart container
+  
+  title: {
+    text: 'Annual Returns'
+  },
+    
+  xAxis: {
+    type: 'datetime',
+    dateTimeLabelFormats: { // Displays year only on the x-axis labels
+      millisecond: '%h:%i:%s TT',
+      second: '%H:%M',
+      minute: '%Y-%m-%d %H:%M',
+      hour: '%Y-%m-%d %H:%M',
+      day: '%Y-%m-%d',
+      month: '%Y-%m',
+      year: '%Y'
+    },
+    
+  yAxis: {
+    min: -105, // Set the minimum value to display negative returns
+    max: 140   // Set the maximum value based on highest return in data
+  },
+
+// Series for annual returns line chart
+series: [{
+    type: 'line',
+    name: 'Annual Returns (%)',
+    pointInterval: Highcharts.dateTime('month'), // Use a monthly interval for each point
+    pointStart: new Date(2006, 0, 1),     // Start from the beginning of 2006
+    data: data.map((d) => [new Date(d.Year + '-01-01'), d.Annual Returns])), // Map year to date and return value
+    marker: {
+      enabled: false
+    },
+    tooltip: {
+      pointFormat: '{{value}}'  // Displays only the return percentage without formatting
+    }
+  }],
+  
+// Enable exporting for saving charts as image files, e.g., PNG or PDF
+  exporting: {
+    enabled: true
+  },
+});
+```
+In this example, we are creating a line chart with the `Highcharts` library. We import necessary modules and libraries at the top of our script. Afterward, we define the data from the given JSON object in an array called `data`. Then, we create the chart using the `chart()` method by passing the container ID as an argument.
+
+Inside the chart options, we set a title for our chart with the text "Annual Returns" and configure the xAxis to use dateTime labels showing only years. The yAxis is configured based on the minimum and maximum returns present in the data array. 
+
+Then, we define a series object that represents our line chart using `type: 'line'`, setting its name as "Annual Returns (%)". We use the `pointInterval` property to set the interval between points to be monthly. The `data` attribute maps each year from the JSON data into an array containing the corresponding date and annual return value.
+
+Additionally, we disable markers in our chart using `marker: { enabled: false }` to improve readability. We also configure tooltips with `tooltip: { pointFormat: '{{value}}' }`, which displays only the percentage of returns without formatting when hovering over a data point on the graph.
+
+Finally, we enable exporting for saving charts as image files by setting `exporting: { enabled: true }`.
+
+Note that you need to replace `'container'` with your actual chart container ID in your HTML file. You can also adjust the date range and formatting options according to your requirements.
+
