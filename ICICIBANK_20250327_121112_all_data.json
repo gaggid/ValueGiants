@@ -1,0 +1,177 @@
+{
+    "metadata": {
+        "company_name": "ICICI Bank Ltd",
+        "stock_symbol": "ICICIBANK",
+        "timestamp": "2025-03-27 12:11:12"
+    },
+    "financial_data": {
+        "tables": [],
+        "structured_divs": [
+            {
+                "div_id": "Div_1",
+                "text": "ICICI Bank Ltd. quarterly, annual results, revenue, profit, P&L, Balance Sheet, Cash Flow, Annual Reports, Margins - 15 Years history",
+                "classes": [
+                    "m-l-1-sm-down",
+                    "financial-page-v3"
+                ]
+            }
+        ],
+        "extracted_figures": [],
+        "timestamp": "2025-03-27 12:11:12"
+    },
+    "technical_data": {
+        "price_data": {
+            "current_price": "1336.65",
+            "change": "1336.65"
+        },
+        "technical_indicators": {},
+        "technical_tables": [],
+        "timestamp": "2025-03-27 12:11:12"
+    },
+    "news_data": {
+        "news_items": [
+            {
+                "id": 1,
+                "title": "ICICI Bank Ltd.",
+                "date": "Date not found",
+                "link": "https://trendlyne.com/latest-news/all/584/ICICIBANK/icici-bank-ltd/",
+                "summary": "No results found"
+            },
+            {
+                "id": 2,
+                "title": "ICICI Bank Ltd.",
+                "date": "Date not found",
+                "link": "https://trendlyne.com/equity/584/ICICIBANK/icici-bank-ltd/",
+                "summary": "ICICI Bank Ltd.27 Mar 2025, 05:39PM1336.650.06%\n                        AIPC alleges ICICI Bank terminated 782 employees without due process\n                        Business Standard\n                 "
+            },
+            {
+                "id": 3,
+                "title": "ICICI Bank Ltd.",
+                "date": "Date not found",
+                "link": "https://trendlyne.com/equity/584/ICICIBANK/icici-bank-ltd/",
+                "summary": "ICICI Bank Ltd.27 Mar 2025, 05:39PM1336.650.06%"
+            },
+            {
+                "id": 4,
+                "title": "27 Mar 2025, 05:39PM",
+                "date": "Date not found",
+                "link": "",
+                "summary": "27 Mar 2025, 05:39PM"
+            },
+            {
+                "id": 5,
+                "title": "1336.650.06%",
+                "date": "Date not found",
+                "link": "",
+                "summary": "1336.650.06%"
+            },
+            {
+                "id": 6,
+                "title": "1336.65",
+                "date": "Date not found",
+                "link": "",
+                "summary": "1336.65"
+            },
+            {
+                "id": 7,
+                "title": "0.06%",
+                "date": "Date not found",
+                "link": "",
+                "summary": "0.06%"
+            },
+            {
+                "id": 8,
+                "title": "",
+                "date": "Date not found",
+                "link": "",
+                "summary": ""
+            },
+            {
+                "id": 9,
+                "title": "AIPC alleges ICICI Bank terminated 782 employees without due process\n                        Busines",
+                "date": "Date not found",
+                "link": "https://www.business-standard.com/industry/news/aipc-alleges-icici-bank-terminated-782-employees-without-due-process-125032700942_1.html",
+                "summary": "AIPC alleges ICICI Bank terminated 782 employees without due process\n                        Business Standard\n                        \n\n\n\n\n    \n        \n            \n            According to sources,"
+            },
+            {
+                "id": 10,
+                "title": "AIPC alleges ICICI Bank terminated 782 employees without due process",
+                "date": "Date not found",
+                "link": "https://www.business-standard.com/industry/news/aipc-alleges-icici-bank-terminated-782-employees-without-due-process-125032700942_1.html",
+                "summary": "AIPC alleges ICICI Bank terminated 782 employees without due process"
+            },
+            {
+                "id": 11,
+                "title": "Copy LinkShare onShare on Share on Share on",
+                "date": "Date not found",
+                "link": "",
+                "summary": "Copy LinkShare onShare on Share on Share on"
+            },
+            {
+                "id": 12,
+                "title": "ICICI Bank Ltd. has an average target of 1493.00 from 13 brokers.",
+                "date": "Date not found",
+                "link": "https://trendlyne.com/research-reports/stock/584/ICICIBANK/icici-bank-ltd/",
+                "summary": "ICICI Bank Ltd. has an average target of 1493.00 from 13 brokers."
+            },
+            {
+                "id": 13,
+                "title": "ICICI Bank Ltd.",
+                "date": "Date not found",
+                "link": "https://trendlyne.com/equity/584/ICICIBANK/icici-bank-ltd/",
+                "summary": "ICICI Bank Ltd.23 Mar 20251336.650.06%\n                        Market capitalisation of 9 of top-10 most -valued firms surges  3 lakh crore; ICICI Bank, Airtel biggest gainers\n                    live"
+            },
+            {
+                "id": 14,
+                "title": "ICICI Bank Ltd.",
+                "date": "Date not found",
+                "link": "https://trendlyne.com/equity/584/ICICIBANK/icici-bank-ltd/",
+                "summary": "ICICI Bank Ltd.23 Mar 20251336.650.06%"
+            },
+            {
+                "id": 15,
+                "title": "23 Mar 2025",
+                "date": "Date not found",
+                "link": "",
+                "summary": "23 Mar 2025"
+            },
+            {
+                "id": 16,
+                "title": "1336.650.06%",
+                "date": "Date not found",
+                "link": "",
+                "summary": "1336.650.06%"
+            },
+            {
+                "id": 17,
+                "title": "1336.65",
+                "date": "Date not found",
+                "link": "",
+                "summary": "1336.65"
+            },
+            {
+                "id": 18,
+                "title": "0.06%",
+                "date": "Date not found",
+                "link": "",
+                "summary": "0.06%"
+            },
+            {
+                "id": 19,
+                "title": "",
+                "date": "Date not found",
+                "link": "",
+                "summary": ""
+            },
+            {
+                "id": 20,
+                "title": "Market capitalisation of 9 of top-10 most -valued firms surges  3 lakh crore; ICICI Bank, Airtel big",
+                "date": "Date not found",
+                "link": "https://www.livemint.com/market/stock-market-news/market-capitalisation-of-9-of-top-10-most-valued-firms-surges-3-lakh-crore-icici-bank-airtel-biggest-gainers-11742716356340.html",
+                "summary": "Market capitalisation of 9 of top-10 most -valued firms surges  3 lakh crore; ICICI Bank, Airtel biggest gainers\n                    livemint\n                        \n\n\n\n\n    \n        \n            \n  "
+            }
+        ],
+        "count": 20,
+        "timestamp": "2025-03-27 12:11:12"
+    }
+}
