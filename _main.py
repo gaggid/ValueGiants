@@ -613,10 +613,10 @@ def main():
                 
                 if soup:
                     # Save HTML for debugging
-                    html_filename = f"debug_{base_filename}_financials.html"
-                    with open(html_filename, 'w', encoding='utf-8') as f:
-                        f.write(html_content)
-                    st.success(f"Saved raw HTML to {html_filename} for debugging")
+                    # html_filename = f"debug_{base_filename}_financials.html"
+                    # with open(html_filename, 'w', encoding='utf-8') as f:
+                    #     f.write(html_content)
+                    # st.success(f"Saved raw HTML to {html_filename} for debugging")
                     
                     # Extract financial tables
                     financial_data = extract_financial_tables(soup)

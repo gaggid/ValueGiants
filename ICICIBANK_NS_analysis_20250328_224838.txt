@@ -1,1 +1,0 @@
-Analysis failed: Command '['ollama', 'run', 'phi3:medium-128k', '-f', 'temp_prompt.txt']' returned non-zero exit status 1.
