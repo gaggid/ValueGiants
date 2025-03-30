@@ -16,6 +16,179 @@ from langchain.prompts import PromptTemplate
 # Set page configuration
 st.set_page_config(page_title="AI Stock Researcher and Analyst", page_icon="📊", layout="wide")
 
+def get_output_format_reference(format_type):
+    """
+    Centralized reference for output formats to reduce prompt verbosity
+    
+    Args:
+        format_type: The type of format reference to retrieve
+        
+    Returns:
+        String with format specifications
+    """
+    format_references = {
+        "fundamental_analysis": """
+            {
+                "revenue_trend": "Analysis of revenue growth trend",
+                "profit_trend": "Analysis of profit margin trend",
+                "key_ratios": [
+                    {
+                        "name": "ROE",
+                        "value": "18.5%",
+                        "interpretation": "Return on Equity interpretation"
+                    }
+                ],
+                "financial_health": "Assessment of overall financial health",
+                "full_analysis": "Complete fundamental analysis"
+            }
+        """,
+        
+        "technical_analysis": """
+            {
+                "trend_direction": "bullish|bearish|neutral",
+                "key_levels": {
+                    "support": [142.50, 138.75],
+                    "resistance": [150.25, 157.80]
+                },
+                "momentum_indicators": [
+                    {
+                        "name": "RSI",
+                        "value": "67.8",
+                        "interpretation": "RSI interpretation"
+                    }
+                ],
+                "volume_analysis": "Volume analysis text",
+                "full_analysis": "Complete technical analysis"
+            }
+        """,
+        
+        "cash_flow_analysis": """
+            {
+                "operating_cf_trend": "Analysis of operating cash flow trend",
+                "free_cash_flow": "Analysis of free cash flow",
+                "cash_flow_metrics": {
+                    "Operating CF to Net Income": "1.76",
+                    "FCF Yield": "2.4%"
+                },
+                "investing_activities": "Analysis of investing activities",
+                "financing_activities": "Analysis of financing activities",
+                "full_analysis": "Complete cash flow analysis"
+            }
+        """,
+        
+        "recommendation": """
+            {
+                "rating": "STRONG BUY|BUY|HOLD|SELL|STRONG SELL",
+                "rationale": "Brief rationale for recommendation",
+                "price_targets": [
+                    {
+                        "scenario": "Bearish",
+                        "price": 142.50,
+                        "timeframe": "6 months"
+                    },
+                    {
+                        "scenario": "Base",
+                        "price": 165.75,
+                        "timeframe": "12 months"
+                    },
+                    {
+                        "scenario": "Bullish",
+                        "price": 185.25,
+                        "timeframe": "12 months"
+                    }
+                ],
+                "supporting_factors": [
+                    "Key factor supporting the recommendation",
+                    "Another supporting factor",
+                    "Third supporting factor"
+                ],
+                "risk_factors": [
+                    "Key risk factor to consider",
+                    "Another risk factor"
+                ]
+            }
+        """
+    }
+    
+    return format_references.get(format_type, "Format reference not found.")
+
+def get_context_window_limit(model_name):
+    """
+    Get the approximate token limit for different model context windows
+    
+    Args:
+        model_name: Name of the LLM model
+        
+    Returns:
+        Approximate context window size in tokens
+    """
+    # Define context window sizes for different models
+    context_windows = {
+        "phi3:medium-128k": 128000,
+        "phi3:mini": 16000,
+        "mistral:7b-instruct-q6_K": 32000,
+        "qwen2.5:7b": 32000,
+        "mixtral-offloaded:latest": 32000,
+        "qwen2.5-32b-Stock-Research:latest": 32000,
+        "hf.co/unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF:Q6_K": 16000
+    }
+    
+    # Default to a conservative limit if model not found
+    return context_windows.get(model_name.lower(), 16000)
+
+def estimate_token_count(text):
+    """
+    Estimate the number of tokens in a text.
+    This is a rough approximation: ~4 characters per token for English text.
+    
+    Args:
+        text: Text to estimate token count for
+        
+    Returns:
+        Estimated token count
+    """
+    # Simple estimation: ~4 characters per token for English text
+    return len(text) // 4
+
+def extract_key_metrics_to_context(key_data_points, context):
+    """
+    Extract key metrics from data and store in the context dictionary
+    
+    Args:
+        key_data_points: Dictionary with extracted key data
+        context: The global context dictionary
+    """
+    # Store current price
+    if 'company_info' in key_data_points and 'current_price' in key_data_points['company_info']:
+        try:
+            context['key_metrics']['current_price'] = float(str(key_data_points['company_info']['current_price']).replace('₹', '').replace(',', ''))
+        except (ValueError, TypeError):
+            pass
+    
+    # Store fundamental metrics if available
+    if 'financial_summary' in key_data_points and 'ratios' in key_data_points['financial_summary']:
+        ratios = key_data_points['financial_summary']['ratios']
+        
+        # Extract ROE
+        if 'roe' in ratios and 'recent_values' in ratios['roe'] and ratios['roe']['recent_values']:
+            context['key_metrics']['roe'] = ratios['roe']['recent_values'][0]
+        
+        # Extract debt/equity
+        if 'debt_equity' in ratios and 'recent_values' in ratios['debt_equity'] and ratios['debt_equity']['recent_values']:
+            context['key_metrics']['debt_equity'] = ratios['debt_equity']['recent_values'][0]
+        
+        # Extract P/E ratio if available
+        if 'pe_ratio' in ratios and 'recent_values' in ratios['pe_ratio'] and ratios['pe_ratio']['recent_values']:
+            context['key_metrics']['pe_ratio'] = ratios['pe_ratio']['recent_values'][0]
+    
+    # Store technical metrics if available
+    if 'technical_summary' in key_data_points and 'indicators' in key_data_points['technical_summary']:
+        indicators = key_data_points['technical_summary']['indicators']
+        
+        # Extract RSI
+        if 'RSI' in indicators:
+            context['key_metrics']['rsi'] = indicators['RSI']
+
 # Define structured data models for different components of the analysis
 class PriceTarget(BaseModel):
     """Price target for different scenarios"""
@@ -94,9 +267,52 @@ class StockAnalysisReport(BaseModel):
     support_resistance: Optional[Dict[str, List[str]]] = Field(None, description="Support and resistance levels")
     price_history: Optional[List[Dict[str, Any]]] = Field(None, description="Historical price data")
 
+def create_analysis_context():
+    """
+    Create a global context dictionary to store and share key metrics and insights
+    across different analysis steps.
+    
+    Returns:
+        Dictionary with structure for storing analysis insights
+    """
+    return {
+        "fundamental": {
+            "revenue_insights": "",
+            "profit_insights": "",
+            "financial_health": "",
+            "key_metrics": {},
+            "summary": ""
+        },
+        "technical": {
+            "trend_insights": "",
+            "support_resistance_insights": "",
+            "momentum_insights": "",
+            "volume_insights": "",
+            "summary": ""
+        },
+        "cash_flow": {
+            "operating_cf_insights": "",
+            "free_cash_flow_insights": "",
+            "investing_insights": "",
+            "financing_insights": "",
+            "summary": ""
+        },
+        "key_metrics": {
+            "current_price": 0.0,
+            "pe_ratio": None,
+            "market_cap": None,
+            "debt_equity": None,
+            "roe": None,
+            "rsi": None,
+            "trend_direction": "neutral"
+        },
+        "insights_summary": ""
+    }
+
 def generate_structured_analysis(data, model_name="phi3:medium-128k"):
     """
-    Generate a complete structured stock analysis report
+    Generate a complete structured stock analysis report with context maintenance,
+    prompt engineering improvements and memory/hardware efficiency optimizations
     
     Args:
         data: Dictionary containing the stock data
@@ -115,10 +331,27 @@ def generate_structured_analysis(data, model_name="phi3:medium-128k"):
         current_price = float(str(current_price).replace('₹', '').replace(',', ''))
     except (ValueError, TypeError):
         current_price = 0.0
+    
+    # Get context window size for the model
+    context_limit = get_context_window_limit(model_name)
+    
+    # Determine data inclusion parameters based on model size
+    if context_limit <= 16000:  # Smaller models
+        max_quarters = 3
+        max_years = 2
+        max_indicators = 3
+    elif context_limit <= 32000:  # Medium-sized models
+        max_quarters = 4
+        max_years = 3
+        max_indicators = 4
+    else:  # Large models
+        max_quarters = 5
+        max_years = 5
+        max_indicators = 5
         
     # Create a progress bar
     progress_bar = st.progress(0)
-    st.info("Starting analysis process...")
+    st.info(f"Starting analysis with {model_name} (context window ~{context_limit} tokens)")
     
     # Initialize LangChain LLM
     try:
@@ -128,39 +361,135 @@ def generate_structured_analysis(data, model_name="phi3:medium-128k"):
         st.error(f"Error initializing LLM: {str(e)}")
         return None
     
-    # Extract and format key data points for analysis
+    # Create analysis context for sharing insights between steps
+    analysis_context = create_analysis_context()
+    
+    # Extract and format key data points for analysis - with memory-efficient data selection
     st.info("Phase 1/5: Extracting key data points...")
     key_data_points = extract_key_data_points(data)
+    # Extract key metrics to context
+    extract_key_metrics_to_context(key_data_points, analysis_context)
     progress_bar.progress(15)
     
-    # Process fundamental analysis
-    st.info("Phase 2/5: Generating fundamental analysis...")
-    fundamental_analysis = generate_fundamental_analysis(key_data_points, company_name, stock_symbol, llm)
+    # Process fundamental analysis - Using our context-aware function
+    st.info("Phase 2/5: Generating fundamental analysis with memory optimization...")
+    # Modify parameters but keep the prompt engineering improvements
+    fundamental_analysis = generate_fundamental_analysis_with_limits(
+        key_data_points, company_name, stock_symbol, llm, 
+        max_quarters=max_quarters, max_years=max_years,
+        context=analysis_context
+    )
     progress_bar.progress(35)
     
-    # Process technical analysis
-    st.info("Phase 3/5: Generating technical analysis...")
-    technical_analysis = generate_technical_analysis(key_data_points, company_name, stock_symbol, current_price, llm)
+    # Process technical analysis - Using our context-aware function
+    st.info("Phase 3/5: Generating technical analysis with context window management...")
+    technical_analysis = generate_technical_analysis_with_limits(
+        key_data_points, company_name, stock_symbol, current_price, llm,
+        max_indicators=max_indicators,
+        context=analysis_context
+    )
     progress_bar.progress(55)
     
-    # Process cash flow analysis - New phase
-    st.info("Phase 4/5: Generating cash flow analysis...")
-    cash_flow_analysis = generate_cash_flow_analysis(key_data_points, company_name, stock_symbol, llm)
+    # Process cash flow analysis - With context-aware analysis
+    st.info("Phase 4/5: Generating cash flow analysis with selective data inclusion...")
+    cash_flow_analysis = generate_cash_flow_analysis_with_limits(
+        key_data_points, company_name, stock_symbol, llm,
+        max_years=max_years,
+        context=analysis_context
+    )
     progress_bar.progress(75)
     
-    # Generate final recommendation and complete report
+    # Generate final recommendation with consolidated context
     st.info("Phase 5/5: Preparing final recommendation and report...")
-    analysis_report = generate_final_report(
+    recommendation = generate_recommendation(
         key_data_points, company_name, stock_symbol, current_price,
-        fundamental_analysis, technical_analysis, llm, data
+        fundamental_analysis, technical_analysis, llm,
+        context=analysis_context
     )
+    
+    # Generate price history analysis using accumulated context
+    price_history_analysis = generate_price_history_analysis(
+        key_data_points, company_name, stock_symbol, llm,
+        context=analysis_context
+    )
+    
+    # Create the complete report
+    analysis_report = StockAnalysisReport(
+        company_name=company_name,
+        stock_symbol=stock_symbol,
+        current_price=current_price,
+        date=datetime.now().strftime("%B %d, %Y"),
+        fundamental_analysis=fundamental_analysis,
+        technical_analysis=technical_analysis,
+        cash_flow_analysis=cash_flow_analysis,
+        recommendation=recommendation,
+        price_history_analysis=price_history_analysis
+    )
+    
+    # Add additional technical data for charts if available
+    if 'technical_data' in data:
+        if 'moving_averages' in data['technical_data']:
+            analysis_report.moving_averages = data['technical_data']['moving_averages']
+        
+        # Add pivot points
+        if 'pivot_points' in data['technical_data']:
+            # Clean up pivot point values for consistency
+            pivot_points = {}
+            for method, levels in data['technical_data']['pivot_points'].items():
+                pivot_points[method] = {}
+                for level, value in levels.items():
+                    try:
+                        if isinstance(value, str):
+                            value = float(value.replace(',', ''))
+                        pivot_points[method][level] = value
+                    except (ValueError, TypeError):
+                        pivot_points[method][level] = value
+            
+            analysis_report.pivot_points = pivot_points
+        
+        # Process support/resistance levels if available
+        if 'support_resistance' in data['technical_data']:
+            support_resistance = {
+                'support': [],
+                'resistance': []
+            }
+            
+            if 'support' in data['technical_data']['support_resistance']:
+                support_data = data['technical_data']['support_resistance']['support']
+                for level in support_data:
+                    try:
+                        # Handle complex support level strings
+                        cleaned_levels = extract_price_levels(level)
+                        support_resistance['support'].extend(cleaned_levels)
+                    except Exception:
+                        # If parsing fails, just include as is
+                        support_resistance['support'].append(level)
+            
+            # Process resistance levels if available
+            if 'resistance' in data['technical_data']['support_resistance']:
+                resistance_data = data['technical_data']['support_resistance']['resistance']
+                for level in resistance_data:
+                    try:
+                        # Handle complex resistance level strings
+                        cleaned_levels = extract_price_levels(level)
+                        support_resistance['resistance'].extend(cleaned_levels)
+                    except Exception:
+                        # If parsing fails, just include as is
+                        support_resistance['resistance'].append(level)
+            
+            analysis_report.support_resistance = support_resistance
+    
+    # Add price history data if available
+    if 'price_history_data' in data and 'daily_data' in data['price_history_data']:
+        analysis_report.price_history = data['price_history_data']['daily_data']
+    
     progress_bar.progress(100)
     
     return analysis_report
 
 def extract_json_from_text(text):
     """
-    Extract JSON from text using multiple strategies
+    Extract valid JSON from text with improved handling for "extra data" errors
     
     Args:
         text: The text that might contain JSON
@@ -171,37 +500,67 @@ def extract_json_from_text(text):
     if not text:
         return None
     
-    # Strategy 1: Find code blocks with JSON
+    import json
+    
+    # Strategy 1: Find code blocks with JSON (common LLM output format)
     json_match = re.search(r'```(?:json)?\s*(.*?)\s*```', text, re.DOTALL)
     if json_match:
-        return json_match.group(1).strip()
+        json_text = json_match.group(1).strip()
+        # Try to find the first valid JSON object within this text
+        try:
+            # Find the indices of all opening and closing braces
+            open_indices = [i for i, char in enumerate(json_text) if char == '{']
+            close_indices = [i for i, char in enumerate(json_text) if char == '}']
+            
+            # Try each potential combination of opening and closing braces
+            for start in open_indices:
+                for end in close_indices:
+                    if end > start:  # Ensure closing brace comes after opening
+                        try:
+                            potential_json = json_text[start:end+1]
+                            parsed = json.loads(potential_json)
+                            return potential_json  # Return first valid JSON
+                        except json.JSONDecodeError:
+                            continue  # Try next combination
+        except Exception:
+            pass  # If brute force approach fails, continue to next strategy
     
     # Strategy 2: Find anything that looks like a complete JSON object
     json_match = re.search(r'(\{.*\})', text, re.DOTALL)
     if json_match:
-        return json_match.group(1).strip()
-    
-    # Strategy 3: Try to clean up the text
-    # Sometimes LLMs add commentary before or after the JSON
-    lines = text.split('\n')
-    json_lines = []
-    in_json = False
-    open_braces = 0
-    
-    for line in lines:
-        if '{' in line and not in_json:
-            in_json = True
+        json_text = json_match.group(1).strip()
         
-        if in_json:
-            json_lines.append(line)
-            open_braces += line.count('{') - line.count('}')
+        # Handle the "Extra data" error by carefully extracting only up to the matching closing brace
+        try:
+            # Parse char by char to find exactly one valid JSON object
+            brace_count = 0
+            for i, char in enumerate(json_text):
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    
+                if brace_count == 0:
+                    # We found a complete, balanced JSON object
+                    potential_json = json_text[:i+1]
+                    # Validate by parsing
+                    parsed = json.loads(potential_json)
+                    return potential_json
+        except Exception:
+            pass
+    
+    # Strategy 3: Look for JSON arrays (for cases where we expect an array)
+    array_match = re.search(r'(\[.*\])', text, re.DOTALL)
+    if array_match:
+        array_text = array_match.group(1).strip()
+        try:
+            # Validate by parsing
+            parsed = json.loads(array_text)
+            return array_text
+        except Exception:
+            pass
             
-            if open_braces == 0 and in_json and '}' in line:
-                break
-    
-    if json_lines:
-        return '\n'.join(json_lines)
-    
+    # No valid JSON found
     return None
 
 def process_fundamental_json(json_str, company_name, stock_symbol):
@@ -266,6 +625,7 @@ def process_fundamental_json(json_str, company_name, stock_symbol):
     except Exception as e:
         st.error(f"Error processing fundamental JSON: {str(e)}")
         return None
+
 
 def process_technical_json(json_str, company_name, stock_symbol, current_price):
     """
@@ -358,48 +718,241 @@ def process_technical_json(json_str, company_name, stock_symbol, current_price):
 
 def generate_fundamental_analysis(key_data_points, company_name, stock_symbol, llm):
     """
-    Generate structured fundamental analysis using LLM with improved JSON parsing
+    Generate structured fundamental analysis using LLM with improved prompt engineering
+    """
+    # Format financial data for the prompt
+    financial_data_str = format_financial_data_for_prompt(key_data_points)
+    
+    # Step 1: First prompt for revenue and profit analysis (simpler component)
+    revenue_profit_prompt = f"""
+    You are a financial analyst specializing in equity research. Analyze {company_name}'s ({stock_symbol}) revenue and profit trends.
+    
+    Focus on these financial data points:
+    {financial_data_str}
+    
+    First, analyze the revenue trends:
+    1. Is revenue growing, stable, or declining?
+    2. What is the growth rate compared to industry averages?
+    3. Are there any seasonal patterns or one-time events affecting revenue?
+    
+    Then, analyze the profit trends:
+    1. Are profit margins expanding, stable, or contracting?
+    2. How does profitability compare to competitors?
+    3. What factors are driving profitability changes?
+    
+    Respond with a JSON object containing:
+    {{
+        "revenue_trend": "Your detailed analysis of revenue trends here...",
+        "profit_trend": "Your detailed analysis of profit trends here..."
+    }}
+    
+    IMPORTANT: Respond ONLY with valid JSON. No preamble or explanation outside the JSON.
+    """
+    
+    try:
+        # Get revenue and profit analysis
+        revenue_profit_response = llm.invoke(revenue_profit_prompt)
+        revenue_profit_json = extract_json_from_text(revenue_profit_response)
+        
+        if not revenue_profit_json:
+            st.warning("Could not extract valid JSON from revenue/profit analysis")
+            revenue_profit_data = {
+                "revenue_trend": f"Analysis of {company_name}'s revenue trends could not be generated.",
+                "profit_trend": f"Analysis of {company_name}'s profit trends could not be generated."
+            }
+        else:
+            import json
+            revenue_profit_data = json.loads(revenue_profit_json)
+        
+        # Step 2: Next prompt for key ratios (another manageable component)
+        key_ratios_prompt = f"""
+        You are a financial analyst specializing in equity research. Analyze {company_name}'s ({stock_symbol}) key financial ratios.
+        
+        Focus on these financial data points:
+        {financial_data_str}
+        
+        Analyze these key financial ratios:
+        1. ROE (Return on Equity)
+        2. ROA (Return on Assets)
+        3. Debt-to-Equity
+        4. Current Ratio
+        5. P/E Ratio
+        
+        For each ratio:
+        - Identify the current value
+        - Assess if it's improving or deteriorating
+        - Compare to industry benchmarks
+        - Explain what it means for investors
+        
+        Respond with a JSON array of key ratio objects:
+        [
+            {{
+                "name": "ROE",
+                "value": "15.2%",
+                "interpretation": "Return on Equity interpretation here..."
+            }},
+            {{
+                "name": "Debt/Equity",
+                "value": "0.75",
+                "interpretation": "Debt to Equity interpretation here..."
+            }}
+            // Additional ratios...
+        ]
+        
+        IMPORTANT: Respond ONLY with valid JSON. No preamble or explanation outside the JSON.
+        """
+        
+        # Get key ratios analysis
+        key_ratios_response = llm.invoke(key_ratios_prompt)
+        key_ratios_json = extract_json_from_text(key_ratios_response)
+        
+        if not key_ratios_json:
+            st.warning("Could not extract valid JSON from key ratios analysis")
+            key_ratios_data = [
+                {
+                    "name": "ROE", 
+                    "value": "N/A", 
+                    "interpretation": "Return on Equity data could not be processed."
+                }
+            ]
+        else:
+            import json
+            key_ratios_data = json.loads(key_ratios_json)
+            
+            # Ensure key_ratios_data is a list
+            if not isinstance(key_ratios_data, list):
+                key_ratios_data = [
+                    {
+                        "name": "ROE", 
+                        "value": "N/A", 
+                        "interpretation": "Return on Equity data could not be processed."
+                    }
+                ]
+        
+        # Step 3: Finally, prompt for financial health and full analysis
+        financial_health_prompt = f"""
+        You are a financial analyst specializing in equity research. Provide an overall assessment of {company_name}'s ({stock_symbol}) financial health.
+        
+        Focus on these financial data points:
+        {financial_data_str}
+        
+        Consider:
+        1. Balance sheet strength and liquidity
+        2. Cash flow sustainability
+        3. Debt levels and interest coverage
+        4. Working capital management
+        5. Overall financial stability
+        
+        Respond with a JSON object containing:
+        {{
+            "financial_health": "Your detailed assessment of overall financial health here...",
+            "full_analysis": "Your comprehensive fundamental analysis, bringing together all aspects including revenue trends, profit margins, ratios, and financial health here..."
+        }}
+        
+        IMPORTANT: Respond ONLY with valid JSON. No preamble or explanation outside the JSON.
+        """
+        
+        # Get financial health analysis
+        financial_health_response = llm.invoke(financial_health_prompt)
+        financial_health_json = extract_json_from_text(financial_health_response)
+        
+        if not financial_health_json:
+            st.warning("Could not extract valid JSON from financial health analysis")
+            financial_health_data = {
+                "financial_health": "Financial health assessment could not be generated.",
+                "full_analysis": f"Complete fundamental analysis for {company_name} could not be generated."
+            }
+        else:
+            import json
+            financial_health_data = json.loads(financial_health_json)
+        
+        # Create the consolidated FundamentalAnalysis object from the three components
+        return FundamentalAnalysis(
+            revenue_trend=revenue_profit_data.get("revenue_trend", f"Analysis of {company_name}'s revenue trends could not be generated."),
+            profit_trend=revenue_profit_data.get("profit_trend", f"Analysis of {company_name}'s profit trends could not be generated."),
+            key_ratios=[
+                KeyMetric(
+                    name=ratio.get("name", "Unknown"),
+                    value=ratio.get("value", "N/A"),
+                    interpretation=ratio.get("interpretation", "No interpretation available")
+                )
+                for ratio in key_ratios_data
+            ],
+            financial_health=financial_health_data.get("financial_health", "Financial health assessment could not be generated."),
+            full_analysis=financial_health_data.get("full_analysis", f"Complete fundamental analysis for {company_name} could not be generated.")
+        )
+        
+    except Exception as e:
+        st.warning(f"Fundamental analysis generation failed: {str(e)}")
+        return fallback_fundamental_analysis(key_data_points, company_name, stock_symbol, llm)
+
+def generate_fundamental_analysis_with_limits(key_data_points, company_name, stock_symbol, llm, max_quarters=4, max_years=3, context=None):
+    """
+    Generate fundamental analysis with memory optimization and context sharing
     
     Args:
         key_data_points: Dictionary containing extracted key data points
         company_name: Name of the company
         stock_symbol: Stock ticker symbol
         llm: LangChain LLM object
+        max_quarters: Maximum number of quarters to include
+        max_years: Maximum number of years to include
+        context: The global context dictionary
         
     Returns:
         FundamentalAnalysis object with the analysis
     """
-    # Format financial data for the prompt
-    financial_data_str = format_financial_data_for_prompt(key_data_points)
+    # Format financial data with limits
+    financial_data_str = format_financial_data_for_prompt(key_data_points, max_quarters=max_quarters, max_years=max_years)
     
-    # Create the prompt template for fundamental analysis
+    # Extract key metrics to reference in the prompt
+    key_metrics_str = ""
+    if context and 'key_metrics' in context:
+        metrics = []
+        for name, value in context['key_metrics'].items():
+            if value is not None:
+                metrics.append(f"{name}: {value}")
+        if metrics:
+            key_metrics_str = "Key metrics identified:\n" + "\n".join(metrics)
+    
+    # Build on our previous prompt engineering with more efficient token usage
+    # and adding chain-of-thought reasoning
     fundamental_prompt = f"""
-    You are a financial analyst specializing in equity research. Analyze the fundamental financial performance of {company_name} ({stock_symbol}).
+    You are a financial analyst specializing in equity research. Analyze {company_name} ({stock_symbol}).
     
     Focus on these financial data points:
     {financial_data_str}
     
-    Provide a JSON object with the following structure:
+    {key_metrics_str}
+    
+    First, I want you to think step by step about:
+    1. Revenue trends and what they indicate about the company's growth trajectory
+    2. Profit margin evolution and operational efficiency
+    3. The company's financial health and stability based on key ratios
+    4. Overall financial outlook based on these factors
+    
+    Once you've analyzed these aspects carefully, provide a JSON object with your complete fundamental analysis:
     {{
-        "revenue_trend": "Analysis of revenue trends here...",
-        "profit_trend": "Analysis of profit trends here...",
+        "revenue_trend": "Your analysis of revenue trends here...",
+        "profit_trend": "Your analysis of profit margins here...",
         "key_ratios": [
             {{
                 "name": "ROE",
-                "value": "1.48%",
+                "value": "15.2%",
                 "interpretation": "Return on Equity interpretation here..."
             }},
             {{
                 "name": "Debt/Equity",
-                "value": "0.3",
+                "value": "0.75",
                 "interpretation": "Debt to Equity interpretation here..."
             }}
         ],
-        "financial_health": "Overall financial health assessment here...",
-        "full_analysis": "Complete fundamental analysis here..."
+        "financial_health": "Your assessment of overall financial health here...",
+        "full_analysis": "Your complete fundamental analysis here...",
+        "summary": "A brief 2-3 sentence summary of the most important fundamental insights..."
     }}
     
-    IMPORTANT: Your response must be only a valid JSON object. No preamble or explanation.
+    IMPORTANT: Respond with your thinking process first, then provide ONLY the JSON object.
     """
     
     # Try to generate structured output with enhanced error handling
@@ -407,15 +960,28 @@ def generate_fundamental_analysis(key_data_points, company_name, stock_symbol, l
         # Invoke the LLM
         response = llm.invoke(fundamental_prompt)
         
-        # Extract JSON from the response
-        json_match = re.search(r'(\{.*\})', response, re.DOTALL)
-        if json_match:
-            json_str = json_match.group(1).strip()
-            
-            # Parse JSON and create FundamentalAnalysis object
+        # Extract JSON from the response - using our enhanced extraction function
+        json_str = extract_json_from_text(response)
+        
+        if json_str:
             import json
             parsed_data = json.loads(json_str)
             
+            # Update context with fundamental insights if context exists
+            if context is not None:
+                context['fundamental']['revenue_insights'] = parsed_data.get("revenue_trend", "")
+                context['fundamental']['profit_insights'] = parsed_data.get("profit_trend", "")
+                context['fundamental']['financial_health'] = parsed_data.get("financial_health", "")
+                context['fundamental']['summary'] = parsed_data.get("summary", "")
+                
+                # Store key metrics interpretations
+                for ratio in parsed_data.get("key_ratios", []):
+                    metric_name = ratio.get("name", "").lower()
+                    context['fundamental']['key_metrics'][metric_name] = {
+                        "value": ratio.get("value", "N/A"),
+                        "interpretation": ratio.get("interpretation", "")
+                    }
+                
             # Create the FundamentalAnalysis object
             return FundamentalAnalysis(
                 revenue_trend=parsed_data.get("revenue_trend", f"No revenue trend analysis available for {company_name}"),
@@ -432,17 +998,16 @@ def generate_fundamental_analysis(key_data_points, company_name, stock_symbol, l
                 full_analysis=parsed_data.get("full_analysis", f"No detailed analysis available for {company_name}")
             )
         else:
-            # If we can't find a valid JSON, fall back
             st.warning("Could not extract valid JSON from fundamental analysis response")
-            return fallback_fundamental_analysis(key_data_points, company_name, stock_symbol, llm)
+            return fallback_fundamental_analysis(key_data_points, company_name, stock_symbol, llm, context)
     
     except Exception as e:
         st.warning(f"Fundamental analysis generation failed: {str(e)}")
-        return fallback_fundamental_analysis(key_data_points, company_name, stock_symbol, llm)
+        return fallback_fundamental_analysis(key_data_points, company_name, stock_symbol, llm, context)
 
-def generate_technical_analysis(key_data_points, company_name, stock_symbol, current_price, llm):
+def generate_technical_analysis_with_limits(key_data_points, company_name, stock_symbol, current_price, llm, max_indicators=5, context=None):
     """
-    Generate structured technical analysis using LLM with improved JSON parsing
+    Generate technical analysis with memory optimization and context sharing
     
     Args:
         key_data_points: Dictionary containing extracted key data points
@@ -450,44 +1015,332 @@ def generate_technical_analysis(key_data_points, company_name, stock_symbol, cur
         stock_symbol: Stock ticker symbol
         current_price: Current stock price
         llm: LangChain LLM object
+        max_indicators: Maximum number of indicators to include
+        context: The global context dictionary
         
     Returns:
         TechnicalAnalysis object with the analysis
     """
-    # Format technical data for the prompt
-    technical_data_str = format_technical_data_for_prompt(key_data_points)
+    # Format technical data with limits
+    technical_data_str = format_technical_data_for_prompt(key_data_points, max_indicators=max_indicators)
     
-    # Create the prompt template for technical analysis
+    # Include fundamental insights from context if available
+    fundamental_context = ""
+    if context and 'fundamental' in context and context['fundamental']['summary']:
+        fundamental_context = f"""
+        Fundamental Analysis Context:
+        {context['fundamental']['summary']}
+        
+        Revenue: {context['fundamental']['revenue_insights'][:100]}...
+        Financial Health: {context['fundamental']['financial_health'][:100]}...
+        """
+    
+    # Build on our previous few-shot examples approach but with more concise examples
+    # and including fundamental context
     technical_prompt = f"""
-    You are a technical analyst with expertise in equity markets. Analyze the technical indicators and price patterns for {company_name} ({stock_symbol}) currently trading at {current_price}.
+    You are a technical analyst with expertise in equity markets. Analyze {company_name} ({stock_symbol}) at {current_price}.
     
     Focus on these technical data points:
     {technical_data_str}
     
-    Provide a JSON object with the following structure:
+    {fundamental_context}
+    
+    First, think step-by-step about:
+    1. The primary trend direction based on price action and moving averages
+    2. Key support and resistance levels and their significance
+    3. What momentum indicators reveal about buying/selling pressure
+    4. Volume patterns and what they suggest about price movements
+    
+    After your careful analysis, provide a JSON object following this format:
     {{
-        "trend_direction": "bullish OR bearish OR neutral",
+        "trend_direction": "bullish",
         "key_levels": {{
-            "support": [number, number],
-            "resistance": [number, number]
+            "support": [142.50, 138.75],
+            "resistance": [150.25, 157.80]
         }},
         "momentum_indicators": [
             {{
                 "name": "RSI",
-                "value": "52.7",
+                "value": "67.8",
                 "interpretation": "RSI interpretation here..."
-            }},
-            {{
-                "name": "MACD",
-                "value": "0.0",
-                "interpretation": "MACD interpretation here..."
             }}
         ],
         "volume_analysis": "Volume analysis text here...",
-        "full_analysis": "Complete technical analysis text here..."
+        "full_analysis": "Complete technical analysis here...",
+        "summary": "A brief 2-3 sentence summary of the most important technical insights..."
     }}
     
-    IMPORTANT: Your response must be only a JSON object. Format as a code block with ```json and ``` tags.
+    IMPORTANT: Provide your thinking process first, then respond with ONLY the JSON object.
+    """
+    
+    # Try to generate structured output with enhanced error handling
+    try:
+        # Invoke the LLM
+        response = llm.invoke(technical_prompt)
+        
+        # Extract JSON from the response - using our enhanced extraction function
+        json_str = extract_json_from_text(response)
+        
+        if json_str:
+            import json
+            parsed_data = json.loads(json_str)
+            
+            # Update context with technical insights if context exists
+            if context is not None:
+                context['technical']['trend_insights'] = f"Trend direction: {parsed_data.get('trend_direction', 'neutral')}"
+                context['technical']['support_resistance_insights'] = f"Key support levels: {parsed_data.get('key_levels', {}).get('support', [])} | Key resistance levels: {parsed_data.get('key_levels', {}).get('resistance', [])}"
+                context['technical']['volume_insights'] = parsed_data.get("volume_analysis", "")
+                context['technical']['summary'] = parsed_data.get("summary", "")
+                context['key_metrics']['trend_direction'] = parsed_data.get("trend_direction", "neutral")
+                
+                # Store momentum indicator insights
+                momentum_insights = []
+                for indicator in parsed_data.get("momentum_indicators", []):
+                    if 'name' in indicator and 'interpretation' in indicator:
+                        momentum_insights.append(f"{indicator['name']}: {indicator['interpretation']}")
+                
+                context['technical']['momentum_insights'] = " | ".join(momentum_insights)
+            
+            # Create the TechnicalAnalysis object
+            return TechnicalAnalysis(
+                trend_direction=parsed_data.get("trend_direction", "neutral"),
+                key_levels=parsed_data.get("key_levels", {"support": [], "resistance": []}),
+                momentum_indicators=[
+                    KeyMetric(
+                        name=indicator.get("name", "Unknown"),
+                        value=indicator.get("value", "N/A"),
+                        interpretation=indicator.get("interpretation", "No interpretation available")
+                    )
+                    for indicator in parsed_data.get("momentum_indicators", [])
+                ],
+                volume_analysis=parsed_data.get("volume_analysis", "No volume analysis available"),
+                full_analysis=parsed_data.get("full_analysis", f"No detailed analysis available for {company_name}")
+            )
+        else:
+            # If we can't find a valid JSON, fall back
+            st.warning("Could not extract valid JSON from technical analysis response")
+            return fallback_technical_analysis(key_data_points, company_name, stock_symbol, current_price, llm, context)
+    
+    except Exception as e:
+        st.warning(f"Technical analysis generation failed: {str(e)}")
+        return fallback_technical_analysis(key_data_points, company_name, stock_symbol, current_price, llm, context)
+
+def generate_cash_flow_analysis_with_limits(key_data_points, company_name, stock_symbol, llm, max_years=3, context=None):
+    """
+    Generate cash flow analysis with memory optimization and context sharing
+    
+    Args:
+        key_data_points: Dictionary containing extracted key data points
+        company_name: Name of the company
+        stock_symbol: Stock ticker symbol
+        llm: LangChain LLM object
+        max_years: Maximum number of years to include
+        context: The global context dictionary
+        
+    Returns:
+        CashFlowAnalysis object with the analysis
+    """
+    # Check if cash flow data exists
+    if not (
+        'financial_summary' in key_data_points and 
+        'cash_flow' in key_data_points['financial_summary'] and 
+        key_data_points['financial_summary']['cash_flow']
+    ):
+        # Return minimal analysis if no data available
+        return CashFlowAnalysis(
+            operating_cf_trend="Cash flow trend data not available.",
+            free_cash_flow="Free cash flow data not available.",
+            cash_flow_metrics={},
+            investing_activities="Investing activities data not available.",
+            financing_activities="Financing activities data not available.",
+            full_analysis=f"Comprehensive cash flow analysis for {company_name} could not be generated due to missing data."
+        )
+    
+    # Format cash flow data for the prompt with selective inclusion
+    cash_flow_data = key_data_points['financial_summary']['cash_flow']
+    cash_flow_str = []
+    
+    # Select only the most important cash flow metrics for efficiency
+    key_metrics = ['operating_cf', 'investing_cf', 'financing_cf', 'net_cf']
+    
+    for cf_type, data in cash_flow_data.items():
+        # Only include key metrics
+        if not any(key in cf_type.lower() for key in key_metrics):
+            continue
+            
+        if 'label' in data and 'recent_values' in data and 'headers' in data:
+            cash_flow_str.append(f"{data['label']}:")
+            
+            # Limit years to max_years
+            headers = data['headers'][:max_years] if len(data['headers']) > max_years else data['headers']
+            values = data['recent_values'][:max_years] if len(data['recent_values']) > max_years else data['recent_values']
+            
+            for i, header in enumerate(headers):
+                if i < len(values):
+                    cash_flow_str.append(f"  {header}: {values[i]}")
+    
+    cash_flow_data_str = "\n".join(cash_flow_str)
+    
+    # Include insights from previous analyses
+    previous_insights = ""
+    if context:
+        fundamental_summary = context.get('fundamental', {}).get('summary', '')
+        technical_summary = context.get('technical', {}).get('summary', '')
+        
+        if fundamental_summary or technical_summary:
+            previous_insights = f"""
+            CONTEXT FROM PREVIOUS ANALYSES:
+            
+            Fundamental Analysis: {fundamental_summary}
+            
+            Technical Analysis: {technical_summary}
+            
+            Use this context to ensure your cash flow analysis is consistent with these insights.
+            """
+    
+    # Build on our chain-of-thought prompting with more focus and previous context
+    cash_flow_prompt = f"""
+    You are a financial analyst specializing in cash flow analysis. Analyze {company_name} ({stock_symbol}).
+    
+    Focus on these cash flow data points:
+    {cash_flow_data_str}
+    
+    {previous_insights}
+    
+    Think step-by-step:
+    1. First analyze operating cash flow trends and quality
+    2. Then calculate and interpret free cash flow generation
+    3. Next evaluate investing activities and capital allocation 
+    4. Then assess financing activities and capital structure decisions
+    5. Finally, determine overall cash flow health and sustainability
+    
+    After your careful analysis, provide a JSON object with your complete cash flow analysis:
+    {{
+        "operating_cf_trend": "Your analysis of operating cash flow trends here...",
+        "free_cash_flow": "Your analysis of free cash flow here...",
+        "cash_flow_metrics": {{
+            "Operating CF to Net Income": "1.76",
+            "FCF Yield": "2.4%"
+        }},
+        "investing_activities": "Your analysis of investing activities here...",
+        "financing_activities": "Your analysis of financing activities here...",
+        "full_analysis": "Your complete cash flow analysis here...",
+        "summary": "A brief 2-3 sentence summary of the most important cash flow insights..."
+    }}
+    
+    IMPORTANT: Provide your thinking process first, then respond with ONLY the JSON. No preamble or explanation outside the JSON.
+    """
+    
+    # Try to generate structured output with enhanced error handling
+    try:
+        # Invoke the LLM
+        response = llm.invoke(cash_flow_prompt)
+        
+        # Extract JSON from the response - using our enhanced extraction function
+        json_str = extract_json_from_text(response)
+        
+        if json_str:
+            import json
+            parsed_data = json.loads(json_str)
+            
+            # Update context with cash flow insights if context exists
+            if context is not None:
+                context['cash_flow']['operating_cf_insights'] = parsed_data.get("operating_cf_trend", "")
+                context['cash_flow']['free_cash_flow_insights'] = parsed_data.get("free_cash_flow", "")
+                context['cash_flow']['investing_insights'] = parsed_data.get("investing_activities", "")
+                context['cash_flow']['financing_insights'] = parsed_data.get("financing_activities", "")
+                context['cash_flow']['summary'] = parsed_data.get("summary", "")
+            
+            # Create the CashFlowAnalysis object
+            return CashFlowAnalysis(
+                operating_cf_trend=parsed_data.get("operating_cf_trend", "Operating cash flow trend analysis not available."),
+                free_cash_flow=parsed_data.get("free_cash_flow", "Free cash flow analysis not available."),
+                cash_flow_metrics=parsed_data.get("cash_flow_metrics", {}),
+                investing_activities=parsed_data.get("investing_activities", "Investing activities analysis not available."),
+                financing_activities=parsed_data.get("financing_activities", "Financing activities analysis not available."),
+                full_analysis=parsed_data.get("full_analysis", "Comprehensive cash flow analysis not available.")
+            )
+        else:
+            # If we can't find a valid JSON, fall back to a simple analysis
+            st.warning("Could not extract valid JSON from cash flow analysis response")
+            return fallback_cash_flow_analysis(key_data_points, company_name, stock_symbol, context)
+    
+    except Exception as e:
+        st.warning(f"Cash flow analysis generation failed: {str(e)}")
+        return fallback_cash_flow_analysis(key_data_points, company_name, stock_symbol, context)
+
+def generate_technical_analysis(key_data_points, company_name, stock_symbol, current_price, llm):
+    """
+    Generate structured technical analysis using LLM with improved prompt engineering
+    """
+    # Format technical data for the prompt
+    technical_data_str = format_technical_data_for_prompt(key_data_points)
+    
+    # Create the prompt template with few-shot examples
+    technical_prompt = f"""
+    You are a technical analyst with expertise in equity markets. Analyze {company_name} ({stock_symbol}) currently trading at {current_price}.
+    
+    Focus on these technical data points:
+    {technical_data_str}
+    
+    Follow this step-by-step approach:
+    1. First, determine the primary trend direction (bullish, bearish, or neutral)
+    2. Next, identify key support and resistance levels
+    3. Then, evaluate momentum indicators (RSI, MACD, etc.)
+    4. Finally, analyze volume patterns and what they suggest
+    
+    EXAMPLE 1 - Bullish trend analysis:
+    ```json
+    {{
+        "trend_direction": "bullish",
+        "key_levels": {{
+            "support": [142.50, 138.75],
+            "resistance": [150.25, 157.80]
+        }},
+        "momentum_indicators": [
+            {{
+                "name": "RSI",
+                "value": "67.8",
+                "interpretation": "RSI approaching overbought territory (70) but still indicates strong bullish momentum."
+            }},
+            {{
+                "name": "MACD",
+                "value": "2.45",
+                "interpretation": "MACD is positive and above signal line, confirming bullish momentum."
+            }}
+        ],
+        "volume_analysis": "Trading volume has been increasing on up days and decreasing on down days, confirming the bullish trend. The 20-day average volume is 15% higher than the 50-day average.",
+        "full_analysis": "The stock is in a strong bullish trend with higher highs and higher lows formed over the past month. The uptrend is supported by positive momentum indicators and healthy volume patterns. Key support exists at 142.50 with immediate resistance at 150.25. The technical setup suggests continuation of the bullish trend as long as price remains above the key support level."
+    }}
+    ```
+    
+    EXAMPLE 2 - Bearish trend analysis:
+    ```json
+    {{
+        "trend_direction": "bearish",
+        "key_levels": {{
+            "support": [85.30, 82.10],
+            "resistance": [90.75, 94.20]
+        }},
+        "momentum_indicators": [
+            {{
+                "name": "RSI",
+                "value": "32.5",
+                "interpretation": "RSI approaching oversold territory (30) but still indicates bearish momentum."
+            }},
+            {{
+                "name": "MACD",
+                "value": "-1.75",
+                "interpretation": "MACD is negative and below signal line, confirming bearish momentum."
+            }}
+        ],
+        "volume_analysis": "Trading volume has been increasing on down days and decreasing on up days, confirming the bearish trend. Recent selling pressure is evident with above-average volume on red candles.",
+        "full_analysis": "The stock is in a defined bearish trend with lower highs and lower lows. Multiple resistance levels have rejected price advances. Momentum indicators confirm the bearish sentiment, with RSI at 32.5 and MACD negative. Volume patterns support the bearish outlook with increased selling pressure. The path of least resistance appears to be downward with initial support at 85.30."
+    }}
+    ```
+    
+    Now analyze {company_name} ({stock_symbol}) and respond with a JSON object following the exact same format as the examples.
+    IMPORTANT: Your response must be ONLY a JSON object. Format as a code block with ```json and ``` tags.
     """
     
     # Try to generate structured output with enhanced error handling
@@ -519,6 +1372,7 @@ def generate_technical_analysis(key_data_points, company_name, stock_symbol, cur
                 volume_analysis=parsed_data.get("volume_analysis", "No volume analysis available"),
                 full_analysis=parsed_data.get("full_analysis", f"No detailed analysis available for {company_name}")
             )
+            
         else:
             # Try raw JSON format
             json_match = re.search(r'(\{.*\})', response, re.DOTALL)
@@ -554,7 +1408,8 @@ def generate_technical_analysis(key_data_points, company_name, stock_symbol, cur
         return fallback_technical_analysis(key_data_points, company_name, stock_symbol, current_price, llm)
 
 def generate_final_report(key_data_points, company_name, stock_symbol, current_price, 
-                        fundamental_analysis, technical_analysis, llm, original_data):
+                        fundamental_analysis, technical_analysis, llm, original_data,
+                        cash_flow_analysis=None):
     """
     Generate the final complete report with recommendation
     
@@ -567,25 +1422,27 @@ def generate_final_report(key_data_points, company_name, stock_symbol, current_p
         technical_analysis: TechnicalAnalysis object
         llm: LangChain LLM object
         original_data: Original data dictionary
+        cash_flow_analysis: Optional CashFlowAnalysis object
         
     Returns:
         StockAnalysisReport object with the complete analysis
     """
-    # Generate the recommendation first
+    # Generate the recommendation using our improved function
     recommendation = generate_recommendation(
         key_data_points, company_name, stock_symbol, current_price,
         fundamental_analysis, technical_analysis, llm
     )
     
-    # Generate price history analysis
+    # Generate price history analysis using chain-of-thought
     price_history_analysis = generate_price_history_analysis(
         key_data_points, company_name, stock_symbol, llm
     )
     
-    # Generate cash flow analysis - New addition
-    cash_flow_analysis = generate_cash_flow_analysis(
-        key_data_points, company_name, stock_symbol, llm
-    )
+    # Use the passed cash_flow_analysis or generate it if not provided
+    if not cash_flow_analysis:
+        cash_flow_analysis = generate_cash_flow_analysis(
+            key_data_points, company_name, stock_symbol, llm
+        )
     
     # Create the complete report
     report = StockAnalysisReport(
@@ -595,7 +1452,7 @@ def generate_final_report(key_data_points, company_name, stock_symbol, current_p
         date=datetime.now().strftime("%B %d, %Y"),
         fundamental_analysis=fundamental_analysis,
         technical_analysis=technical_analysis,
-        cash_flow_analysis=cash_flow_analysis,  # New addition
+        cash_flow_analysis=cash_flow_analysis,
         recommendation=recommendation,
         price_history_analysis=price_history_analysis
     )
@@ -605,7 +1462,7 @@ def generate_final_report(key_data_points, company_name, stock_symbol, current_p
         if 'moving_averages' in original_data['technical_data']:
             report.moving_averages = original_data['technical_data']['moving_averages']
         
-        # Add pivot points - New addition
+        # Add pivot points
         if 'pivot_points' in original_data['technical_data']:
             # Clean up pivot point values for consistency
             pivot_points = {}
@@ -660,141 +1517,276 @@ def generate_final_report(key_data_points, company_name, stock_symbol, current_p
     return report
 
 def generate_recommendation(key_data_points, company_name, stock_symbol, current_price,
-                         fundamental_analysis, technical_analysis, llm):
+                         fundamental_analysis, technical_analysis, llm, context=None):
     """
-    Generate investment recommendation based on fundamental and technical analysis
+    Generate investment recommendation using cumulative context from all analyses
     
     Args:
-        key_data_points: Dictionary containing extracted key data points
+        key_data_points: Dictionary with key data points
         company_name: Name of the company
         stock_symbol: Stock ticker symbol
         current_price: Current stock price
         fundamental_analysis: FundamentalAnalysis object
         technical_analysis: TechnicalAnalysis object
         llm: LangChain LLM object
+        context: Global context dictionary with insights from all analyses
         
     Returns:
-        StockRecommendation object with the recommendation
+        StockRecommendation object
     """
-    # Setup the parser for structured output
-    parser = PydanticOutputParser(pydantic_object=StockRecommendation)
-    format_instructions = parser.get_format_instructions()
-    
     # Extract key insights from fundamental and technical analysis
     fundamental_insights = fundamental_analysis.full_analysis
     technical_insights = technical_analysis.full_analysis
     
-    # Create the prompt template for recommendation
-    recommendation_prompt = PromptTemplate(
-        template="""
-        You are the head of equity research at a top investment firm. Provide an investment recommendation for {company_name} ({stock_symbol}) currently trading at {current_price}.
+    # Prepare comprehensive context from all analyses
+    consolidated_insights = ""
+    if context:
+        # Create a concise summary of all key insights
+        context['insights_summary'] = f"""
+        FUNDAMENTAL INSIGHTS:
+        - Revenue: {context['fundamental'].get('revenue_insights', '')[:100]}...
+        - Profit: {context['fundamental'].get('profit_insights', '')[:100]}...
+        - Financial Health: {context['fundamental'].get('financial_health', '')[:100]}...
         
-        Base your recommendation on these insights:
+        TECHNICAL INSIGHTS:
+        - Trend: {context['technical'].get('trend_insights', '')}
+        - Support/Resistance: {context['technical'].get('support_resistance_insights', '')}
+        - Momentum: {context['technical'].get('momentum_insights', '')}
+        - Volume: {context['technical'].get('volume_insights', '')[:100]}...
         
-        FUNDAMENTAL ANALYSIS:
-        {fundamental_insights}
+        CASH FLOW INSIGHTS:
+        - Operating CF: {context['cash_flow'].get('operating_cf_insights', '')[:100]}...
+        - Free Cash Flow: {context['cash_flow'].get('free_cash_flow_insights', '')[:100]}...
+        - Financing: {context['cash_flow'].get('financing_insights', '')[:100]}...
+        """
         
-        TECHNICAL ANALYSIS:
-        {technical_insights}
-        
-        Provide a structured investment recommendation that includes:
-        1. A clear rating (STRONG BUY, BUY, HOLD, SELL, or STRONG SELL)
-        2. Rationale for your recommendation in 1-2 sentences
-        3. Price targets for bearish, base, and bullish scenarios
-        4. 3 key supporting factors for your recommendation
-        5. 2 key risk factors investors should consider
-        
-        {format_instructions}
-        
-        Return a valid JSON object based on the format instructions.
-        """,
-        input_variables=["company_name", "stock_symbol", "current_price", 
-                         "fundamental_insights", "technical_insights"],
-        partial_variables={"format_instructions": format_instructions}
-    )
+        consolidated_insights = context['insights_summary']
     
-    # Format the prompt with the input data
-    formatted_prompt = recommendation_prompt.format(
-        company_name=company_name,
-        stock_symbol=stock_symbol,
-        current_price=current_price,
-        fundamental_insights=fundamental_insights,
-        technical_insights=technical_insights
-    )
+    # Get the format reference for recommendations
+    recommendation_format = get_output_format_reference("recommendation")
+    
+    # Create a more concise prompt template with chain-of-thought and comprehensive context
+    recommendation_prompt = f"""
+    As an equity research analyst, provide an investment recommendation for {company_name} ({stock_symbol}) at {current_price}.
+    
+    CONSOLIDATED ANALYSIS INSIGHTS:
+    {consolidated_insights if consolidated_insights else "No consolidated insights available."}
+    
+    First, think step by step about the recommendation:
+    
+    STEP 1: Evaluate fundamental strength
+    - Analyze revenue growth, profit trends, and financial health
+    - Consider competitive position and business model sustainability
+    - Assess management effectiveness and capital allocation
+    
+    STEP 2: Assess technical setup
+    - Evaluate current trend direction, support/resistance, and momentum
+    - Consider volume patterns and potential price catalysts
+    - Identify key price levels that could change the outlook
+    
+    STEP 3: Weigh cash flow quality
+    - Consider operating cash flow sustainability
+    - Evaluate free cash flow generation and uses
+    - Assess capital allocation decisions
+    
+    STEP 4: Determine risk/reward balance
+    - Identify potential upside scenarios and catalysts
+    - Consider key downside risks and mitigating factors
+    - Evaluate probability of different outcomes
+    
+    STEP 5: Formulate final recommendation
+    - STRONG BUY: Exceptional opportunity, high conviction (>25% upside)
+    - BUY: Positive outlook, reasonable valuation (10-25% upside)
+    - HOLD: Balanced risk/reward, fair valuation (±10% potential)
+    - SELL: Negative outlook, better alternatives exist (10-25% downside)
+    - STRONG SELL: Significant downside risk, avoid (>25% downside)
+    
+    Based on your careful analysis, provide your recommendation in this exact JSON format:
+    {recommendation_format}
+    
+    IMPORTANT: Provide your thinking process first, then respond with ONLY the valid JSON object.
+    """
     
     # Try to generate structured output with error handling
     try:
         # Invoke the LLM
-        response = llm.invoke(formatted_prompt)
+        response = llm.invoke(recommendation_prompt)
         
-        # Try direct parsing - FIXED: Added the model_class parameter
-        try:
-            return parser.parse(response)
-        except Exception as parse_error1:
-            st.warning(f"Direct parsing failed: {str(parse_error1)}")
-            
-            # Try to extract JSON and process it directly
-            json_str = extract_json_from_text(response)
-            if json_str:
-                try:
-                    import json
-                    parsed_json = json.loads(json_str)
-                    return StockRecommendation(**parsed_json)
-                except Exception as e:
-                    st.warning(f"JSON parsing failed: {str(e)}")
-                    
-            # Fall back to simple extraction
-            return fallback_recommendation(key_data_points, company_name, stock_symbol, 
-                                         current_price, fundamental_analysis, technical_analysis, llm)
+        # Extract JSON and create the recommendation object
+        json_str = extract_json_from_text(response)
+        if json_str:
+            try:
+                import json
+                recommendation_data = json.loads(json_str)
+                
+                # Process price targets
+                price_targets = []
+                for target in recommendation_data.get("price_targets", []):
+                    try:
+                        price_targets.append(
+                            PriceTarget(
+                                scenario=target.get("scenario", "Unknown"),
+                                price=float(target.get("price", current_price)),
+                                timeframe=target.get("timeframe", "12 months")
+                            )
+                        )
+                    except (ValueError, TypeError):
+                        # Handle cases where price might be a string with non-numeric characters
+                        try:
+                            price_str = str(target.get("price", current_price))
+                            price_str = re.sub(r'[^\d.]', '', price_str)
+                            price_targets.append(
+                                PriceTarget(
+                                    scenario=target.get("scenario", "Unknown"),
+                                    price=float(price_str) if price_str else current_price,
+                                    timeframe=target.get("timeframe", "12 months")
+                                )
+                            )
+                        except:
+                            pass
+                
+                # If no price targets were found, create default ones
+                if not price_targets:
+                    price_targets = [
+                        PriceTarget(scenario="Bearish", price=round(current_price * 0.9, 2), timeframe="6 months"),
+                        PriceTarget(scenario="Base", price=round(current_price * 1.1, 2), timeframe="12 months"),
+                        PriceTarget(scenario="Bullish", price=round(current_price * 1.3, 2), timeframe="12 months")
+                    ]
+                
+                # Get supporting and risk factors with fallbacks
+                supporting_factors = recommendation_data.get("supporting_factors", [])
+                if not supporting_factors or len(supporting_factors) < 3:
+                    default_supports = [
+                        f"{company_name} shows potential for future growth",
+                        f"Technical indicators suggest a favorable entry point",
+                        f"The stock appears reasonably valued"
+                    ]
+                    # Add default factors as needed to reach 3
+                    supporting_factors.extend(default_supports[:(3-len(supporting_factors))])
+                
+                risk_factors = recommendation_data.get("risk_factors", [])
+                if not risk_factors or len(risk_factors) < 2:
+                    default_risks = [
+                        f"Market volatility could impact {company_name}'s performance",
+                        f"Competitive pressures may affect profit margins"
+                    ]
+                    # Add default factors as needed to reach 2
+                    risk_factors.extend(default_risks[:(2-len(risk_factors))])
+                
+                return StockRecommendation(
+                    rating=recommendation_data.get("rating", "HOLD"),
+                    rationale=recommendation_data.get("rationale", f"Assessment based on analysis of {company_name}'s fundamentals and technicals."),
+                    price_targets=price_targets,
+                    supporting_factors=supporting_factors[:3],  # Ensure we have exactly 3
+                    risk_factors=risk_factors[:2]  # Ensure we have exactly 2
+                )
+            except Exception as parse_error:
+                st.warning(f"JSON parsing failed: {str(parse_error)}")
+        
+        # Fall back to simple extraction
+        return fallback_recommendation(key_data_points, company_name, stock_symbol, 
+                                     current_price, fundamental_analysis, technical_analysis, llm, context)
     
     except Exception as e:
         st.warning(f"Structured recommendation failed: {str(e)}")
-        # Fall back to simple extraction
         return fallback_recommendation(key_data_points, company_name, stock_symbol, 
-                                     current_price, fundamental_analysis, technical_analysis, llm)
+                                     current_price, fundamental_analysis, technical_analysis, llm, context)
 
-def generate_price_history_analysis(key_data_points, company_name, stock_symbol, llm):
+def generate_price_history_analysis(key_data_points, company_name, stock_symbol, llm, context=None):
     """
-    Generate analysis of price history and performance comparisons
+    Generate analysis of price history with chain-of-thought prompting and context sharing
     
     Args:
         key_data_points: Dictionary containing extracted key data points
         company_name: Name of the company
         stock_symbol: Stock ticker symbol
         llm: LangChain LLM object
+        context: Global context dictionary with insights from all analyses
         
     Returns:
-        String containing the price history analysis
+        String with price history analysis
     """
     # Format price history data for the prompt
     price_history_data = format_price_history_for_prompt(key_data_points)
     
-    # Create a simple prompt for price history analysis
-    price_history_prompt = f"""
-    You are a market strategist specializing in comparative analysis. Analyze the price history and relative performance of {company_name} ({stock_symbol}).
+    # Include insights from previous analyses
+    previous_insights = ""
+    if context and context.get('insights_summary'):
+        previous_insights = f"""
+        CONTEXT FROM PREVIOUS ANALYSES:
+        {context['insights_summary']}
+        
+        Consider this context when analyzing price history to ensure consistency.
+        """
     
-    Focus on these data points:
+    # Create a prompt with chain-of-thought reasoning and previous context
+    price_history_prompt = f"""
+    You are a market strategist specializing in historical price analysis. Analyze {company_name} ({stock_symbol}).
+    
+    PRICE HISTORY DATA:
     {price_history_data}
     
-    Provide a concise, professional analysis that covers:
-    1. How the stock has performed compared to relevant indices (Nifty, Sensex, etc.)
-    2. Any recurring seasonal patterns or cyclical behavior
-    3. Long-term performance trends and key inflection points
-    4. Relative strength versus the market in different conditions
+    {previous_insights}
     
-    Format your analysis in 2-3 clear paragraphs. Use specific percentages and time periods to support your observations.
-    """
+    Think step-by-step about this analysis:
     
+    STEP 1: TREND ANALYSIS
+    - Identify the primary long-term trend (uptrend, downtrend, sideways)
+    - Note any significant breakouts or breakdowns
+    - Observe cyclical or seasonal patterns
+    
+    STEP 2: RELATIVE PERFORMANCE
+    - Compare performance to relevant market indices
+    - Identify periods of outperformance/underperformance
+    - Calculate relative strength vs. the market
+    
+    STEP 3: VOLATILITY ASSESSMENT
+    - Evaluate historical volatility compared to the market
+    - Note periods of extreme price movement
+    - Assess if volatility is increasing or decreasing
+    
+    STEP 4: VOLUME ANALYSIS
+    - Examine volume patterns during price moves
+    - Note any volume divergences from price
+    - Identify accumulation or distribution patterns
+    
+    STEP 5: KEY PRICE LEVELS
+    - Identify historically significant support/resistance levels
+    - Note price reaction to these levels
+    - Determine which levels are most relevant now
+    
+    STEP 6: CONSISTENCY CHECK
+    - Ensure your price history analysis is consistent with the fundamental and technical insights provided
+    - Address any discrepancies between price action and company fundamentals
+    
+    Based on this step-by-step analysis, provide a comprehensive but concise price history analysis in 2-3 paragraphs. Use specific data points and percentages where available.
+       
+       Your analysis should be clear, professional, and focus on actionable insights for investors.
+       """
+   
     # Try to generate the analysis with error handling
     try:
         # Invoke the LLM
         response = llm.invoke(price_history_prompt)
-        return response
+        
+        # Clean up the response - remove any additional notes or formatting
+        cleaned_response = re.sub(r'^(Step \d+:|STEP \d+:).*?$', '', response, flags=re.MULTILINE)
+        cleaned_response = re.sub(r'^Analysis:|^Summary:', '', cleaned_response, flags=re.MULTILINE)
+        
+        # Update context with price history insights if context exists
+        if context is not None:
+            # Extract a brief summary from the response (first 200 chars)
+            summary = cleaned_response.strip()[:200] + "..."
+            context['price_history_summary'] = summary
+        
+        # Return the cleaned response
+        return cleaned_response.strip()
     
     except Exception as e:
         st.warning(f"Price history analysis failed: {str(e)}")
         # Return a simple placeholder
         return f"Analysis of {company_name}'s historical price performance could not be generated. Please check the data and try again."
+
 
 def parse_structured_output(response, parser, model_class):
     """
@@ -872,19 +1864,22 @@ def extract_price_levels(level_string):
         # Return as is if we can't parse it
         return [level_string]
 
-def format_financial_data_for_prompt(key_data):
+
+def format_financial_data_for_prompt(key_data, max_quarters=4, max_years=3):
     """
-    Format financial data into a clear string for prompts
+    Format financial data into a clear string for prompts, limiting to most relevant data points
     
     Args:
         key_data: Dictionary containing extracted key data
+        max_quarters: Maximum number of recent quarters to include
+        max_years: Maximum number of recent years to include
         
     Returns:
         Formatted string with financial data
     """
     result = []
     
-    # Add quarterly data
+    # Add quarterly data (limited to max_quarters)
     if 'financial_summary' in key_data and 'quarterly' in key_data['financial_summary']:
         result.append("QUARTERLY TRENDS:")
         quarterly = key_data['financial_summary']['quarterly']
@@ -892,11 +1887,16 @@ def format_financial_data_for_prompt(key_data):
         for metric, data in quarterly.items():
             if 'headers' in data and 'recent_values' in data:
                 result.append(f"  {data.get('label', metric.upper())}:")
-                for i, header in enumerate(data['headers']):
-                    if i < len(data['recent_values']):
-                        result.append(f"    {header}: {data['recent_values'][i]}")
+                
+                # Limit to max_quarters most recent quarters
+                headers = data['headers'][:max_quarters] if len(data['headers']) > max_quarters else data['headers']
+                values = data['recent_values'][:max_quarters] if len(data['recent_values']) > max_quarters else data['recent_values']
+                
+                for i, header in enumerate(headers):
+                    if i < len(values):
+                        result.append(f"    {header}: {values[i]}")
     
-    # Add annual data
+    # Add annual data (limited to max_years)
     if 'financial_summary' in key_data and 'annual' in key_data['financial_summary']:
         result.append("\nANNUAL PERFORMANCE:")
         annual = key_data['financial_summary']['annual']
@@ -906,89 +1906,126 @@ def format_financial_data_for_prompt(key_data):
                 result.append(f"  {data.get('label', metric.upper())}:")
                 if 'cagr_3yr' in data:
                     result.append(f"    3-Year CAGR: {data['cagr_3yr']}")
-                if 'cagr_5yr' in data:
+                if 'cagr_5yr' in data and max_years >= 5:  # Only include 5yr CAGR if we're looking at 5+ years
                     result.append(f"    5-Year CAGR: {data['cagr_5yr']}")
                 
-                for i, header in enumerate(data['headers']):
-                    if i < len(data['recent_values']):
-                        result.append(f"    {header}: {data['recent_values'][i]}")
+                # Limit to max_years most recent years
+                headers = data['headers'][:max_years] if len(data['headers']) > max_years else data['headers']
+                values = data['recent_values'][:max_years] if len(data['recent_values']) > max_years else data['recent_values']
+                
+                for i, header in enumerate(headers):
+                    if i < len(values):
+                        result.append(f"    {header}: {values[i]}")
     
-    # Add cash flow data - New addition
+    # Add cash flow data (limited to max_years)
     if 'financial_summary' in key_data and 'cash_flow' in key_data['financial_summary']:
         result.append("\nCASH FLOW ANALYSIS:")
         cash_flow = key_data['financial_summary']['cash_flow']
         
-        for metric, data in cash_flow.items():
-            if 'headers' in data and 'recent_values' in data:
-                result.append(f"  {data.get('label', metric.upper())}:")
-                if 'cagr_3yr' in data and data['cagr_3yr'] != '-':
-                    result.append(f"    3-Year CAGR: {data['cagr_3yr']}")
-                if 'cagr_5yr' in data and data['cagr_5yr'] != '-':
-                    result.append(f"    5-Year CAGR: {data['cagr_5yr']}")
-                
-                for i, header in enumerate(data['headers']):
-                    if i < len(data['recent_values']):
-                        result.append(f"    {header}: {data['recent_values'][i]}")
+        # Priority metrics for cash flow - focus on the most important ones
+        priority_metrics = ['operating_cf', 'investing_cf', 'financing_cf', 'net_cf']
+        
+        # First add priority metrics
+        for metric_name in priority_metrics:
+            for cf_key, data in cash_flow.items():
+                if metric_name in cf_key.lower() and 'headers' in data and 'recent_values' in data:
+                    result.append(f"  {data.get('label', cf_key.upper())}:")
+                    if 'cagr_3yr' in data and data['cagr_3yr'] != '-':
+                        result.append(f"    3-Year CAGR: {data['cagr_3yr']}")
+                    
+                    # Limit to max_years most recent years
+                    headers = data['headers'][:max_years] if len(data['headers']) > max_years else data['headers']
+                    values = data['recent_values'][:max_years] if len(data['recent_values']) > max_years else data['recent_values']
+                    
+                    for i, header in enumerate(headers):
+                        if i < len(values):
+                            result.append(f"    {header}: {values[i]}")
     
-    # Add key ratios
+    # Add key ratios (focus on most important ones)
     if 'financial_summary' in key_data and 'ratios' in key_data['financial_summary']:
         result.append("\nKEY FINANCIAL RATIOS:")
         ratios = key_data['financial_summary']['ratios']
         
-        for ratio_name, data in ratios.items():
-            if 'headers' in data and 'recent_values' in data:
+        # Define important ratios to prioritize
+        priority_ratios = ['roe', 'roa', 'debt_equity', 'price_to_book', 'current_ratio']
+        
+        # First add priority ratios
+        for ratio_name in priority_ratios:
+            if ratio_name in ratios and 'headers' in ratios[ratio_name] and 'recent_values' in ratios[ratio_name]:
+                data = ratios[ratio_name]
                 result.append(f"  {data.get('label', ratio_name.upper())}:")
-                for i, header in enumerate(data['headers']):
-                    if i < len(data['recent_values']):
-                        result.append(f"    {header}: {data['recent_values'][i]}")
+                
+                # Limit to max_years most recent years
+                headers = data['headers'][:max_years] if len(data['headers']) > max_years else data['headers']
+                values = data['recent_values'][:max_years] if len(data['recent_values']) > max_years else data['recent_values']
+                
+                for i, header in enumerate(headers):
+                    if i < len(values):
+                        result.append(f"    {header}: {values[i]}")
     
     return "\n".join(result) if result else "Financial data not available."
 
-def format_technical_data_for_prompt(key_data):
+def format_technical_data_for_prompt(key_data, max_indicators=5):
     """
-    Format technical data into a clear string for prompts
+    Format technical data into a clear string for prompts, limiting to most relevant indicators
     
     Args:
         key_data: Dictionary containing extracted key data
+        max_indicators: Maximum number of technical indicators to include
         
     Returns:
         Formatted string with technical data
     """
     result = []
     
-    # Add technical indicators
+    # Add technical indicators (limited to max_indicators)
     if 'technical_summary' in key_data and 'indicators' in key_data['technical_summary']:
         result.append("TECHNICAL INDICATORS:")
-        for indicator, value in key_data['technical_summary']['indicators'].items():
-            result.append(f"  {indicator}: {value}")
+        
+        # Define priority indicators to ensure we get the most important ones
+        priority_indicators = ['RSI', 'ADX', 'Momentum Score']
+        indicators = key_data['technical_summary']['indicators']
+        
+        # Add priority indicators first
+        indicators_added = 0
+        for indicator in priority_indicators:
+            if indicator in indicators and indicators_added < max_indicators:
+                result.append(f"  {indicator}: {indicators[indicator]}")
+                indicators_added += 1
+        
+        # Add any remaining indicators up to max_indicators
+        for indicator, value in indicators.items():
+            if indicator not in priority_indicators and indicators_added < max_indicators:
+                result.append(f"  {indicator}: {value}")
+                indicators_added += 1
     
-    # Add oscillators - New addition
+    # Add oscillators - New addition (selectively)
     if 'technical_summary' in key_data and 'oscillators' in key_data['technical_summary']:
         result.append("\nOSCILLATORS:")
-        for oscillator, value in key_data['technical_summary']['oscillators'].items():
-            result.append(f"  {oscillator}: {value}")
+        
+        # Priority oscillators
+        priority_oscillators = ['Stochastic', 'MACD', 'CCI']
+        oscillators = key_data['technical_summary']['oscillators']
+        
+        # Add only top oscillators (max 3)
+        oscillators_added = 0
+        for oscillator in priority_oscillators:
+            if oscillator in oscillators and oscillators_added < 3:
+                result.append(f"  {oscillator}: {oscillators[oscillator]}")
+                oscillators_added += 1
     
-    # Add moving averages
+    # Add moving averages (most relevant ones only)
     if 'technical_summary' in key_data and 'moving_averages' in key_data['technical_summary']:
         result.append("\nMOVING AVERAGES:")
-        for ma_type, value in key_data['technical_summary']['moving_averages'].items():
-            result.append(f"  {ma_type}: {value}")
-    
-    # Add pivot points - New addition
-    if 'technical_summary' in key_data and 'pivot_points' in key_data['technical_summary']:
-        pivot_data = key_data['technical_summary']['pivot_points']
         
-        # Add Classic pivot points if available
-        if 'Classic' in pivot_data:
-            result.append("\nCLASSIC PIVOT POINTS:")
-            for level, value in pivot_data['Classic'].items():
-                result.append(f"  {level}: {value}")
+        # Priority moving averages (short, medium, long-term)
+        priority_mas = ['SMA20', 'SMA50', 'SMA100']
+        ma_data = key_data['technical_summary']['moving_averages']
         
-        # Add Fibonacci pivot points if available
-        if 'Fibonacci' in pivot_data:
-            result.append("\nFIBONACCI PIVOT POINTS:")
-            for level, value in pivot_data['Fibonacci'].items():
-                result.append(f"  {level}: {value}")
+        # Add only top moving averages
+        for ma_type in priority_mas:
+            if ma_type in ma_data:
+                result.append(f"  {ma_type}: {ma_data[ma_type]}")
     
     # Add support/resistance levels
     if 'technical_summary' in key_data and 'support_resistance' in key_data['technical_summary']:
@@ -996,43 +2033,37 @@ def format_technical_data_for_prompt(key_data):
         
         if 'support' in sr_data and sr_data['support']:
             result.append("\nSUPPORT LEVELS:")
-            for level in sr_data['support']:
+            # Only include top 2 support levels
+            for level in sr_data['support'][:2]:
                 result.append(f"  {level}")
         
         if 'resistance' in sr_data and sr_data['resistance']:
             result.append("\nRESISTANCE LEVELS:")
-            for level in sr_data['resistance']:
+            # Only include top 2 resistance levels
+            for level in sr_data['resistance'][:2]:
                 result.append(f"  {level}")
     
-    # Add performance data
+    # Add performance data (focus on key timeframes)
     if 'technical_summary' in key_data and 'performance' in key_data['technical_summary']:
         result.append("\nPRICE PERFORMANCE:")
-        for period, value in key_data['technical_summary']['performance'].items():
-            if isinstance(value, dict) and 'percentage' in value:
-                result.append(f"  {period}: {value['percentage']}")
-            else:
-                result.append(f"  {period}: {value}")
-    
-    # Add beta data - New addition
-    if 'technical_summary' in key_data and 'beta' in key_data['technical_summary']:
-        result.append("\nBETA VALUES:")
-        for period, value in key_data['technical_summary']['beta'].items():
-            result.append(f"  {period}: {value}")
+        
+        # Focus on most relevant timeframes
+        key_timeframes = ['1 Month', '3 Months', '1 Year']
+        performance = key_data['technical_summary']['performance']
+        
+        for period in key_timeframes:
+            if period in performance:
+                value = performance[period]
+                if isinstance(value, dict) and 'percentage' in value:
+                    result.append(f"  {period}: {value['percentage']}")
+                else:
+                    result.append(f"  {period}: {value}")
     
     return "\n".join(result) if result else "Technical data not available."
 
 def generate_cash_flow_analysis(key_data_points, company_name, stock_symbol, llm):
     """
-    Generate structured cash flow analysis using LLM
-    
-    Args:
-        key_data_points: Dictionary containing extracted key data points
-        company_name: Name of the company
-        stock_symbol: Stock ticker symbol
-        llm: LangChain LLM object
-        
-    Returns:
-        CashFlowAnalysis object with the analysis
+    Generate structured cash flow analysis using LLM with chain-of-thought prompting
     """
     # Check if cash flow data exists
     if not (
@@ -1063,28 +2094,60 @@ def generate_cash_flow_analysis(key_data_points, company_name, stock_symbol, llm
     
     cash_flow_data_str = "\n".join(cash_flow_str)
     
-    # Create the prompt template for cash flow analysis
+    # Create the prompt template with chain-of-thought prompting
     cash_flow_prompt = f"""
     You are a financial analyst specializing in equity research. Analyze the cash flow performance of {company_name} ({stock_symbol}).
     
     Focus on these cash flow data points:
     {cash_flow_data_str}
     
-    Provide a JSON object with the following structure:
+    Let's analyze the cash flows step-by-step:
+    
+    Step 1: Operating Cash Flow Analysis
+    - Examine the operating cash flow trend over time
+    - Compare operating cash flow to net income (quality of earnings)
+    - Identify any concerning fluctuations or positive developments
+    - Based on this analysis, what can we conclude about operating cash flow trends?
+    
+    Step 2: Free Cash Flow Analysis
+    - Calculate or examine free cash flow (Operating CF - Capital Expenditures)
+    - Assess free cash flow sustainability and growth trends
+    - Determine if free cash flow covers dividend payments, if applicable
+    - Based on this analysis, what can we conclude about free cash flow generation?
+    
+    Step 3: Investing Activities Analysis
+    - Analyze capital expenditure trends and major investments
+    - Assess if investments appear strategic or necessary for growth
+    - Determine if capital allocation decisions appear sound
+    - Based on this analysis, what can we conclude about investing activities?
+    
+    Step 4: Financing Activities Analysis
+    - Examine debt issuance/repayment patterns
+    - Analyze share repurchases or issuances
+    - Assess dividend payment trends, if applicable
+    - Based on this analysis, what can we conclude about financing activities?
+    
+    Step 5: Overall Cash Flow Health
+    - Integrate all the above insights
+    - Assess overall cash flow sustainability and quality
+    - Identify key cash flow metrics and their values
+    - Provide a comprehensive assessment of the company's cash flow situation
+    
+    Now, based on this step-by-step analysis, provide a JSON object with the following structure:
     {{
-        "operating_cf_trend": "Analysis of operating cash flow trends here...",
-        "free_cash_flow": "Analysis of free cash flow here...",
+        "operating_cf_trend": "Your detailed analysis of operating cash flow trends here...",
+        "free_cash_flow": "Your detailed analysis of free cash flow here...",
         "cash_flow_metrics": {{
             "Operating CF to Net Income": "1.76",
             "FCF Yield": "2.4%",
             "Cash Flow Growth Rate": "12.3%"
         }},
-        "investing_activities": "Analysis of investing activities here...",
-        "financing_activities": "Analysis of financing activities here...",
-        "full_analysis": "Complete cash flow analysis here..."
+        "investing_activities": "Your analysis of investing activities here...",
+        "financing_activities": "Your analysis of financing activities here...",
+        "full_analysis": "Your complete cash flow analysis integrating all the above insights here..."
     }}
     
-    IMPORTANT: Your response must be only a valid JSON object. No preamble or explanation.
+    IMPORTANT: Respond ONLY with the JSON object. No preamble or explanation.
     """
     
     # Try to generate structured output with enhanced error handling
@@ -1119,140 +2182,149 @@ def generate_cash_flow_analysis(key_data_points, company_name, stock_symbol, llm
         st.warning(f"Cash flow analysis generation failed: {str(e)}")
         return fallback_cash_flow_analysis(key_data_points, company_name, stock_symbol)
 
-def fallback_cash_flow_analysis(key_data_points, company_name, stock_symbol):
-   """
-   Generate a fallback cash flow analysis when structured parsing fails
-   
-   Args:
-       key_data_points: Dictionary containing extracted key data points
-       company_name: Name of the company
-       stock_symbol: Stock ticker symbol
-       
-   Returns:
-       CashFlowAnalysis object with basic analysis
-   """
-   # Extract basic cash flow metrics for display
-   cash_flow_metrics = {}
-   
-   if ('financial_summary' in key_data_points and 
-       'cash_flow' in key_data_points['financial_summary']):
-       
-       cash_flow_data = key_data_points['financial_summary']['cash_flow']
-       
-       # Extract operating cash flow trend
-       operating_cf_trend = "Operating cash flow data not available."
-       if 'operating_cf' in cash_flow_data:
-           cf_data = cash_flow_data['operating_cf']
-           if 'recent_values' in cf_data and cf_data['recent_values']:
-               # Get the most recent value
-               latest_cf = cf_data['recent_values'][0]
-               cash_flow_metrics["Latest Operating CF"] = latest_cf
-               
-               # Try to determine trend
-               if len(cf_data['recent_values']) > 1:
-                   trend_direction = "stable"
-                   try:
-                       latest = float(latest_cf.replace(',', ''))
-                       previous = float(cf_data['recent_values'][1].replace(',', ''))
-                       percent_change = ((latest - previous) / previous) * 100
-                       
-                       if percent_change > 10:
-                           trend_direction = "strongly increasing"
-                       elif percent_change > 0:
-                           trend_direction = "increasing"
-                       elif percent_change < -10:
-                           trend_direction = "strongly decreasing"
-                       elif percent_change < 0:
-                           trend_direction = "decreasing"
-                           
-                       operating_cf_trend = f"{company_name}'s operating cash flow is {trend_direction} with the most recent value at {latest_cf}."
-                   except (ValueError, TypeError, ZeroDivisionError):
-                       operating_cf_trend = f"{company_name}'s operating cash flow was {latest_cf} in the most recent period."
-               else:
-                   operating_cf_trend = f"{company_name}'s operating cash flow was {latest_cf} in the most recent period."
-       
-       # Extract investing cash flow information
-       investing_activities = "Investing activities data not available."
-       if 'investing_cf' in cash_flow_data:
-           cf_data = cash_flow_data['investing_cf']
-           if 'recent_values' in cf_data and cf_data['recent_values']:
-               latest_cf = cf_data['recent_values'][0]
-               cash_flow_metrics["Latest Investing CF"] = latest_cf
-               
-               try:
-                   value = float(latest_cf.replace(',', ''))
-                   if value < 0:
-                       investing_activities = f"{company_name} is investing significantly with a cash outflow of {latest_cf} in the most recent period."
-                   else:
-                       investing_activities = f"{company_name} has a positive cash flow from investing activities of {latest_cf} in the most recent period."
-               except (ValueError, TypeError):
-                   investing_activities = f"{company_name}'s cash flow from investing activities was {latest_cf} in the most recent period."
-       
-       # Extract financing cash flow information
-       financing_activities = "Financing activities data not available."
-       if 'financing_cf' in cash_flow_data:
-           cf_data = cash_flow_data['financing_cf']
-           if 'recent_values' in cf_data and cf_data['recent_values']:
-               latest_cf = cf_data['recent_values'][0]
-               cash_flow_metrics["Latest Financing CF"] = latest_cf
-               
-               try:
-                   value = float(latest_cf.replace(',', ''))
-                   if value < 0:
-                       financing_activities = f"{company_name} is reducing debt or returning capital to shareholders with a financing cash outflow of {latest_cf}."
-                   else:
-                       financing_activities = f"{company_name} has raised capital with a financing cash inflow of {latest_cf}."
-               except (ValueError, TypeError):
-                   financing_activities = f"{company_name}'s cash flow from financing activities was {latest_cf} in the most recent period."
-       
-       # Calculate simple free cash flow approximation
-       free_cash_flow = "Free cash flow data not available."
-       if ('operating_cf' in cash_flow_data and 'investing_cf' in cash_flow_data and
-           'recent_values' in cash_flow_data['operating_cf'] and 
-           'recent_values' in cash_flow_data['investing_cf'] and
-           cash_flow_data['operating_cf']['recent_values'] and
-           cash_flow_data['investing_cf']['recent_values']):
-           
-           try:
-               op_cf = float(cash_flow_data['operating_cf']['recent_values'][0].replace(',', ''))
-               inv_cf = float(cash_flow_data['investing_cf']['recent_values'][0].replace(',', ''))
-               
-               # Free cash flow = Operating CF + Investing CF (typically negative)
-               fcf = op_cf + inv_cf
-               
-               cash_flow_metrics["Free Cash Flow"] = f"{fcf:,.2f}"
-               
-               if fcf > 0:
-                   free_cash_flow = f"{company_name} generated positive free cash flow of approximately {fcf:,.2f}, indicating sufficient cash generation to fund operations and investments."
-               else:
-                   free_cash_flow = f"{company_name} has negative free cash flow of approximately {fcf:,.2f}, indicating the company is spending more than it generates from operations."
-           except (ValueError, TypeError):
-               free_cash_flow = f"Free cash flow calculation not possible due to data format issues."
-   
-   # Create a basic full analysis
-   full_analysis = f"""
-   Cash Flow Analysis for {company_name} ({stock_symbol}):
-   
-   Operating Cash Flow: {operating_cf_trend}
-   
-   Free Cash Flow: {free_cash_flow}
-   
-   Investing Activities: {investing_activities}
-   
-   Financing Activities: {financing_activities}
-   
-   This is a simplified analysis based on the available cash flow data. A more detailed analysis would require additional context about the company's business model, growth stage, and industry dynamics.
-   """
-   
-   # Create the fallback analysis
-   return CashFlowAnalysis(
-       operating_cf_trend=operating_cf_trend,
-       free_cash_flow=free_cash_flow,
-       cash_flow_metrics=cash_flow_metrics,
-       investing_activities=investing_activities,
-       financing_activities=financing_activities,
-       full_analysis=full_analysis.strip()
-   )
+def fallback_cash_flow_analysis(key_data_points, company_name, stock_symbol, context=None):
+  """
+  Generate a fallback cash flow analysis when structured parsing fails
+  
+  Args:
+      key_data_points: Dictionary containing extracted key data points
+      company_name: Name of the company
+      stock_symbol: Stock ticker symbol
+      context: Global context dictionary
+      
+  Returns:
+      CashFlowAnalysis object with basic analysis
+  """
+  # Extract basic cash flow metrics for display
+  cash_flow_metrics = {}
+  
+  if ('financial_summary' in key_data_points and 
+      'cash_flow' in key_data_points['financial_summary']):
+      
+      cash_flow_data = key_data_points['financial_summary']['cash_flow']
+      
+      # Extract operating cash flow trend
+      operating_cf_trend = "Operating cash flow data not available."
+      if 'operating_cf' in cash_flow_data:
+          cf_data = cash_flow_data['operating_cf']
+          if 'recent_values' in cf_data and cf_data['recent_values']:
+              # Get the most recent value
+              latest_cf = cf_data['recent_values'][0]
+              cash_flow_metrics["Latest Operating CF"] = latest_cf
+              
+              # Try to determine trend
+              if len(cf_data['recent_values']) > 1:
+                  trend_direction = "stable"
+                  try:
+                      latest = float(latest_cf.replace(',', ''))
+                      previous = float(cf_data['recent_values'][1].replace(',', ''))
+                      percent_change = ((latest - previous) / previous) * 100
+                      
+                      if percent_change > 10:
+                          trend_direction = "strongly increasing"
+                      elif percent_change > 0:
+                          trend_direction = "increasing"
+                      elif percent_change < -10:
+                          trend_direction = "strongly decreasing"
+                      elif percent_change < 0:
+                          trend_direction = "decreasing"
+                          
+                      operating_cf_trend = f"{company_name}'s operating cash flow is {trend_direction} with the most recent value at {latest_cf}."
+                  except (ValueError, TypeError, ZeroDivisionError):
+                      operating_cf_trend = f"{company_name}'s operating cash flow was {latest_cf} in the most recent period."
+              else:
+                  operating_cf_trend = f"{company_name}'s operating cash flow was {latest_cf} in the most recent period."
+      
+      # Extract investing cash flow information
+      investing_activities = "Investing activities data not available."
+      if 'investing_cf' in cash_flow_data:
+          cf_data = cash_flow_data['investing_cf']
+          if 'recent_values' in cf_data and cf_data['recent_values']:
+              latest_cf = cf_data['recent_values'][0]
+              cash_flow_metrics["Latest Investing CF"] = latest_cf
+              
+              try:
+                  value = float(latest_cf.replace(',', ''))
+                  if value < 0:
+                      investing_activities = f"{company_name} is investing significantly with a cash outflow of {latest_cf} in the most recent period."
+                  else:
+                      investing_activities = f"{company_name} has a positive cash flow from investing activities of {latest_cf} in the most recent period."
+              except (ValueError, TypeError):
+                  investing_activities = f"{company_name}'s cash flow from investing activities was {latest_cf} in the most recent period."
+      
+      # Extract financing cash flow information
+      financing_activities = "Financing activities data not available."
+      if 'financing_cf' in cash_flow_data:
+          cf_data = cash_flow_data['financing_cf']
+          if 'recent_values' in cf_data and cf_data['recent_values']:
+              latest_cf = cf_data['recent_values'][0]
+              cash_flow_metrics["Latest Financing CF"] = latest_cf
+              
+              try:
+                  value = float(latest_cf.replace(',', ''))
+                  if value < 0:
+                      financing_activities = f"{company_name} is reducing debt or returning capital to shareholders with a financing cash outflow of {latest_cf}."
+                  else:
+                      financing_activities = f"{company_name} has raised capital with a financing cash inflow of {latest_cf}."
+              except (ValueError, TypeError):
+                  financing_activities = f"{company_name}'s cash flow from financing activities was {latest_cf} in the most recent period."
+      
+      # Calculate simple free cash flow approximation
+      free_cash_flow = "Free cash flow data not available."
+      if ('operating_cf' in cash_flow_data and 'investing_cf' in cash_flow_data and
+          'recent_values' in cash_flow_data['operating_cf'] and 
+          'recent_values' in cash_flow_data['investing_cf'] and
+          cash_flow_data['operating_cf']['recent_values'] and
+          cash_flow_data['investing_cf']['recent_values']):
+          
+          try:
+              op_cf = float(cash_flow_data['operating_cf']['recent_values'][0].replace(',', ''))
+              inv_cf = float(cash_flow_data['investing_cf']['recent_values'][0].replace(',', ''))
+              
+              # Free cash flow = Operating CF + Investing CF (typically negative)
+              fcf = op_cf + inv_cf
+              
+              cash_flow_metrics["Free Cash Flow"] = f"{fcf:,.2f}"
+              
+              if fcf > 0:
+                  free_cash_flow = f"{company_name} generated positive free cash flow of approximately {fcf:,.2f}, indicating sufficient cash generation to fund operations and investments."
+              else:
+                  free_cash_flow = f"{company_name} has negative free cash flow of approximately {fcf:,.2f}, indicating the company is spending more than it generates from operations."
+          except (ValueError, TypeError):
+              free_cash_flow = f"Free cash flow calculation not possible due to data format issues."
+  
+  # Create a basic full analysis
+  full_analysis = f"""
+  Cash Flow Analysis for {company_name} ({stock_symbol}):
+  
+  Operating Cash Flow: {operating_cf_trend}
+  
+  Free Cash Flow: {free_cash_flow}
+  
+  Investing Activities: {investing_activities}
+  
+  Financing Activities: {financing_activities}
+  
+  This is a simplified analysis based on the available cash flow data. A more detailed analysis would require additional context about the company's business model, growth stage, and industry dynamics.
+  """
+  
+  # Update context if available
+  if context is not None:
+      context['cash_flow']['operating_cf_insights'] = operating_cf_trend
+      context['cash_flow']['free_cash_flow_insights'] = free_cash_flow
+      context['cash_flow']['investing_insights'] = investing_activities
+      context['cash_flow']['financing_insights'] = financing_activities
+      context['cash_flow']['summary'] = f"{company_name}'s cash flow data was processed using fallback analysis."
+  
+  # Create the fallback analysis
+  return CashFlowAnalysis(
+      operating_cf_trend=operating_cf_trend,
+      free_cash_flow=free_cash_flow,
+      cash_flow_metrics=cash_flow_metrics,
+      investing_activities=investing_activities,
+      financing_activities=financing_activities,
+      full_analysis=full_analysis.strip()
+  )
 
 def format_price_history_for_prompt(key_data):
     """
@@ -1290,87 +2362,95 @@ def format_price_history_for_prompt(key_data):
     
     return "\n".join(result) if result else "Price history data not available."
 
-def fallback_fundamental_analysis(key_data, company_name, stock_symbol, llm):
-    """
-    Generate a fallback fundamental analysis when structured parsing fails
-    
-    Args:
-        key_data: Dictionary containing extracted key data points
-        company_name: Name of the company
-        stock_symbol: Stock ticker symbol
-        llm: LangChain LLM object
-        
-    Returns:
-        FundamentalAnalysis object with basic analysis
-    """
-    # Simpler prompt for basic text generation
-    simple_prompt = f"""
-    As a financial analyst, provide a brief analysis of {company_name}'s ({stock_symbol}) financial performance.
-    Focus on revenue trends, profit margins, and key financial ratios.
-    Keep your response concise and factual, focusing only on the data provided.
-    """
-    
-    try:
-        # Get a simple text response
-        response = llm.invoke(simple_prompt)
-        
-        # Extract basic information from the response
-        revenue_trend = extract_section(response, "revenue", 100)
-        profit_trend = extract_section(response, "profit", 100)
-        financial_health = extract_section(response, "financial health", 100)
-        
-        # Create basic key metrics
-        key_ratios = []
-        
-        # Try to extract ROE
-        if 'financial_summary' in key_data and 'ratios' in key_data['financial_summary']:
-            ratios = key_data['financial_summary']['ratios']
-            if 'roe' in ratios and 'recent_values' in ratios['roe'] and ratios['roe']['recent_values']:
-                key_ratios.append(KeyMetric(
-                    name="ROE",
-                    value=ratios['roe']['recent_values'][0],
-                    interpretation="Return on Equity measures profitability relative to shareholders' equity."
-                ))
-            
-            if 'debt_equity' in ratios and 'recent_values' in ratios['debt_equity'] and ratios['debt_equity']['recent_values']:
-                key_ratios.append(KeyMetric(
-                    name="Debt/Equity",
-                    value=ratios['debt_equity']['recent_values'][0],
-                    interpretation="Debt to Equity ratio indicates financial leverage and risk."
-                ))
-        
-        # Add a generic metric if none found
-        if not key_ratios:
-            key_ratios.append(KeyMetric(
-                name="Profit Margin",
-                value="Varies",
-                interpretation="Measures the company's profitability as a percentage of revenue."
-            ))
-        
-        # Create the fallback analysis
-        return FundamentalAnalysis(
-            revenue_trend=revenue_trend or f"Analysis of {company_name}'s revenue trends could not be generated.",
-            profit_trend=profit_trend or f"Analysis of {company_name}'s profit trends could not be generated.",
-            key_ratios=key_ratios,
-            financial_health=financial_health or "Financial health assessment could not be generated.",
-            full_analysis=response
-        )
-    
-    except Exception as e:
-        st.error(f"Fallback fundamental analysis failed: {str(e)}")
-        
-        # Create a minimal valid object with default values
-        return FundamentalAnalysis(
-            revenue_trend=f"Analysis of {company_name}'s revenue trends could not be generated.",
-            profit_trend=f"Analysis of {company_name}'s profit trends could not be generated.",
-            key_ratios=[KeyMetric(
-                name="N/A", 
-                value="N/A", 
-                interpretation="Financial metrics could not be analyzed."
-            )],
-            financial_health="Financial health assessment could not be generated.",
-            full_analysis=f"Comprehensive fundamental analysis for {company_name} could not be generated due to data processing issues. Please check the data and try again."
-        )
+def fallback_fundamental_analysis(key_data, company_name, stock_symbol, llm, context=None):
+   """
+   Generate a fallback fundamental analysis when structured parsing fails
+   
+   Args:
+       key_data: Dictionary containing extracted key data points
+       company_name: Name of the company
+       stock_symbol: Stock ticker symbol
+       llm: LangChain LLM object
+       context: Global context dictionary
+       
+   Returns:
+       FundamentalAnalysis object with basic analysis
+   """
+   # Simpler prompt for basic text generation
+   simple_prompt = f"""
+   As a financial analyst, provide a brief analysis of {company_name}'s ({stock_symbol}) financial performance.
+   Focus on revenue trends, profit margins, and key financial ratios.
+   Keep your response concise and factual, focusing only on the data provided.
+   """
+   
+   try:
+       # Get a simple text response
+       response = llm.invoke(simple_prompt)
+       
+       # Extract basic information from the response
+       revenue_trend = extract_section(response, "revenue", 100)
+       profit_trend = extract_section(response, "profit", 100)
+       financial_health = extract_section(response, "financial health", 100)
+       
+       # Update context if available
+       if context is not None:
+           context['fundamental']['revenue_insights'] = revenue_trend or f"Revenue trends for {company_name} could not be analyzed."
+           context['fundamental']['profit_insights'] = profit_trend or f"Profit margins for {company_name} could not be analyzed."
+           context['fundamental']['financial_health'] = financial_health or "Financial health could not be assessed."
+           context['fundamental']['summary'] = f"{company_name}'s financial data was processed using fallback analysis."
+       
+       # Create basic key metrics
+       key_ratios = []
+       
+       # Try to extract ROE
+       if 'financial_summary' in key_data and 'ratios' in key_data['financial_summary']:
+           ratios = key_data['financial_summary']['ratios']
+           if 'roe' in ratios and 'recent_values' in ratios['roe'] and ratios['roe']['recent_values']:
+               key_ratios.append(KeyMetric(
+                   name="ROE",
+                   value=ratios['roe']['recent_values'][0],
+                   interpretation="Return on Equity measures profitability relative to shareholders' equity."
+               ))
+           
+           if 'debt_equity' in ratios and 'recent_values' in ratios['debt_equity'] and ratios['debt_equity']['recent_values']:
+               key_ratios.append(KeyMetric(
+                   name="Debt/Equity",
+                   value=ratios['debt_equity']['recent_values'][0],
+                   interpretation="Debt to Equity ratio indicates financial leverage and risk."
+               ))
+       
+       # Add a generic metric if none found
+       if not key_ratios:
+           key_ratios.append(KeyMetric(
+               name="Profit Margin",
+               value="Varies",
+               interpretation="Measures the company's profitability as a percentage of revenue."
+           ))
+       
+       # Create the fallback analysis
+       return FundamentalAnalysis(
+           revenue_trend=revenue_trend or f"Analysis of {company_name}'s revenue trends could not be generated.",
+           profit_trend=profit_trend or f"Analysis of {company_name}'s profit trends could not be generated.",
+           key_ratios=key_ratios,
+           financial_health=financial_health or "Financial health assessment could not be generated.",
+           full_analysis=response
+       )
+   
+   except Exception as e:
+       st.error(f"Fallback fundamental analysis failed: {str(e)}")
+       
+       # Create a minimal valid object with default values
+       return FundamentalAnalysis(
+           revenue_trend=f"Analysis of {company_name}'s revenue trends could not be generated.",
+           profit_trend=f"Analysis of {company_name}'s profit trends could not be generated.",
+           key_ratios=[KeyMetric(
+               name="N/A", 
+               value="N/A", 
+               interpretation="Financial metrics could not be analyzed."
+           )],
+           financial_health="Financial health assessment could not be generated.",
+           full_analysis=f"Comprehensive fundamental analysis for {company_name} could not be generated due to data processing issues. Please check the data and try again."
+       )
 
 def debug_llm_response(response, message):
     """
@@ -1406,244 +2486,297 @@ def debug_llm_response(response, message):
         st.error(f"Error analyzing JSON structure: {str(e)}")
         return response
 
-def fallback_technical_analysis(key_data, company_name, stock_symbol, current_price, llm):
-    """
-    Generate a fallback technical analysis when structured parsing fails
-    
-    Args:
-        key_data: Dictionary containing extracted key data points
-        company_name: Name of the company
-        stock_symbol: Stock ticker symbol
-        current_price: Current stock price
-        llm: LangChain LLM object
-        
-    Returns:
-        TechnicalAnalysis object with basic analysis
-    """
-    # Simpler prompt for basic text generation
-    simple_prompt = f"""
-    As a technical analyst, provide a brief technical assessment of {company_name} ({stock_symbol}) at price {current_price}.
-    Focus on current trend, support/resistance levels, and key technical indicators.
-    Keep your response concise and factual.
-    """
-    
-    try:
-        # Get a simple text response
-        response = llm.invoke(simple_prompt)
-        
-        # Extract basic trend direction
-        trend_direction = "neutral"  # Default
-        if "bullish" in response.lower():
-            trend_direction = "bullish"
-        elif "bearish" in response.lower():
-            trend_direction = "bearish"
-        
-        # Extract or create support/resistance levels
-        key_levels = {"support": [], "resistance": []}
-        
-        # Try to extract from original data
-        if 'technical_summary' in key_data and 'support_resistance' in key_data['technical_summary']:
-            sr_data = key_data['technical_summary']['support_resistance']
-            
-            if 'support' in sr_data and sr_data['support']:
-                for level in sr_data['support']:
-                    try:
-                        clean_levels = extract_price_levels(level)
-                        for clean_level in clean_levels:
-                            key_levels["support"].append(float(clean_level))
-                    except:
-                        pass
-            
-            if 'resistance' in sr_data and sr_data['resistance']:
-                for level in sr_data['resistance']:
-                    try:
-                        clean_levels = extract_price_levels(level)
-                        for clean_level in clean_levels:
-                            key_levels["resistance"].append(float(clean_level))
-                    except:
-                        pass
-        
-        # If no levels found, create some based on current price
-        if not key_levels["support"]:
-            key_levels["support"] = [round(current_price * 0.95, 2), round(current_price * 0.90, 2)]
-        
-        if not key_levels["resistance"]:
-            key_levels["resistance"] = [round(current_price * 1.05, 2), round(current_price * 1.10, 2)]
-        
-        # Extract or create momentum indicators
-        momentum_indicators = []
-        
-        # Try to extract from original data
-        if 'technical_summary' in key_data and 'indicators' in key_data['technical_summary']:
-            indicators = key_data['technical_summary']['indicators']
-            
-            if 'RSI' in indicators:
-                rsi_value = indicators['RSI']
-                interpretation = "Neutral"
-                if float(rsi_value) > 70:
-                    interpretation = "Overbought"
-                elif float(rsi_value) < 30:
-                    interpretation = "Oversold"
-                
-                momentum_indicators.append(KeyMetric(
-                    name="RSI",
-                    value=rsi_value,
-                    interpretation=f"RSI at {rsi_value} indicates {interpretation} conditions."
-                ))
-            
-            if 'MACD' in indicators:
-                momentum_indicators.append(KeyMetric(
-                    name="MACD",
-                    value=indicators['MACD'],
-                    interpretation="MACD is a trend-following momentum indicator."
-                ))
-        
-        # Add generic indicator if none found
-        if not momentum_indicators:
-            momentum_indicators.append(KeyMetric(
-                name="Momentum",
-                value="N/A",
-                interpretation="Momentum indicators measure the rate of price changes."
-            ))
-        
-        # Extract volume analysis or create generic one
-        volume_analysis = extract_section(response, "volume", 100)
-        if not volume_analysis:
-            volume_analysis = "Volume analysis could not be generated from the available data."
-        
-        # Create the fallback analysis
-        return TechnicalAnalysis(
-            trend_direction=trend_direction,
-            key_levels=key_levels,
-            momentum_indicators=momentum_indicators,
-            volume_analysis=volume_analysis,
-            full_analysis=response
-        )
-    
-    except Exception as e:
-        st.error(f"Fallback technical analysis failed: {str(e)}")
-        
-        # Create a minimal valid object
-        return TechnicalAnalysis(
-            trend_direction="neutral",
-            key_levels={"support": [round(current_price * 0.95, 2), round(current_price * 0.90, 2)],
-                      "resistance": [round(current_price * 1.05, 2), round(current_price * 1.10, 2)]},
-            momentum_indicators=[KeyMetric(
-                name="N/A", 
-                value="N/A", 
-                interpretation="Technical indicators could not be analyzed."
-            )],
-            volume_analysis="Volume analysis could not be generated.",
-            full_analysis=f"Comprehensive technical analysis for {company_name} could not be generated due to data processing issues. Please check the data and try again."
-        )
+def fallback_technical_analysis(key_data, company_name, stock_symbol, current_price, llm, context=None):
+   """
+   Generate a fallback technical analysis when structured parsing fails
+   
+   Args:
+       key_data: Dictionary containing extracted key data points
+       company_name: Name of the company
+       stock_symbol: Stock ticker symbol
+       current_price: Current stock price
+       llm: LangChain LLM object
+       context: Global context dictionary
+       
+   Returns:
+       TechnicalAnalysis object with basic analysis
+   """
+   # Simpler prompt for basic text generation
+   simple_prompt = f"""
+   As a technical analyst, provide a brief technical assessment of {company_name} ({stock_symbol}) at price {current_price}.
+   Focus on current trend, support/resistance levels, and key technical indicators.
+   Keep your response concise and factual.
+   """
+   
+   try:
+       # Get a simple text response
+       response = llm.invoke(simple_prompt)
+       
+       # Extract basic trend direction
+       trend_direction = "neutral"  # Default
+       if "bullish" in response.lower():
+           trend_direction = "bullish"
+       elif "bearish" in response.lower():
+           trend_direction = "bearish"
+       
+       # Update context if available
+       if context is not None:
+           context['technical']['trend_insights'] = f"Trend direction: {trend_direction}"
+           context['technical']['summary'] = f"{company_name}'s technical data was processed using fallback analysis."
+           context['key_metrics']['trend_direction'] = trend_direction
+       
+       # Extract or create support/resistance levels
+       key_levels = {"support": [], "resistance": []}
+       
+       # Try to extract from original data
+       if 'technical_summary' in key_data and 'support_resistance' in key_data['technical_summary']:
+           sr_data = key_data['technical_summary']['support_resistance']
+           
+           if 'support' in sr_data and sr_data['support']:
+               for level in sr_data['support']:
+                   try:
+                       clean_levels = extract_price_levels(level)
+                       for clean_level in clean_levels:
+                           key_levels["support"].append(float(clean_level))
+                   except:
+                       pass
+           
+           if 'resistance' in sr_data and sr_data['resistance']:
+               for level in sr_data['resistance']:
+                   try:
+                       clean_levels = extract_price_levels(level)
+                       for clean_level in clean_levels:
+                           key_levels["resistance"].append(float(clean_level))
+                   except:
+                       pass
+       
+       # If no levels found, create some based on current price
+       if not key_levels["support"]:
+           key_levels["support"] = [round(current_price * 0.95, 2), round(current_price * 0.90, 2)]
+       
+       if not key_levels["resistance"]:
+           key_levels["resistance"] = [round(current_price * 1.05, 2), round(current_price * 1.10, 2)]
+       
+       # Update context with support/resistance
+       if context is not None:
+           context['technical']['support_resistance_insights'] = f"Key support levels: {key_levels['support']} | Key resistance levels: {key_levels['resistance']}"
+       
+       # Extract or create momentum indicators
+       momentum_indicators = []
+       
+       # Try to extract from original data
+       if 'technical_summary' in key_data and 'indicators' in key_data['technical_summary']:
+           indicators = key_data['technical_summary']['indicators']
+           
+           if 'RSI' in indicators:
+               rsi_value = indicators['RSI']
+               interpretation = "Neutral"
+               if float(rsi_value) > 70:
+                   interpretation = "Overbought"
+               elif float(rsi_value) < 30:
+                   interpretation = "Oversold"
+               
+               momentum_indicators.append(KeyMetric(
+                   name="RSI",
+                   value=rsi_value,
+                   interpretation=f"RSI at {rsi_value} indicates {interpretation} conditions."
+               ))
+           
+           if 'MACD' in indicators:
+               momentum_indicators.append(KeyMetric(
+                   name="MACD",
+                   value=indicators['MACD'],
+                   interpretation="MACD is a trend-following momentum indicator."
+               ))
+       
+       # Add generic indicator if none found
+       if not momentum_indicators:
+           momentum_indicators.append(KeyMetric(
+               name="Momentum",
+               value="N/A",
+               interpretation="Momentum indicators measure the rate of price changes."
+           ))
+       
+       # Extract volume analysis or create generic one
+       volume_analysis = extract_section(response, "volume", 100)
+       if not volume_analysis:
+           volume_analysis = "Volume analysis could not be generated from the available data."
+       
+       # Update context with volume analysis
+       if context is not None:
+           context['technical']['volume_insights'] = volume_analysis
+       
+       # Create the fallback analysis
+       return TechnicalAnalysis(
+           trend_direction=trend_direction,
+           key_levels=key_levels,
+           momentum_indicators=momentum_indicators,
+           volume_analysis=volume_analysis,
+           full_analysis=response
+       )
+   
+   except Exception as e:
+       st.error(f"Fallback technical analysis failed: {str(e)}")
+       
+       # Create a minimal valid object
+       return TechnicalAnalysis(
+           trend_direction="neutral",
+           key_levels={"support": [round(current_price * 0.95, 2), round(current_price * 0.90, 2)],
+                     "resistance": [round(current_price * 1.05, 2), round(current_price * 1.10, 2)]},
+           momentum_indicators=[KeyMetric(
+               name="N/A", 
+               value="N/A", 
+               interpretation="Technical indicators could not be analyzed."
+           )],
+           volume_analysis="Volume analysis could not be generated.",
+           full_analysis=f"Comprehensive technical analysis for {company_name} could not be generated due to data processing issues. Please check the data and try again."
+       )
 
 def fallback_recommendation(key_data, company_name, stock_symbol, current_price, 
-                         fundamental_analysis, technical_analysis, llm):
-    """
-    Generate a fallback recommendation when structured parsing fails
-    
-    Args:
-        key_data: Dictionary containing extracted key data points
-        company_name: Name of the company
-        stock_symbol: Stock ticker symbol
-        current_price: Current stock price
-        fundamental_analysis: FundamentalAnalysis object
-        technical_analysis: TechnicalAnalysis object
-        llm: LangChain LLM object
-        
-    Returns:
-        StockRecommendation object with basic recommendation
-    """
-    # Default to HOLD rating as the safe option
-    rating = "HOLD"
-    
-    # Try to determine a better rating from the analysis text
-    combined_analysis = fundamental_analysis.full_analysis + " " + technical_analysis.full_analysis
-    combined_analysis = combined_analysis.upper()
-    
-    if "STRONG BUY" in combined_analysis:
-        rating = "STRONG BUY"
-    elif "BUY" in combined_analysis:
-        rating = "BUY"
-    elif "SELL" in combined_analysis and "STRONG SELL" not in combined_analysis:
-        rating = "SELL"
-    elif "STRONG SELL" in combined_analysis:
-        rating = "STRONG SELL"
-    
-    # Create basic price targets
-    bearish_target = round(current_price * 0.9, 2)  # 10% down
-    base_target = round(current_price * 1.1, 2)     # 10% up
-    bullish_target = round(current_price * 1.3, 2)  # 30% up
-    
-    # Create price targets
-    price_targets = [
-        PriceTarget(scenario="Bearish (Worst Case)", price=bearish_target, timeframe="6 months"),
-        PriceTarget(scenario="Base (Most Likely)", price=base_target, timeframe="6 months"),
-        PriceTarget(scenario="Bullish (Best Case)", price=bullish_target, timeframe="6 months")
-    ]
-    
-    # Extract supporting and risk factors
-    supporting_factors = []
-    risk_factors = []
-    
-    # Try to extract factors from the analysis texts
-    try:
-        # For supporting factors
-        for text in [fundamental_analysis.full_analysis, technical_analysis.full_analysis]:
-            if "strength" in text.lower() or "positive" in text.lower() or "growth" in text.lower():
-                sentences = text.split(".")
-                for sentence in sentences:
-                    if ("strength" in sentence.lower() or "positive" in sentence.lower() or 
-                        "growth" in sentence.lower()) and len(sentence.strip()) > 15:
-                        supporting_factors.append(sentence.strip())
-                        if len(supporting_factors) >= 3:
-                            break
-            if len(supporting_factors) >= 3:
-                break
-        
-        # For risk factors
-        for text in [fundamental_analysis.full_analysis, technical_analysis.full_analysis]:
-            if "risk" in text.lower() or "concern" in text.lower() or "negative" in text.lower():
-                sentences = text.split(".")
-                for sentence in sentences:
-                    if ("risk" in sentence.lower() or "concern" in sentence.lower() or 
-                        "negative" in sentence.lower()) and len(sentence.strip()) > 15:
-                        risk_factors.append(sentence.strip())
-                        if len(risk_factors) >= 2:
-                            break
-            if len(risk_factors) >= 2:
-                break
-    except:
-        # Ignore errors in factor extraction
-        pass
-    
-    # Add generic factors if needed
-    if len(supporting_factors) < 3:
-        generic_supports = [
-            f"{company_name} shows potential for future growth based on market trends",
-            f"Technical indicators suggest a favorable entry point at current levels",
-            f"The stock is trading at reasonable valuations compared to its sector"
-        ]
-        supporting_factors.extend(generic_supports[:(3-len(supporting_factors))])
-    
-    if len(risk_factors) < 2:
-        generic_risks = [
-            f"Market volatility could impact {company_name}'s short-term performance",
-            f"Competitive pressures in the industry may affect profit margins"
-        ]
-        risk_factors.extend(generic_risks[:(2-len(risk_factors))])
-    
-    # Create a basic rationale
-    rationale = f"Based on balance of fundamental and technical factors, {company_name} is rated {rating}."
-    
-    # Create the fallback recommendation
-    return StockRecommendation(
-        rating=rating,
-        rationale=rationale,
-        price_targets=price_targets,
-        supporting_factors=supporting_factors[:3],  # Ensure we only have 3
-        risk_factors=risk_factors[:2]  # Ensure we only have 2
-    )
+                        fundamental_analysis, technical_analysis, llm, context=None):
+   """
+   Generate a fallback recommendation when structured parsing fails
+   
+   Args:
+       key_data: Dictionary containing extracted key data points
+       company_name: Name of the company
+       stock_symbol: Stock ticker symbol
+       current_price: Current stock price
+       fundamental_analysis: FundamentalAnalysis object
+       technical_analysis: TechnicalAnalysis object
+       llm: LangChain LLM object
+       context: Global context dictionary
+       
+   Returns:
+       StockRecommendation object with basic recommendation
+   """
+   # Default to HOLD rating as the safe option
+   rating = "HOLD"
+   
+   # Try to determine a better rating from the analysis text and context
+   combined_analysis = fundamental_analysis.full_analysis + " " + technical_analysis.full_analysis
+   combined_analysis = combined_analysis.upper()
+   
+   # Check context for trend direction if available
+   if context and context.get('key_metrics', {}).get('trend_direction') == "bullish":
+       # If context shows bullish trend, consider upgrading the rating
+       if "STRONG BUY" in combined_analysis or "BUY" in combined_analysis:
+           rating = "BUY"
+   elif context and context.get('key_metrics', {}).get('trend_direction') == "bearish":
+       # If context shows bearish trend, consider downgrading the rating
+       if "SELL" in combined_analysis or "STRONG SELL" in combined_analysis:
+           rating = "SELL"
+   else:
+       # Use the text analysis approach if no context is available
+       if "STRONG BUY" in combined_analysis:
+           rating = "STRONG BUY"
+       elif "BUY" in combined_analysis:
+           rating = "BUY"
+       elif "SELL" in combined_analysis and "STRONG SELL" not in combined_analysis:
+           rating = "SELL"
+       elif "STRONG SELL" in combined_analysis:
+           rating = "STRONG SELL"
+   
+   # Create basic price targets
+   bearish_target = round(current_price * 0.9, 2)  # 10% down
+   base_target = round(current_price * 1.1, 2)     # 10% up
+   bullish_target = round(current_price * 1.3, 2)  # 30% up
+   
+   # Create price targets
+   price_targets = [
+       PriceTarget(scenario="Bearish (Worst Case)", price=bearish_target, timeframe="6 months"),
+       PriceTarget(scenario="Base (Most Likely)", price=base_target, timeframe="6 months"),
+       PriceTarget(scenario="Bullish (Best Case)", price=bullish_target, timeframe="6 months")
+   ]
+   
+   # Extract supporting and risk factors
+   supporting_factors = []
+   risk_factors = []
+   
+   # Try to extract factors from context first if available
+   if context:
+       # Get insights from context for supporting factors
+       if context.get('fundamental', {}).get('revenue_insights'):
+           if 'growth' in context['fundamental']['revenue_insights'] or 'increase' in context['fundamental']['revenue_insights']:
+               supporting_factors.append(f"Revenue growth: {context['fundamental']['revenue_insights'][:75]}...")
+       
+       if context.get('technical', {}).get('trend_insights'):
+           if 'bullish' in context['technical']['trend_insights']:
+               supporting_factors.append(f"Positive technical trend: {context['technical']['trend_insights']}")
+       
+       if context.get('cash_flow', {}).get('free_cash_flow_insights'):
+           if 'positive' in context['cash_flow']['free_cash_flow_insights'] or 'sufficient' in context['cash_flow']['free_cash_flow_insights']:
+               supporting_factors.append(f"Strong cash flow: {context['cash_flow']['free_cash_flow_insights'][:75]}...")
+       
+       # Get insights from context for risk factors
+       if context.get('technical', {}).get('momentum_insights'):
+           if 'overbought' in context['technical']['momentum_insights']:
+               risk_factors.append(f"Overbought conditions: {context['technical']['momentum_insights']}")
+       
+       if context.get('fundamental', {}).get('financial_health'):
+           if 'debt' in context['fundamental']['financial_health'] or 'weak' in context['fundamental']['financial_health']:
+               risk_factors.append(f"Financial concerns: {context['fundamental']['financial_health'][:75]}...")
+   
+   # If we couldn't get enough from context, fall back to text analysis
+   if len(supporting_factors) < 3 or len(risk_factors) < 2:
+       # Try to extract factors from the analysis texts
+       try:
+           # For supporting factors
+           for text in [fundamental_analysis.full_analysis, technical_analysis.full_analysis]:
+               if "strength" in text.lower() or "positive" in text.lower() or "growth" in text.lower():
+                   sentences = text.split(".")
+                   for sentence in sentences:
+                       if ("strength" in sentence.lower() or "positive" in sentence.lower() or 
+                           "growth" in sentence.lower()) and len(sentence.strip()) > 15:
+                           supporting_factors.append(sentence.strip())
+                           if len(supporting_factors) >= 3:
+                               break
+               if len(supporting_factors) >= 3:
+                   break
+           
+           # For risk factors
+           for text in [fundamental_analysis.full_analysis, technical_analysis.full_analysis]:
+               if "risk" in text.lower() or "concern" in text.lower() or "negative" in text.lower():
+                   sentences = text.split(".")
+                   for sentence in sentences:
+                       if ("risk" in sentence.lower() or "concern" in sentence.lower() or 
+                           "negative" in sentence.lower()) and len(sentence.strip()) > 15:
+                           risk_factors.append(sentence.strip())
+                           if len(risk_factors) >= 2:
+                               break
+               if len(risk_factors) >= 2:
+                   break
+       except:
+           # Ignore errors in factor extraction
+           pass
+   
+   # Add generic factors if needed
+   if len(supporting_factors) < 3:
+       generic_supports = [
+           f"{company_name} shows potential for future growth based on market trends",
+           f"Technical indicators suggest a favorable entry point at current levels",
+           f"The stock is trading at reasonable valuations compared to its sector"
+       ]
+       supporting_factors.extend(generic_supports[:(3-len(supporting_factors))])
+   
+   if len(risk_factors) < 2:
+       generic_risks = [
+           f"Market volatility could impact {company_name}'s short-term performance",
+           f"Competitive pressures in the industry may affect profit margins"
+       ]
+       risk_factors.extend(generic_risks[:(2-len(risk_factors))])
+   
+   # Create a basic rationale
+   rationale = f"Based on balance of fundamental and technical factors, {company_name} is rated {rating}."
+   
+   # Create the fallback recommendation
+   return StockRecommendation(
+       rating=rating,
+       rationale=rationale,
+       price_targets=price_targets,
+       supporting_factors=supporting_factors[:3],  # Ensure we only have 3
+       risk_factors=risk_factors[:2]  # Ensure we only have 2
+   )
 
 def extract_section(text, keyword, max_length=100):
     """
@@ -2479,6 +3612,17 @@ def main():
     models = ["phi3:medium-128k", "mistral:7b-instruct-q6_K", "qwen2.5:7b", "mixtral-offloaded:latest","hf.co/unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF:Q6_K","qwen2.5-32b-Stock-Research:latest"]
     selected_model = st.selectbox("Select LLM model", models)
     
+    # Display memory efficiency settings based on model
+    context_window = get_context_window_limit(selected_model)
+    if context_window <= 16000:
+        memory_settings = "Low Memory Mode: 3 quarters, 2 years of data"
+    elif context_window <= 32000:
+        memory_settings = "Medium Memory Mode: 4 quarters, 3 years of data"
+    else:
+        memory_settings = "High Memory Mode: 5 quarters, 5 years of data"
+        
+    st.info(f"Model context window: ~{context_window:,} tokens - {memory_settings}")
+    
     # Process uploaded file
     if uploaded_file is not None:
         try:
@@ -2508,10 +3652,14 @@ def main():
                     rsi = data["technical_data"]["indicators"].get("RSI", "N/A")
                     st.metric("RSI", rsi)
             
+            # Add memory usage estimator
+            file_size_kb = len(str(data)) / 1024
+            st.caption(f"Input data size: {file_size_kb:.1f} KB")
+            
             # Generate analysis button
             if st.button(f"Generate Analysis using {selected_model}"):
                 with st.spinner("Analyzing data... This may take several minutes depending on your hardware."):
-                    # Use our structured analysis function
+                    # Use our memory-optimized structured analysis function
                     analysis_report = generate_structured_analysis(data, selected_model)
                     
                     if analysis_report:
@@ -2519,7 +3667,6 @@ def main():
                         display_stock_analysis_report(analysis_report)
                     else:
                         st.error("Failed to generate analysis. Please try a different model or check if your LLM service is running.")
-        
         except Exception as e:
             st.error(f"Error processing uploaded file: {str(e)}")
             st.info("Please ensure the uploaded file is a valid JSON file with the expected structure.")
