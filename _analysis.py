@@ -13,6 +13,9 @@ from pydantic import BaseModel, Field
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 
+# Set page configuration
+st.set_page_config(page_title="AI Stock Researcher and Analyst", page_icon="📊", layout="wide")
+
 # Define structured data models for different components of the analysis
 class PriceTarget(BaseModel):
     """Price target for different scenarios"""
@@ -66,6 +69,15 @@ class StockRecommendation(BaseModel):
             return "HOLD"
         return v
 
+class CashFlowAnalysis(BaseModel):
+    """Structured cash flow analysis output"""
+    operating_cf_trend: str = Field(description="Analysis of operating cash flow trend")
+    free_cash_flow: str = Field(description="Analysis of free cash flow")
+    cash_flow_metrics: Dict[str, str] = Field(description="Key cash flow metrics with values")
+    investing_activities: str = Field(description="Analysis of investing activities")
+    financing_activities: str = Field(description="Analysis of financing activities")
+    full_analysis: str = Field(description="Complete cash flow analysis in text form")
+
 class StockAnalysisReport(BaseModel):
     """Complete stock analysis report"""
     company_name: str = Field(description="Name of the company")
@@ -74,9 +86,11 @@ class StockAnalysisReport(BaseModel):
     date: str = Field(description="Date of analysis")
     fundamental_analysis: FundamentalAnalysis = Field(description="Fundamental analysis component")
     technical_analysis: TechnicalAnalysis = Field(description="Technical analysis component")
+    cash_flow_analysis: Optional[CashFlowAnalysis] = Field(None, description="Cash flow analysis component")
     recommendation: StockRecommendation = Field(description="Investment recommendation")
     price_history_analysis: str = Field(description="Analysis of historical price performance")
     moving_averages: Optional[Dict[str, str]] = Field(None, description="Moving average values")
+    pivot_points: Optional[Dict[str, Dict[str, float]]] = Field(None, description="Pivot point levels")
     support_resistance: Optional[Dict[str, List[str]]] = Field(None, description="Support and resistance levels")
     price_history: Optional[List[Dict[str, Any]]] = Field(None, description="Historical price data")
 
@@ -115,22 +129,27 @@ def generate_structured_analysis(data, model_name="phi3:medium-128k"):
         return None
     
     # Extract and format key data points for analysis
-    st.info("Phase 1/4: Extracting key data points...")
+    st.info("Phase 1/5: Extracting key data points...")
     key_data_points = extract_key_data_points(data)
-    progress_bar.progress(20)
+    progress_bar.progress(15)
     
     # Process fundamental analysis
-    st.info("Phase 2/4: Generating fundamental analysis...")
+    st.info("Phase 2/5: Generating fundamental analysis...")
     fundamental_analysis = generate_fundamental_analysis(key_data_points, company_name, stock_symbol, llm)
-    progress_bar.progress(45)
+    progress_bar.progress(35)
     
     # Process technical analysis
-    st.info("Phase 3/4: Generating technical analysis...")
+    st.info("Phase 3/5: Generating technical analysis...")
     technical_analysis = generate_technical_analysis(key_data_points, company_name, stock_symbol, current_price, llm)
-    progress_bar.progress(70)
+    progress_bar.progress(55)
+    
+    # Process cash flow analysis - New phase
+    st.info("Phase 4/5: Generating cash flow analysis...")
+    cash_flow_analysis = generate_cash_flow_analysis(key_data_points, company_name, stock_symbol, llm)
+    progress_bar.progress(75)
     
     # Generate final recommendation and complete report
-    st.info("Phase 4/4: Preparing final recommendation and report...")
+    st.info("Phase 5/5: Preparing final recommendation and report...")
     analysis_report = generate_final_report(
         key_data_points, company_name, stock_symbol, current_price,
         fundamental_analysis, technical_analysis, llm, data
@@ -563,6 +582,11 @@ def generate_final_report(key_data_points, company_name, stock_symbol, current_p
         key_data_points, company_name, stock_symbol, llm
     )
     
+    # Generate cash flow analysis - New addition
+    cash_flow_analysis = generate_cash_flow_analysis(
+        key_data_points, company_name, stock_symbol, llm
+    )
+    
     # Create the complete report
     report = StockAnalysisReport(
         company_name=company_name,
@@ -571,6 +595,7 @@ def generate_final_report(key_data_points, company_name, stock_symbol, current_p
         date=datetime.now().strftime("%B %d, %Y"),
         fundamental_analysis=fundamental_analysis,
         technical_analysis=technical_analysis,
+        cash_flow_analysis=cash_flow_analysis,  # New addition
         recommendation=recommendation,
         price_history_analysis=price_history_analysis
     )
@@ -580,12 +605,39 @@ def generate_final_report(key_data_points, company_name, stock_symbol, current_p
         if 'moving_averages' in original_data['technical_data']:
             report.moving_averages = original_data['technical_data']['moving_averages']
         
+        # Add pivot points - New addition
+        if 'pivot_points' in original_data['technical_data']:
+            # Clean up pivot point values for consistency
+            pivot_points = {}
+            for method, levels in original_data['technical_data']['pivot_points'].items():
+                pivot_points[method] = {}
+                for level, value in levels.items():
+                    try:
+                        if isinstance(value, str):
+                            value = float(value.replace(',', ''))
+                        pivot_points[method][level] = value
+                    except (ValueError, TypeError):
+                        pivot_points[method][level] = value
+            
+            report.pivot_points = pivot_points
+        
+        # Process support/resistance levels if available
         if 'support_resistance' in original_data['technical_data']:
-            # Clean up support/resistance levels
             support_resistance = {
                 'support': [],
                 'resistance': []
             }
+            
+            if 'support' in original_data['technical_data']['support_resistance']:
+                support_data = original_data['technical_data']['support_resistance']['support']
+                for level in support_data:
+                    try:
+                        # Handle complex support level strings
+                        cleaned_levels = extract_price_levels(level)
+                        support_resistance['support'].extend(cleaned_levels)
+                    except Exception:
+                        # If parsing fails, just include as is
+                        support_resistance['support'].append(level)
             
             # Process resistance levels if available
             if 'resistance' in original_data['technical_data']['support_resistance']:
@@ -861,6 +913,23 @@ def format_financial_data_for_prompt(key_data):
                     if i < len(data['recent_values']):
                         result.append(f"    {header}: {data['recent_values'][i]}")
     
+    # Add cash flow data - New addition
+    if 'financial_summary' in key_data and 'cash_flow' in key_data['financial_summary']:
+        result.append("\nCASH FLOW ANALYSIS:")
+        cash_flow = key_data['financial_summary']['cash_flow']
+        
+        for metric, data in cash_flow.items():
+            if 'headers' in data and 'recent_values' in data:
+                result.append(f"  {data.get('label', metric.upper())}:")
+                if 'cagr_3yr' in data and data['cagr_3yr'] != '-':
+                    result.append(f"    3-Year CAGR: {data['cagr_3yr']}")
+                if 'cagr_5yr' in data and data['cagr_5yr'] != '-':
+                    result.append(f"    5-Year CAGR: {data['cagr_5yr']}")
+                
+                for i, header in enumerate(data['headers']):
+                    if i < len(data['recent_values']):
+                        result.append(f"    {header}: {data['recent_values'][i]}")
+    
     # Add key ratios
     if 'financial_summary' in key_data and 'ratios' in key_data['financial_summary']:
         result.append("\nKEY FINANCIAL RATIOS:")
@@ -893,11 +962,33 @@ def format_technical_data_for_prompt(key_data):
         for indicator, value in key_data['technical_summary']['indicators'].items():
             result.append(f"  {indicator}: {value}")
     
+    # Add oscillators - New addition
+    if 'technical_summary' in key_data and 'oscillators' in key_data['technical_summary']:
+        result.append("\nOSCILLATORS:")
+        for oscillator, value in key_data['technical_summary']['oscillators'].items():
+            result.append(f"  {oscillator}: {value}")
+    
     # Add moving averages
     if 'technical_summary' in key_data and 'moving_averages' in key_data['technical_summary']:
         result.append("\nMOVING AVERAGES:")
         for ma_type, value in key_data['technical_summary']['moving_averages'].items():
             result.append(f"  {ma_type}: {value}")
+    
+    # Add pivot points - New addition
+    if 'technical_summary' in key_data and 'pivot_points' in key_data['technical_summary']:
+        pivot_data = key_data['technical_summary']['pivot_points']
+        
+        # Add Classic pivot points if available
+        if 'Classic' in pivot_data:
+            result.append("\nCLASSIC PIVOT POINTS:")
+            for level, value in pivot_data['Classic'].items():
+                result.append(f"  {level}: {value}")
+        
+        # Add Fibonacci pivot points if available
+        if 'Fibonacci' in pivot_data:
+            result.append("\nFIBONACCI PIVOT POINTS:")
+            for level, value in pivot_data['Fibonacci'].items():
+                result.append(f"  {level}: {value}")
     
     # Add support/resistance levels
     if 'technical_summary' in key_data and 'support_resistance' in key_data['technical_summary']:
@@ -922,7 +1013,246 @@ def format_technical_data_for_prompt(key_data):
             else:
                 result.append(f"  {period}: {value}")
     
+    # Add beta data - New addition
+    if 'technical_summary' in key_data and 'beta' in key_data['technical_summary']:
+        result.append("\nBETA VALUES:")
+        for period, value in key_data['technical_summary']['beta'].items():
+            result.append(f"  {period}: {value}")
+    
     return "\n".join(result) if result else "Technical data not available."
+
+def generate_cash_flow_analysis(key_data_points, company_name, stock_symbol, llm):
+    """
+    Generate structured cash flow analysis using LLM
+    
+    Args:
+        key_data_points: Dictionary containing extracted key data points
+        company_name: Name of the company
+        stock_symbol: Stock ticker symbol
+        llm: LangChain LLM object
+        
+    Returns:
+        CashFlowAnalysis object with the analysis
+    """
+    # Check if cash flow data exists
+    if not (
+        'financial_summary' in key_data_points and 
+        'cash_flow' in key_data_points['financial_summary'] and 
+        key_data_points['financial_summary']['cash_flow']
+    ):
+        # Return minimal analysis if no data available
+        return CashFlowAnalysis(
+            operating_cf_trend="Cash flow trend data not available.",
+            free_cash_flow="Free cash flow data not available.",
+            cash_flow_metrics={},
+            investing_activities="Investing activities data not available.",
+            financing_activities="Financing activities data not available.",
+            full_analysis=f"Comprehensive cash flow analysis for {company_name} could not be generated due to missing data."
+        )
+    
+    # Format cash flow data for the prompt
+    cash_flow_data = key_data_points['financial_summary']['cash_flow']
+    cash_flow_str = []
+    
+    for cf_type, data in cash_flow_data.items():
+        if 'label' in data and 'recent_values' in data and 'headers' in data:
+            cash_flow_str.append(f"{data['label']}:")
+            for i, header in enumerate(data['headers']):
+                if i < len(data['recent_values']):
+                    cash_flow_str.append(f"  {header}: {data['recent_values'][i]}")
+    
+    cash_flow_data_str = "\n".join(cash_flow_str)
+    
+    # Create the prompt template for cash flow analysis
+    cash_flow_prompt = f"""
+    You are a financial analyst specializing in equity research. Analyze the cash flow performance of {company_name} ({stock_symbol}).
+    
+    Focus on these cash flow data points:
+    {cash_flow_data_str}
+    
+    Provide a JSON object with the following structure:
+    {{
+        "operating_cf_trend": "Analysis of operating cash flow trends here...",
+        "free_cash_flow": "Analysis of free cash flow here...",
+        "cash_flow_metrics": {{
+            "Operating CF to Net Income": "1.76",
+            "FCF Yield": "2.4%",
+            "Cash Flow Growth Rate": "12.3%"
+        }},
+        "investing_activities": "Analysis of investing activities here...",
+        "financing_activities": "Analysis of financing activities here...",
+        "full_analysis": "Complete cash flow analysis here..."
+    }}
+    
+    IMPORTANT: Your response must be only a valid JSON object. No preamble or explanation.
+    """
+    
+    # Try to generate structured output with enhanced error handling
+    try:
+        # Invoke the LLM
+        response = llm.invoke(cash_flow_prompt)
+        
+        # Extract JSON from the response
+        json_match = re.search(r'(\{.*\})', response, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1).strip()
+            
+            # Parse JSON and create CashFlowAnalysis object
+            import json
+            parsed_data = json.loads(json_str)
+            
+            # Create the CashFlowAnalysis object
+            return CashFlowAnalysis(
+                operating_cf_trend=parsed_data.get("operating_cf_trend", "Operating cash flow trend analysis not available."),
+                free_cash_flow=parsed_data.get("free_cash_flow", "Free cash flow analysis not available."),
+                cash_flow_metrics=parsed_data.get("cash_flow_metrics", {}),
+                investing_activities=parsed_data.get("investing_activities", "Investing activities analysis not available."),
+                financing_activities=parsed_data.get("financing_activities", "Financing activities analysis not available."),
+                full_analysis=parsed_data.get("full_analysis", "Comprehensive cash flow analysis not available.")
+            )
+        else:
+            # If we can't find a valid JSON, fall back to a simple analysis
+            st.warning("Could not extract valid JSON from cash flow analysis response")
+            return fallback_cash_flow_analysis(key_data_points, company_name, stock_symbol)
+    
+    except Exception as e:
+        st.warning(f"Cash flow analysis generation failed: {str(e)}")
+        return fallback_cash_flow_analysis(key_data_points, company_name, stock_symbol)
+
+def fallback_cash_flow_analysis(key_data_points, company_name, stock_symbol):
+   """
+   Generate a fallback cash flow analysis when structured parsing fails
+   
+   Args:
+       key_data_points: Dictionary containing extracted key data points
+       company_name: Name of the company
+       stock_symbol: Stock ticker symbol
+       
+   Returns:
+       CashFlowAnalysis object with basic analysis
+   """
+   # Extract basic cash flow metrics for display
+   cash_flow_metrics = {}
+   
+   if ('financial_summary' in key_data_points and 
+       'cash_flow' in key_data_points['financial_summary']):
+       
+       cash_flow_data = key_data_points['financial_summary']['cash_flow']
+       
+       # Extract operating cash flow trend
+       operating_cf_trend = "Operating cash flow data not available."
+       if 'operating_cf' in cash_flow_data:
+           cf_data = cash_flow_data['operating_cf']
+           if 'recent_values' in cf_data and cf_data['recent_values']:
+               # Get the most recent value
+               latest_cf = cf_data['recent_values'][0]
+               cash_flow_metrics["Latest Operating CF"] = latest_cf
+               
+               # Try to determine trend
+               if len(cf_data['recent_values']) > 1:
+                   trend_direction = "stable"
+                   try:
+                       latest = float(latest_cf.replace(',', ''))
+                       previous = float(cf_data['recent_values'][1].replace(',', ''))
+                       percent_change = ((latest - previous) / previous) * 100
+                       
+                       if percent_change > 10:
+                           trend_direction = "strongly increasing"
+                       elif percent_change > 0:
+                           trend_direction = "increasing"
+                       elif percent_change < -10:
+                           trend_direction = "strongly decreasing"
+                       elif percent_change < 0:
+                           trend_direction = "decreasing"
+                           
+                       operating_cf_trend = f"{company_name}'s operating cash flow is {trend_direction} with the most recent value at {latest_cf}."
+                   except (ValueError, TypeError, ZeroDivisionError):
+                       operating_cf_trend = f"{company_name}'s operating cash flow was {latest_cf} in the most recent period."
+               else:
+                   operating_cf_trend = f"{company_name}'s operating cash flow was {latest_cf} in the most recent period."
+       
+       # Extract investing cash flow information
+       investing_activities = "Investing activities data not available."
+       if 'investing_cf' in cash_flow_data:
+           cf_data = cash_flow_data['investing_cf']
+           if 'recent_values' in cf_data and cf_data['recent_values']:
+               latest_cf = cf_data['recent_values'][0]
+               cash_flow_metrics["Latest Investing CF"] = latest_cf
+               
+               try:
+                   value = float(latest_cf.replace(',', ''))
+                   if value < 0:
+                       investing_activities = f"{company_name} is investing significantly with a cash outflow of {latest_cf} in the most recent period."
+                   else:
+                       investing_activities = f"{company_name} has a positive cash flow from investing activities of {latest_cf} in the most recent period."
+               except (ValueError, TypeError):
+                   investing_activities = f"{company_name}'s cash flow from investing activities was {latest_cf} in the most recent period."
+       
+       # Extract financing cash flow information
+       financing_activities = "Financing activities data not available."
+       if 'financing_cf' in cash_flow_data:
+           cf_data = cash_flow_data['financing_cf']
+           if 'recent_values' in cf_data and cf_data['recent_values']:
+               latest_cf = cf_data['recent_values'][0]
+               cash_flow_metrics["Latest Financing CF"] = latest_cf
+               
+               try:
+                   value = float(latest_cf.replace(',', ''))
+                   if value < 0:
+                       financing_activities = f"{company_name} is reducing debt or returning capital to shareholders with a financing cash outflow of {latest_cf}."
+                   else:
+                       financing_activities = f"{company_name} has raised capital with a financing cash inflow of {latest_cf}."
+               except (ValueError, TypeError):
+                   financing_activities = f"{company_name}'s cash flow from financing activities was {latest_cf} in the most recent period."
+       
+       # Calculate simple free cash flow approximation
+       free_cash_flow = "Free cash flow data not available."
+       if ('operating_cf' in cash_flow_data and 'investing_cf' in cash_flow_data and
+           'recent_values' in cash_flow_data['operating_cf'] and 
+           'recent_values' in cash_flow_data['investing_cf'] and
+           cash_flow_data['operating_cf']['recent_values'] and
+           cash_flow_data['investing_cf']['recent_values']):
+           
+           try:
+               op_cf = float(cash_flow_data['operating_cf']['recent_values'][0].replace(',', ''))
+               inv_cf = float(cash_flow_data['investing_cf']['recent_values'][0].replace(',', ''))
+               
+               # Free cash flow = Operating CF + Investing CF (typically negative)
+               fcf = op_cf + inv_cf
+               
+               cash_flow_metrics["Free Cash Flow"] = f"{fcf:,.2f}"
+               
+               if fcf > 0:
+                   free_cash_flow = f"{company_name} generated positive free cash flow of approximately {fcf:,.2f}, indicating sufficient cash generation to fund operations and investments."
+               else:
+                   free_cash_flow = f"{company_name} has negative free cash flow of approximately {fcf:,.2f}, indicating the company is spending more than it generates from operations."
+           except (ValueError, TypeError):
+               free_cash_flow = f"Free cash flow calculation not possible due to data format issues."
+   
+   # Create a basic full analysis
+   full_analysis = f"""
+   Cash Flow Analysis for {company_name} ({stock_symbol}):
+   
+   Operating Cash Flow: {operating_cf_trend}
+   
+   Free Cash Flow: {free_cash_flow}
+   
+   Investing Activities: {investing_activities}
+   
+   Financing Activities: {financing_activities}
+   
+   This is a simplified analysis based on the available cash flow data. A more detailed analysis would require additional context about the company's business model, growth stage, and industry dynamics.
+   """
+   
+   # Create the fallback analysis
+   return CashFlowAnalysis(
+       operating_cf_trend=operating_cf_trend,
+       free_cash_flow=free_cash_flow,
+       cash_flow_metrics=cash_flow_metrics,
+       investing_activities=investing_activities,
+       financing_activities=financing_activities,
+       full_analysis=full_analysis.strip()
+   )
 
 def format_price_history_for_prompt(key_data):
     """
@@ -1389,20 +1719,20 @@ def extract_key_data_points(data):
                     if 'Total Rev' in row[0]:
                         quarterly['revenue'] = {
                             'label': row[0],
-                            'recent_values': [val for val in row[2:7] if val],
-                            'headers': table_data['headers'][2:7] if len(table_data['headers']) >= 7 else table_data['headers'][2:]
+                            'recent_values': [val for val in row[1:6] if val],  # Get 5 most recent values
+                            'headers': table_data['headers'][1:6] if len(table_data['headers']) >= 6 else table_data['headers'][1:]
                         }
                     elif 'Net Profit' in row[0]:
                         quarterly['net_profit'] = {
                             'label': row[0],
-                            'recent_values': [val for val in row[2:7] if val],
-                            'headers': table_data['headers'][2:7] if len(table_data['headers']) >= 7 else table_data['headers'][2:]
+                            'recent_values': [val for val in row[1:6] if val],
+                            'headers': table_data['headers'][1:6] if len(table_data['headers']) >= 6 else table_data['headers'][1:]
                         }
                     elif 'Operating Profit Margin' in row[0]:
                         quarterly['operating_margin'] = {
                             'label': row[0],
-                            'recent_values': [val for val in row[2:7] if val],
-                            'headers': table_data['headers'][2:7] if len(table_data['headers']) >= 7 else table_data['headers'][2:]
+                            'recent_values': [val for val in row[1:6] if val],
+                            'headers': table_data['headers'][1:6] if len(table_data['headers']) >= 6 else table_data['headers'][1:]
                         }
             
             key_data['financial_summary']['quarterly'] = quarterly
@@ -1422,29 +1752,91 @@ def extract_key_data_points(data):
                     if any(metric in row[0] for metric in ['Total Rev', 'Total Revenue']):
                         annual['revenue'] = {
                             'label': row[0],
-                            'cagr_3yr': row[2] if len(row) > 2 else 'N/A',
-                            'cagr_5yr': row[3] if len(row) > 3 else 'N/A',
-                            'recent_values': [val for val in row[4:9] if val],
-                            'headers': table_data['headers'][4:9] if len(table_data['headers']) >= 9 else table_data['headers'][4:]
+                            'cagr_3yr': row[1] if len(row) > 1 else 'N/A',
+                            'cagr_5yr': row[2] if len(row) > 2 else 'N/A',
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
                         }
                     elif 'Net Profit' in row[0]:
                         annual['net_profit'] = {
                             'label': row[0],
-                            'cagr_3yr': row[2] if len(row) > 2 else 'N/A',
-                            'cagr_5yr': row[3] if len(row) > 3 else 'N/A',
-                            'recent_values': [val for val in row[4:9] if val],
-                            'headers': table_data['headers'][4:9] if len(table_data['headers']) >= 9 else table_data['headers'][4:]
+                            'cagr_3yr': row[1] if len(row) > 1 else 'N/A',
+                            'cagr_5yr': row[2] if len(row) > 2 else 'N/A',
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
                         }
                     elif 'NPM' in row[0] or 'Net Profit Margin' in row[0] or 'NETPCT' in row[0]:
                         annual['net_margin'] = {
                             'label': row[0],
-                            'cagr_3yr': row[2] if len(row) > 2 else 'N/A',
-                            'cagr_5yr': row[3] if len(row) > 3 else 'N/A',
-                            'recent_values': [val for val in row[4:9] if val],
-                            'headers': table_data['headers'][4:9] if len(table_data['headers']) >= 9 else table_data['headers'][4:]
+                            'cagr_3yr': row[1] if len(row) > 1 else 'N/A',
+                            'cagr_5yr': row[2] if len(row) > 2 else 'N/A',
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
                         }
             
             key_data['financial_summary']['annual'] = annual
+        
+        # Cash Flow data - New addition
+        if 'cash_flow' in financial_data:
+            cash_flow = {}
+            for table_name, table_data in financial_data['cash_flow'].items():
+                if not table_data.get('rows'):
+                    continue
+                
+                # Extract key cash flow metrics
+                for row in table_data['rows']:
+                    if not row or len(row) < 5:
+                        continue
+                    
+                    # Operating Cash Flow
+                    if any(cf in row[0] for cf in ['CFO', 'Cash from Operating']):
+                        cash_flow['operating_cf'] = {
+                            'label': row[0],
+                            'cagr_3yr': row[1] if len(row) > 1 else 'N/A',
+                            'cagr_5yr': row[2] if len(row) > 2 else 'N/A',
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
+                        }
+                    # Investing Cash Flow
+                    elif any(cf in row[0] for cf in ['CFI', 'Cash from Investing']):
+                        cash_flow['investing_cf'] = {
+                            'label': row[0],
+                            'cagr_3yr': row[1] if len(row) > 1 else 'N/A',
+                            'cagr_5yr': row[2] if len(row) > 2 else 'N/A',
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
+                        }
+                    # Financing Cash Flow
+                    elif any(cf in row[0] for cf in ['CFA', 'Cash from Financing']):
+                        cash_flow['financing_cf'] = {
+                            'label': row[0],
+                            'cagr_3yr': row[1] if len(row) > 1 else 'N/A',
+                            'cagr_5yr': row[2] if len(row) > 2 else 'N/A',
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
+                        }
+                    # Net Cash Flow
+                    elif any(cf in row[0] for cf in ['NCF', 'Net Cash Flow']):
+                        cash_flow['net_cf'] = {
+                            'label': row[0],
+                            'cagr_3yr': row[1] if len(row) > 1 else 'N/A',
+                            'cagr_5yr': row[2] if len(row) > 2 else 'N/A',
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
+                        }
+                    # Ending Cash Balance
+                    elif any(cf in row[0] for cf in ['Cash And Cash Equivalent End', 'Cash Plus Cash Eqv']):
+                        cash_flow['ending_cash'] = {
+                            'label': row[0],
+                            'cagr_3yr': row[1] if len(row) > 1 else 'N/A',
+                            'cagr_5yr': row[2] if len(row) > 2 else 'N/A',
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
+                        }
+            
+            # Add cash flow data to financial summary
+            if cash_flow:
+                key_data['financial_summary']['cash_flow'] = cash_flow
         
         # Key ratios
         if 'ratios' in financial_data:
@@ -1461,26 +1853,26 @@ def extract_key_data_points(data):
                     if 'ROE' in row[0]:
                         ratios['roe'] = {
                             'label': row[0],
-                            'recent_values': [val for val in row[4:9] if val],
-                            'headers': table_data['headers'][4:9] if len(table_data['headers']) >= 9 else table_data['headers'][4:]
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
                         }
                     elif 'ROA' in row[0]:
                         ratios['roa'] = {
                             'label': row[0],
-                            'recent_values': [val for val in row[4:9] if val],
-                            'headers': table_data['headers'][4:9] if len(table_data['headers']) >= 9 else table_data['headers'][4:]
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
                         }
                     elif any(d in row[0] for d in ['Debt to Equity', 'DEBT_CE']):
                         ratios['debt_equity'] = {
                             'label': row[0],
-                            'recent_values': [val for val in row[4:9] if val],
-                            'headers': table_data['headers'][4:9] if len(table_data['headers']) >= 9 else table_data['headers'][4:]
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
                         }
                     elif 'Price' in row[0] and 'BV' in row[0]:
                         ratios['price_to_book'] = {
                             'label': row[0],
-                            'recent_values': [val for val in row[4:9] if val],
-                            'headers': table_data['headers'][4:9] if len(table_data['headers']) >= 9 else table_data['headers'][4:]
+                            'recent_values': [val for val in row[3:8] if val],
+                            'headers': table_data['headers'][3:8] if len(table_data['headers']) >= 8 else table_data['headers'][3:]
                         }
             
             key_data['financial_summary']['ratios'] = ratios
@@ -1496,33 +1888,65 @@ def extract_key_data_points(data):
                 if k in ['RSI', 'MACD', 'MFI', 'ATR', 'ADX', 'Momentum Score']
             }
         
+        # Oscillators - New addition
+        if 'oscillators' in tech_data:
+            key_data['technical_summary']['oscillators'] = tech_data['oscillators']
+        
         # Moving averages
         if 'moving_averages' in tech_data:
-            key_data['technical_summary']['moving_averages'] = {
-                k: v for k, v in tech_data['moving_averages'].items()
-                if k in ['SMA20', 'SMA50', 'SMA100', 'SMA200'] or (k.startswith('SMA') and len(tech_data['moving_averages']) <= 4)
-            }
+            key_data['technical_summary']['moving_averages'] = tech_data['moving_averages']
+        
+        # Extract Pivot Points - New addition
+        if 'pivot_points' in tech_data:
+            pivot_points = {}
+            
+            # Process each pivot point methodology
+            for method, levels in tech_data['pivot_points'].items():
+                pivot_points[method] = {}
+                for level_type, value in levels.items():
+                    # Clean up the values for consistency
+                    try:
+                        if isinstance(value, str):
+                            value = float(value.replace(',', ''))
+                        pivot_points[method][level_type] = value
+                    except (ValueError, TypeError):
+                        pivot_points[method][level_type] = value
+            
+            if pivot_points:
+                key_data['technical_summary']['pivot_points'] = pivot_points
         
         # Support and resistance levels
         if 'support_resistance' in tech_data:
             support = tech_data['support_resistance'].get('support', [])
             resistance = tech_data['support_resistance'].get('resistance', [])
             
-            if resistance:  # Only checking resistance since that's what's in the sample data
-                key_data['technical_summary']['support_resistance'] = {
-                    'support': [],  # Empty as there are none in the sample data
-                    'resistance': resistance[:3] if resistance else []  # Top 3 resistance levels
-                }
+            key_data['technical_summary']['support_resistance'] = {
+                'support': support,
+                'resistance': resistance
+            }
         
         # Performance metrics
         if 'performance' in tech_data:
-            key_data['technical_summary']['performance'] = {
-                k: v for k, v in tech_data['performance'].items()
-                if k in ['1 Day', '1 Week', '1 Month', '3 Months', '1 Year']
-            }
+            key_data['technical_summary']['performance'] = {}
+            for period, data in tech_data['performance'].items():
+                # Check if data is a dictionary with percentage key
+                if isinstance(data, dict) and 'percentage' in data:
+                    key_data['technical_summary']['performance'][period] = data['percentage']
+                else:
+                    key_data['technical_summary']['performance'][period] = data
+        
+        # Beta values - New addition
+        if 'beta' in tech_data:
+            key_data['technical_summary']['beta'] = tech_data['beta']
     
-    # Extract performance comparison data
+    # Extract price history data
     if 'price_history_data' in data:
+        # Daily price data - New addition
+        if 'daily_data' in data['price_history_data']:
+            key_data['price_history'] = {
+                'daily_data': data['price_history_data']['daily_data']
+            }
+        
         # Returns comparison
         if 'returns_comparison' in data['price_history_data']:
             comparison_data = []
@@ -1589,7 +2013,7 @@ def display_stock_analysis_report(report):
     # Display company info
     st.title(f"Investment Analysis Report: {report.company_name} ({report.stock_symbol})")
     
-    # Use columns for metrics to save vertical space - removing Potential Return
+    # Use columns for metrics to save vertical space
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Current Price", f"₹{report.current_price}")
@@ -1644,7 +2068,7 @@ def display_stock_analysis_report(report):
         st.warning("Couldn't generate price projection chart. Check data format.")
     
     # Detailed analysis sections using tabs for better organization
-    tabs = st.tabs(["Fundamental Analysis", "Technical Analysis", "Historical Performance"])
+    tabs = st.tabs(["Fundamental Analysis", "Technical Analysis", "Cash Flow Analysis", "Historical Performance"])
     
     with tabs[0]:
         # Display key metrics in a table
@@ -1688,6 +2112,28 @@ def display_stock_analysis_report(report):
             for level in report.technical_analysis.key_levels["resistance"]:
                 st.markdown(f"* ₹{level}")
         
+        # Display pivot points if available - New section
+        if hasattr(report, 'pivot_points') and report.pivot_points:
+            st.subheader("Pivot Points")
+            
+            # Get list of available pivot point methods
+            pivot_methods = list(report.pivot_points.keys())
+            # Create tabs for each pivot point method
+            pivot_tabs = st.tabs(pivot_methods)
+            
+            # Display each method in its own tab
+            for i, method in enumerate(pivot_methods):
+                with pivot_tabs[i]:
+                    pivot_data = []
+                    for level, value in report.pivot_points[method].items():
+                        pivot_data.append({
+                            "Level": level,
+                            "Value": f"₹{value}"
+                        })
+                    # Sort pivot data to show in logical order (resistances, pivot, supports)
+                    pivot_data_sorted = sorted(pivot_data, key=lambda x: x["Level"])
+                    st.table(pd.DataFrame(pivot_data_sorted))
+        
         # Display momentum indicators
         st.subheader("Momentum Indicators")
         indicators_data = [{
@@ -1704,6 +2150,42 @@ def display_stock_analysis_report(report):
         st.markdown(report.technical_analysis.full_analysis)
     
     with tabs[2]:
+        # Cash Flow Analysis Tab - New tab
+        if hasattr(report, 'cash_flow_analysis') and report.cash_flow_analysis:
+            # Display cash flow metrics in a table if available
+            if hasattr(report.cash_flow_analysis, 'cash_flow_metrics') and report.cash_flow_analysis.cash_flow_metrics:
+                st.subheader("Key Cash Flow Metrics")
+                cf_metrics_data = []
+                for metric, value in report.cash_flow_analysis.cash_flow_metrics.items():
+                    cf_metrics_data.append({
+                        "Metric": metric,
+                        "Value": value
+                    })
+                st.table(pd.DataFrame(cf_metrics_data))
+            
+            # Display operating cash flow trend
+            st.subheader("Operating Cash Flow Trend")
+            st.markdown(report.cash_flow_analysis.operating_cf_trend)
+            
+            # Display free cash flow
+            st.subheader("Free Cash Flow")
+            st.markdown(report.cash_flow_analysis.free_cash_flow)
+            
+            # Display investing activities
+            st.subheader("Investing Activities")
+            st.markdown(report.cash_flow_analysis.investing_activities)
+            
+            # Display financing activities
+            st.subheader("Financing Activities")
+            st.markdown(report.cash_flow_analysis.financing_activities)
+            
+            # Display complete cash flow analysis
+            st.subheader("Complete Cash Flow Analysis")
+            st.markdown(report.cash_flow_analysis.full_analysis)
+        else:
+            st.info("Cash flow analysis not available for this report.")
+    
+    with tabs[3]:
         if report.price_history_analysis:
             st.markdown(report.price_history_analysis)
         else:
@@ -1794,6 +2276,17 @@ def display_stock_analysis_report(report):
         
         ### Complete Technical Analysis
         {report.technical_analysis.full_analysis}
+        
+        ## Cash Flow Analysis
+        
+        ### Operating Cash Flow Trend
+        {report.cash_flow_analysis.operating_cf_trend if hasattr(report, 'cash_flow_analysis') and report.cash_flow_analysis else "Not available"}
+        
+        ### Free Cash Flow
+        {report.cash_flow_analysis.free_cash_flow if hasattr(report, 'cash_flow_analysis') and report.cash_flow_analysis else "Not available"}
+        
+        ### Complete Cash Flow Analysis
+        {report.cash_flow_analysis.full_analysis if hasattr(report, 'cash_flow_analysis') and report.cash_flow_analysis else "Not available"}
         
         ## Historical Performance Analysis
         {report.price_history_analysis}
@@ -1973,70 +2466,98 @@ def create_price_projection_chart(report):
     return fig
 
 def main():
-   st.title("📈 Advanced Stock Analysis Report Generator")
-   st.write("Generate a detailed stock analysis report using structured AI analysis")
-   
-   # File selection
-   st.subheader("Select Data Source")
-   
-   # Find all JSON files in the current directory
-   import os
-   json_files = [f for f in os.listdir('.') if f.endswith('_all_data.json')]
-   if not json_files:
-       st.error("No JSON data files found in the current directory.")
-       return
-   
-   selected_file = st.selectbox("Select a stock data file", json_files)
-   
-   # Model selection
-   models = ["phi3:medium-128k", "mistral:7b-instruct-q6_K", "qwen2.5:7b", "mixtral-offloaded:latest"]
-   selected_model = st.selectbox("Select LLM model", models)
-   
-   # Load the data
-   def load_data_from_json(file_path):
-       """Load data from JSON file."""
-       try:
-           with open(file_path, 'r', encoding='utf-8') as f:
-               return json.load(f)
-       except Exception as e:
-           st.error(f"Error loading data: {str(e)}")
-           return None
-   
-   data = load_data_from_json(selected_file)
-   
-   if data:
-       st.success(f"Successfully loaded data for {data['metadata']['company_name']} ({data['metadata']['stock_symbol']})")
-       
-       # Display company info
-       col1, col2, col3 = st.columns(3)
-       with col1:
-           st.metric("Current Price", f"₹{data.get('technical_data', {}).get('current_price', 'N/A')}")
-       with col2:
-           if "stock_info" in data and "marketCap" in data["stock_info"]:
-               market_cap = data["stock_info"].get("marketCap", "N/A")
-               if market_cap != "N/A":
-                   try:
-                       market_cap = float(market_cap)
-                       market_cap_display = f"₹{market_cap/10000000:.2f} Cr" if market_cap > 10000000 else f"₹{market_cap:,}"
-                       st.metric("Market Cap", market_cap_display)
-                   except:
-                       st.metric("Market Cap", "N/A")
-       with col3:
-           if "technical_data" in data and "indicators" in data["technical_data"]:
-               rsi = data["technical_data"]["indicators"].get("RSI", "N/A")
-               st.metric("RSI", rsi)
-       
-       # Generate analysis button
-       if st.button(f"Generate Analysis using {selected_model}"):
-           with st.spinner("Analyzing data... This may take several minutes depending on your hardware."):
-               # Use our structured analysis function
-               analysis_report = generate_structured_analysis(data, selected_model)
-               
-               if analysis_report:
-                   # Display the analysis using our display function
-                   display_stock_analysis_report(analysis_report)
-               else:
-                   st.error("Failed to generate analysis. Please try a different model or check if your LLM service is running.")
+    st.title("📈 Advanced Stock Analysis Report Generator")
+    st.write("Generate a detailed stock analysis report using structured AI analysis")
+    
+    # File uploader widget
+    st.subheader("Upload Data Source")
+    
+    # Create a file uploader that accepts only JSON files
+    uploaded_file = st.file_uploader("Upload a stock data JSON file", type=['json'])
+    
+    # Model selection
+    models = ["phi3:medium-128k", "mistral:7b-instruct-q6_K", "qwen2.5:7b", "mixtral-offloaded:latest","hf.co/unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF:Q6_K","qwen2.5-32b-Stock-Research:latest"]
+    selected_model = st.selectbox("Select LLM model", models)
+    
+    # Process uploaded file
+    if uploaded_file is not None:
+        try:
+            # Load JSON data from uploaded file
+            import json
+            data = json.load(uploaded_file)
+            
+            # Display success message with company info
+            st.success(f"Successfully loaded data for {data['metadata']['company_name']} ({data['metadata']['stock_symbol']})")
+            
+            # Display company info
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Current Price", f"₹{data.get('technical_data', {}).get('current_price', 'N/A')}")
+            with col2:
+                if "stock_info" in data and "marketCap" in data["stock_info"]:
+                    market_cap = data["stock_info"].get("marketCap", "N/A")
+                    if market_cap != "N/A":
+                        try:
+                            market_cap = float(market_cap)
+                            market_cap_display = f"₹{market_cap/10000000:.2f} Cr" if market_cap > 10000000 else f"₹{market_cap:,}"
+                            st.metric("Market Cap", market_cap_display)
+                        except:
+                            st.metric("Market Cap", "N/A")
+            with col3:
+                if "technical_data" in data and "indicators" in data["technical_data"]:
+                    rsi = data["technical_data"]["indicators"].get("RSI", "N/A")
+                    st.metric("RSI", rsi)
+            
+            # Generate analysis button
+            if st.button(f"Generate Analysis using {selected_model}"):
+                with st.spinner("Analyzing data... This may take several minutes depending on your hardware."):
+                    # Use our structured analysis function
+                    analysis_report = generate_structured_analysis(data, selected_model)
+                    
+                    if analysis_report:
+                        # Display the analysis using our display function
+                        display_stock_analysis_report(analysis_report)
+                    else:
+                        st.error("Failed to generate analysis. Please try a different model or check if your LLM service is running.")
+        
+        except Exception as e:
+            st.error(f"Error processing uploaded file: {str(e)}")
+            st.info("Please ensure the uploaded file is a valid JSON file with the expected structure.")
+    else:
+        # Show instructions when no file is uploaded
+        st.info("Please upload a JSON file with stock data to begin analysis.")
+        
+        # Optionally, show sample JSON structure
+        with st.expander("Expected JSON Structure"):
+            st.code("""
+            {
+                "metadata": {
+                    "company_name": "Company Name",
+                    "stock_symbol": "SYMBOL.NS",
+                    "timestamp": "YYYY-MM-DD HH:MM:SS"
+                },
+                "financial_data": {
+                    "quarterly": { ... },
+                    "annual": { ... },
+                    "balance_sheet": { ... },
+                    "ratios": { ... },
+                    "cash_flow": { ... }
+                },
+                "technical_data": {
+                    "current_price": "1234.56",
+                    "indicators": { ... },
+                    "performance": { ... },
+                    "moving_averages": { ... },
+                    "oscillators": { ... },
+                    "pivot_points": { ... }
+                },
+                "price_history_data": {
+                    "daily_data": [ ... ],
+                    "returns_comparison": [ ... ],
+                    "returns_seasonality": [ ... ]
+                }
+            }
+            """, language="json")
 
 if __name__ == "__main__":
-   main()
+    main()

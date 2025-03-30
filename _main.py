@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import yfinance as yf
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -11,13 +10,16 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+from selenium.webdriver.common.by import By
 
 # Set page configuration
 st.set_page_config(page_title="Investment Data Scraper", page_icon="📊", layout="wide")
 
-@st.cache_resource
-def get_selenium_driver():
+def get_selenium_driver(debug_mode=False):
     """Initialize and return a Selenium WebDriver."""
+    if debug_mode:
+        st.write("🔍 **DEBUG:** Initializing Selenium WebDriver")
+    
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
@@ -25,34 +27,315 @@ def get_selenium_driver():
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-features=NetworkService")
     options.add_argument("--window-size=1920x1080")
-    options.add_argument("--disable-features=VizDisplayCompositor")
     
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    return driver
+    # Add more robust error handling
+    for attempt in range(3):
+        try:
+            if debug_mode:
+                st.write(f"🔍 **DEBUG:** Attempt {attempt+1}/3 to initialize WebDriver")
+            
+            # Try a different approach to initialize the driver
+            try:
+                # Method 1: Using ChromeDriverManager
+                service = Service(ChromeDriverManager().install())
+                driver = webdriver.Chrome(service=service, options=options)
+                if debug_mode:
+                    st.write("🔍 **DEBUG:** WebDriver initialized successfully with ChromeDriverManager")
+                return driver
+            except Exception as e1:
+                if debug_mode:
+                    st.write(f"🔍 **DEBUG:** ChromeDriverManager failed: {str(e1)}")
+                
+                try:
+                    # Method 2: Try using executable_path directly
+                    driver = webdriver.Chrome(options=options)
+                    if debug_mode:
+                        st.write("🔍 **DEBUG:** WebDriver initialized successfully with direct Chrome")
+                    return driver
+                except Exception as e2:
+                    if debug_mode:
+                        st.write(f"🔍 **DEBUG:** Direct Chrome method failed: {str(e2)}")
+                    
+                    try:
+                        # Method 3: Try Firefox as a fallback
+                        from selenium.webdriver.firefox.options import Options as FirefoxOptions
+                        from selenium.webdriver.firefox.service import Service as FirefoxService
+                        from webdriver_manager.firefox import GeckoDriverManager
+                        
+                        firefox_options = FirefoxOptions()
+                        firefox_options.add_argument("--headless")
+                        firefox_service = FirefoxService(GeckoDriverManager().install())
+                        driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
+                        if debug_mode:
+                            st.write("🔍 **DEBUG:** WebDriver initialized successfully with Firefox")
+                        return driver
+                    except Exception as e3:
+                        if debug_mode:
+                            st.write(f"🔍 **DEBUG:** Firefox fallback failed: {str(e3)}")
+                        raise Exception(f"All WebDriver methods failed: {str(e1)}, {str(e2)}, {str(e3)}")
+                        
+        except Exception as e:
+            if attempt < 2:  # Try 3 times total
+                if debug_mode:
+                    st.write(f"🔍 **DEBUG:** Attempt {attempt+1} failed: {str(e)}. Retrying...")
+                time.sleep(2)
+            else:
+                st.error(f"Failed to initialize WebDriver after 3 attempts: {str(e)}")
+                raise
+    
+    # If we get here, all attempts failed
+    raise Exception("Failed to initialize WebDriver after multiple attempts")
 
-def scrape_with_selenium(url, wait_time=5):
-    """Scrape content using Selenium for JavaScript-heavy pages."""
-    driver = get_selenium_driver()
-    
+def debug_print(message, data=None):
+    """Print debug information if debug mode is enabled."""
+    # Get debug_mode from session state instead of global variable
+    if st.session_state.get("debug_mode_main", False):
+        st.write(f"🔍 **DEBUG:** {message}")
+        if data is not None:
+            # Format different types of data appropriately
+            if isinstance(data, (dict, list)):
+                st.write("```python")
+                st.write(json.dumps(data, indent=2, default=str))
+                st.write("```")
+            elif isinstance(data, pd.DataFrame):
+                st.write("DataFrame:")
+                st.dataframe(data)
+            else:
+                st.write(f"```\n{data}\n```")
+
+def scrape_with_requests(url, debug_mode=False):
+    """Fallback scraper using regular requests instead of Selenium."""
     try:
-        st.info(f"Loading page with Selenium: {url}")
-        driver.get(url)
-        # Wait for JavaScript to load
-        time.sleep(wait_time)
+        st.info(f"Attempting to scrape with basic requests: {url}")
+        if debug_mode:
+            st.write("🔍 **DEBUG:** Using requests as fallback method")
+            
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1"
+        }
         
-        # Get the page source after JavaScript execution
-        page_source = driver.page_source
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status()
         
         # Parse with BeautifulSoup
-        soup = BeautifulSoup(page_source, 'html.parser')
-        return soup, page_source
+        soup = BeautifulSoup(response.text, 'html.parser')
+        if debug_mode:
+            st.write(f"🔍 **DEBUG:** Requests successful, received {len(response.text)} bytes")
+            st.write(f"🔍 **DEBUG:** First 500 characters: {response.text[:500]}...")
+            
+        return soup, response.text
     except Exception as e:
-        st.error(f"Error with Selenium: {str(e)}")
+        st.error(f"Error with requests scraping: {str(e)}")
+        if debug_mode:
+            import traceback
+            st.write(f"🔍 **DEBUG:** Requests error details: {traceback.format_exc()}")
         return None, None
-    finally:
-        # Don't close the driver as it's cached
-        pass
+
+def scrape_with_selenium(url, wait_time=5, debug_mode=False):
+    """Scrape content using Selenium for JavaScript-heavy pages with requests fallback."""
+    
+    if debug_mode:
+        st.write(f"🔍 **DEBUG:** Starting Selenium scraping for URL: {url}")
+    
+    try:
+        driver = get_selenium_driver(debug_mode=debug_mode)
+        
+        try:
+            st.info(f"Loading page with Selenium: {url}")
+            if debug_mode:
+                st.write(f"🔍 **DEBUG:** Attempting to load URL with Selenium")
+                
+            driver.get(url)
+            
+            # Wait for JavaScript to load
+            if debug_mode:
+                st.write(f"🔍 **DEBUG:** Waiting {wait_time} seconds for JavaScript to load")
+            time.sleep(wait_time)
+            
+            # Get the page source after JavaScript execution
+            page_source = driver.page_source
+            
+            if debug_mode:
+                st.write(f"🔍 **DEBUG:** Page source received, length: {len(page_source)} characters")
+                st.write("🔍 **DEBUG:** First 500 characters of page source:")
+                st.write(f"```html\n{page_source[:500]}...\n```")
+            
+            # Parse with BeautifulSoup
+            soup = BeautifulSoup(page_source, 'html.parser')
+            if debug_mode:
+                st.write(f"🔍 **DEBUG:** BeautifulSoup object created")
+                
+            return soup, page_source
+        except Exception as e:
+            st.error(f"Error with Selenium: {str(e)}")
+            if debug_mode:
+                st.write("🔍 **DEBUG:** Full Selenium error:")
+                import traceback
+                st.write(f"```python\n{traceback.format_exc()}\n```")
+                st.write("🔍 **DEBUG:** Falling back to requests method...")
+            
+            # Fallback to requests method
+            return scrape_with_requests(url, debug_mode=debug_mode)
+        finally:
+            # Close the driver as we don't need it anymore
+            if debug_mode:
+                st.write("🔍 **DEBUG:** Attempting to close WebDriver")
+            try:
+                driver.quit()
+                if debug_mode:
+                    st.write("🔍 **DEBUG:** WebDriver closed successfully")
+            except Exception as e:
+                if debug_mode:
+                    st.write(f"🔍 **DEBUG:** Error closing WebDriver: {str(e)}")
+    except Exception as e:
+        st.error(f"Error initializing Selenium: {str(e)}")
+        if debug_mode:
+            st.write("🔍 **DEBUG:** Selenium initialization failed, trying requests fallback...")
+        
+        # Fallback to requests if Selenium can't be initialized
+        return scrape_with_requests(url, debug_mode=debug_mode)
+    
+def extract_financial_tables(soup):
+    """Extract financial tables from a BeautifulSoup object."""
+    # Access debug_mode from global scope or pass it as a parameter
+    global debug_mode  # Add this line to access debug_mode from global scope
+    
+    financial_data = {
+        "quarterly": {},
+        "annual": {},
+        "balance_sheet": {},
+        "ratios": {},
+        "cash_flow": {}
+    }
+    
+    # Find all tables for financial data
+    tables = soup.find_all('table')
+    
+    for i, table in enumerate(tables):
+        # Extract headers
+        headers = []
+        header_row = table.find('tr')
+        if header_row:
+            headers = [th.text.strip() for th in header_row.find_all(['th', 'td'])]
+        
+        # Filter out graph columns and other unwanted columns
+        unwanted_terms = ['graph', 'created with highcharts', 'earnings_transcripts', 
+                         'results_pdf', 'result_notes', 'Annual_Reports']
+        
+        clean_headers = []
+        clean_indices = []
+        
+        for j, header in enumerate(headers):
+            if not any(term in header.lower() for term in unwanted_terms):
+                clean_headers.append(header)
+                clean_indices.append(j)
+        
+        # Extract rows - Fix the 'td' error here by extracting all cells from each row
+        rows = []
+        for tr in table.find_all('tr')[1:]:  # Skip header row
+            cells = [td.text.strip() for td in tr.find_all(['td', 'th'])]  # Changed 'td' to 'tr'
+            
+            # Skip rows with unwanted terms in the first column
+            if cells and any(term in cells[0].lower() for term in 
+                           ['earnings_transcripts', 'results_pdf', 'result_notes', 'Annual_Reports']):
+                continue
+                
+            # Filter the cells to match clean headers
+            clean_cells = [cells[j] for j in clean_indices if j < len(cells)]
+            
+            if clean_cells and len(clean_cells) > 1:  # Ensure row has content
+                rows.append(clean_cells)
+        
+        # Skip empty tables
+        if not rows:
+            continue
+            
+        # Categorize the table based on its content
+        # First, create table_text using both headers and rows (rows is now defined)
+        table_text = ' '.join(clean_headers).lower() + ' ' + ' '.join([' '.join(row) for row in rows]).lower()
+        
+        # Check for quarterly indicators in headers
+        quarter_pattern = re.compile(r'q[1-4]|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec')
+        date_pattern = re.compile(r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*['`]?\d{2}", re.IGNORECASE)
+        year_pattern = re.compile(r'20\d\d|19\d\d|fy\d\d')
+        cash_flow_pattern = re.compile(r'cash|operating|investing|financing')
+        
+        quarter_matches = sum(1 for h in clean_headers if quarter_pattern.search(str(h).lower()))
+        date_matches = sum(1 for h in clean_headers if date_pattern.search(str(h)))
+        year_matches = sum(1 for h in clean_headers if year_pattern.search(str(h).lower()))
+        
+        # Check if this is a quarterly results table specifically
+        is_quarterly_results = 'quarterly results' in table_text.lower() or 'quarterly revenue' in table_text.lower()
+        
+        # Check for multiple date columns in the format "MMM 'YY"
+        has_quarterly_dates = False
+        date_format_pattern = re.compile(r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*['\']?\d{2}", re.IGNORECASE)
+        date_columns_count = sum(1 for h in clean_headers if date_format_pattern.search(str(h)))
+        if date_columns_count >= 3:  # If at least 3 columns have date formats like "Dec '24"
+            has_quarterly_dates = True
+            
+        # Special case for ICICI Bank pattern (look for specific content markers)
+        icici_quarterly_pattern = False
+        if any('total rev' in row[0].lower() for row in rows if row and len(row) > 0):
+            if any('dec' in str(h).lower() and "'" in str(h).lower() for h in clean_headers):
+                icici_quarterly_pattern = True
+                if debug_mode:
+                    st.write(f"🔍 **DEBUG:** Detected ICICI Bank quarterly results pattern in Table {i+1}")
+        
+        # Determine category based on table content and patterns
+        if 'cash flow' in table_text or 'operating activities' in table_text or 'financing' in table_text:
+            category = "cash_flow"
+        elif 'balance sheet' in table_text or 'assets' in table_text or 'liabilities' in table_text:
+            category = "balance_sheet"
+        elif 'ratio' in table_text or 'roe' in table_text or 'roa' in table_text:
+            category = "ratios"
+        elif is_quarterly_results or has_quarterly_dates or icici_quarterly_pattern:
+            category = "quarterly"
+            if debug_mode:
+                reason = []
+                if is_quarterly_results: reason.append("contains 'quarterly results' text")
+                if has_quarterly_dates: reason.append("has quarterly date columns")
+                if icici_quarterly_pattern: reason.append("matches ICICI quarterly pattern")
+                st.write(f"🔍 **DEBUG:** Table {i+1} categorized as quarterly because: {', '.join(reason)}")
+        elif 'quarterly' in table_text or 'quarter' in table_text:
+            category = "quarterly"
+        elif 'annual' in table_text or 'yearly' in table_text or 'year' in table_text:
+            category = "annual"
+        elif cash_flow_pattern.search(table_text):
+            category = "cash_flow"
+        elif date_matches >= 3 or quarter_matches > year_matches:
+            # Special case for tables with multiple date columns like "Dec '24"
+            category = "quarterly"
+            if debug_mode:
+                st.write(f"🔍 **DEBUG:** Table {i+1} categorized as quarterly based on date patterns")
+        elif year_matches > 0:
+            category = "annual"
+        else:
+            # Default to quarterly for tables that look like financial data
+            # but don't clearly fit other categories
+            category = "quarterly"
+        
+        if debug_mode:
+            st.write(f"🔍 **DEBUG:** Table {i+1} final category: {category}")
+            st.write(f"🔍 **DEBUG:** Table {i+1} has {len(clean_headers)} headers and {len(rows)} rows")
+        
+        # Store the table data with clean headers
+        financial_data[category][f"Table_{i+1}"] = {
+            "headers": clean_headers,
+            "rows": rows
+        }
+    
+    # Add summary of categorized tables if in debug mode
+    if debug_mode:
+        for category, tables in financial_data.items():
+            st.write(f"🔍 **DEBUG:** Category '{category}' has {len(tables)} tables")
+    
+    return financial_data
 
 def extract_share_price_history(soup):
     """Extract share price history and returns data from a BeautifulSoup object."""
@@ -91,10 +374,16 @@ def extract_share_price_history(soup):
         if is_daily_table:
             for row in table.find_all('tr')[1:]:  # Skip header row
                 cells = [cell.text.strip() for cell in row.find_all(['td', 'th'])]
-                if len(cells) < len(headers):
+                
+                # Skip rows with specific indicators or metadata
+                if not cells or len(cells) < 2:
                     continue
-                    
-                # Create a dictionary from the cells
+                
+                # Skip rows containing metadata indicators
+                if any(indicator in cells[0] for indicator in ["POSITIVE", "NEGATIVE", "Notes", "Earnings Transcripts", "Results PDF"]):
+                    continue
+                
+                # Create a clean row with proper data
                 row_data = {}
                 for i, header in enumerate(headers):
                     if i < len(cells):
@@ -105,6 +394,7 @@ def extract_share_price_history(soup):
                             row_data[header_clean] = cells[i]
                 
                 if row_data:  # Only add if we have data
+                    # FIX: Append to price_history["daily_data"] instead of undefined rows
                     price_history["daily_data"].append(row_data)
         
         elif is_returns_comparison:
@@ -226,104 +516,6 @@ def extract_share_price_history(soup):
     
     return price_history
 
-def get_stock_info(symbol):
-    """Get basic stock information using yfinance."""
-    try:
-        st.info(f"Fetching stock information for: {symbol}")
-        stock = yf.Ticker(symbol)
-        info = stock.info
-        
-        # Extract relevant information
-        relevant_info = {
-            "name": info.get("longName", "N/A"),
-            "sector": info.get("sector", "N/A"),
-            "industry": info.get("industry", "N/A"),
-            "currentPrice": info.get("currentPrice", "N/A"),
-            "marketCap": info.get("marketCap", "N/A"),
-            "trailingPE": info.get("trailingPE", "N/A"),
-            "dividendYield": info.get("dividendYield", "N/A") * 100 if info.get("dividendYield") else "N/A",
-            "52WeekHigh": info.get("fiftyTwoWeekHigh", "N/A"),
-            "52WeekLow": info.get("fiftyTwoWeekLow", "N/A"),
-        }
-        
-        return relevant_info
-    except Exception as e:
-        st.error(f"Error fetching stock information: {str(e)}")
-        return {}
-
-def extract_financial_tables(soup):
-    """Extract financial tables from a BeautifulSoup object."""
-    financial_data = {
-        "quarterly": {},
-        "annual": {},
-        "balance_sheet": {},
-        "ratios": {},
-        "cash_flow": {}
-    }
-    
-    # Find all tables
-    tables = soup.find_all('table')
-    st.write(f"Found {len(tables)} tables on the page")
-    
-    for i, table in enumerate(tables):
-        # Extract headers
-        headers = []
-        header_row = table.find('tr')
-        if header_row:
-            headers = [th.text.strip() for th in header_row.find_all(['th', 'td'])]
-        
-        # Extract rows
-        rows = []
-        for tr in table.find_all('tr')[1:] if headers else table.find_all('tr'):
-            row = [td.text.strip() for td in tr.find_all(['td', 'th'])]
-            if row and len(row) > 1:  # Ensure row has content
-                rows.append(row)
-        
-        # Skip empty tables
-        if not rows:
-            continue
-            
-        # Categorize the table based on its content
-        table_text = ' '.join(headers) + ' ' + ' '.join([' '.join(row) for row in rows])
-        table_text = table_text.lower()
-        
-        category = None
-        
-        # Determine category based on table content
-        if 'quarterly' in table_text or 'quarter' in table_text:
-            category = "quarterly"
-        elif 'annual' in table_text or 'yearly' in table_text or 'year' in table_text:
-            category = "annual"
-        elif 'balance sheet' in table_text or 'assets' in table_text or 'liabilities' in table_text:
-            category = "balance_sheet"
-        elif 'ratio' in table_text or 'roe' in table_text or 'roa' in table_text:
-            category = "ratios"
-        elif 'cash flow' in table_text or 'operating activities' in table_text:
-            category = "cash_flow"
-        else:
-            # Try to infer from structure if not explicitly stated
-            # Quarter columns often have Q1, Q2, Q3, Q4 or month names
-            quarter_pattern = re.compile(r'q[1-4]|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec')
-            year_pattern = re.compile(r'20\d\d|19\d\d|fy\d\d')
-            
-            quarter_matches = sum(1 for h in headers if quarter_pattern.search(h.lower()))
-            year_matches = sum(1 for h in headers if year_pattern.search(h.lower()))
-            
-            if quarter_matches > year_matches:
-                category = "quarterly"
-            elif year_matches > 0:
-                category = "annual"
-            else:
-                # Default to quarterly as it's most common
-                category = "quarterly"
-        
-        # Store the table data
-        financial_data[category][f"Table_{i+1}"] = {
-            "headers": headers,
-            "rows": rows
-        }
-    
-    return financial_data
 
 def extract_technical_indicators(soup):
     """Extract technical indicators from a BeautifulSoup object."""
@@ -482,46 +674,106 @@ def extract_technical_indicators(soup):
         if delivery_volume_pattern:
             technical_data["volume_analysis"]["Delivery Volume"] = delivery_volume_pattern.group(1) + "M"
     
-    # Extract support and resistance
-    support_resistance = {}
-    
-    # Support levels
-    # Support levels
-    support_patterns = [
-        (r'Support 1\s*([\d,.]+)', 'S1'),
-        (r'Support 2\s*([\d,.]+)', 'S2'),
-        (r'Support 3\s*([\d,.]+)', 'S3')
-    ]
+    # Extract pivot points - generalized for any stock symbol
+    pivot_section_pattern = re.compile(r'PIVOT\s+LEVEL(.*?)(?:\n\n|\Z)', re.DOTALL | re.IGNORECASE)
+    pivot_section = pivot_section_pattern.search(text)
 
-    support_list = []
-    for pattern, label in support_patterns:
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        if matches:
-            for match in matches:
-                # Make sure we're only getting valid number strings
-                if re.match(r'^[\d,.]+$', match):
-                    support_list.append(match)
+    if not pivot_section:
+        # Try alternative patterns that might indicate a pivot section
+        pivot_section = re.search(r'(?:PIVOT|SUPPORT.*?RESISTANCE)(.*?)(?:\n\n|\Z)', text, re.DOTALL | re.IGNORECASE)
 
-    # Resistance levels
-    resistance_patterns = [
-        (r'Resistance 1\s*([\d,.]+)', 'R1'),
-        (r'Resistance 2\s*([\d,.]+)', 'R2'),
-        (r'Resistance 3\s*([\d,.]+)', 'R3')
-    ]
-
-    resistance_list = []
-    for pattern, label in resistance_patterns:
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        if matches:
-            for match in matches:
-                # Make sure we're only getting valid number strings
-                if re.match(r'^[\d,.]+$', match):
-                    resistance_list.append(match)
-    
-    if resistance_list:
-        support_resistance["resistance"] = resistance_list
-    
-    technical_data["support_resistance"] = support_resistance
+    if pivot_section:
+        pivot_text = pivot_section.group(1)
+        
+        # Initialize pivot points structure
+        technical_data["pivot_points"] = {}
+        
+        # Try to extract pivot data from HTML table structure
+        pivot_table = soup.find('table', class_='pivot-table')
+        
+        if pivot_table:
+            # Found a structured table - extract methods from header
+            headers = [th.text.strip() for th in pivot_table.find('thead').find_all('th')]
+            methods = headers[1:]  # Skip the first header (usually empty)
+            
+            # Process each row in the table
+            for row in pivot_table.find('tbody').find_all('tr'):
+                cells = row.find_all('td')
+                if len(cells) >= 2:  # Need at least one value
+                    level_name = cells[0].text.strip()
+                    
+                    # Determine the pivot level code
+                    level_code = None
+                    if 'Resistance 3' in level_name:
+                        level_code = 'R3'
+                    elif 'Resistance 2' in level_name:
+                        level_code = 'R2'
+                    elif 'Resistance 1' in level_name:
+                        level_code = 'R1'
+                    elif 'Pivot Point' in level_name:
+                        level_code = 'PP'
+                    elif 'Support 1' in level_name:
+                        level_code = 'S1'
+                    elif 'Support 2' in level_name:
+                        level_code = 'S2'
+                    elif 'Support 3' in level_name:
+                        level_code = 'S3'
+                    
+                    if level_code:
+                        # Extract values for each method
+                        for i, method in enumerate(methods):
+                            if i+1 < len(cells):  # Check if cell exists
+                                value = cells[i+1].text.strip()
+                                
+                                # Store in nested structure
+                                if method not in technical_data["pivot_points"]:
+                                    technical_data["pivot_points"][method] = {}
+                                
+                                technical_data["pivot_points"][method][level_code] = value
+        else:
+            # Fallback to regex extraction if table not found
+            method_pattern = re.compile(r'(Classic|Woodie|Camarilla|Fibonacci|Traditional|DeMark)', re.IGNORECASE)
+            method_matches = method_pattern.findall(pivot_text)
+            
+            # If no methods found in text, use default generic method
+            methods = method_matches if method_matches else ["Method1"]
+            
+            # For each method, initialize empty dict
+            for method in methods:
+                technical_data["pivot_points"][method] = {}
+            
+            # Define pivot levels to extract
+            pivot_levels = [
+                ('Resistance 3', 'R3'),
+                ('Resistance 2', 'R2'), 
+                ('Resistance 1', 'R1'),
+                ('Pivot Point', 'PP'),
+                ('Support 1', 'S1'),
+                ('Support 2', 'S2'),
+                ('Support 3', 'S3')
+            ]
+            
+            # Extract each level
+            for level_name, level_code in pivot_levels:
+                # Look for the level in text
+                pattern = re.compile(f'{level_name}\\s*([-\\d.,]+)', re.IGNORECASE)
+                match = pattern.search(pivot_text)
+                
+                if match:
+                    value_str = match.group(1).strip()
+                    
+                    # Handle different possible formats
+                    if '.' in value_str and value_str.count('.') > methods.count('.'):
+                        # Try to split concatenated values
+                        values = re.findall(r'(\d+\.\d+)', value_str)
+                        
+                        # Assign values to methods
+                        for i, method in enumerate(methods):
+                            if i < len(values):
+                                technical_data["pivot_points"][method][level_code] = values[i]
+                    else:
+                        # If only one value, assign to first method
+                        technical_data["pivot_points"][methods[0]][level_code] = value_str
     
     return technical_data
 
@@ -535,9 +787,17 @@ def save_data_to_file(data, filename):
         st.error(f"Error saving data to {filename}: {str(e)}")
         return False
 
+debug_mode = False 
+
 def main():
+    global debug_mode  # Tell Python we're using the global version
     st.title("📊 Advanced Stock Data Scraper")
     st.write("Enter company details and URLs to scrape investment research data.")
+    
+    # Debug mode toggle should be at the beginning
+    debug_mode = st.sidebar.checkbox("Enable Debug Mode", False)
+    if debug_mode:
+        st.sidebar.warning("Debug mode is enabled. Detailed information will be shown.")
     
     # Create form for input
     with st.form("stock_data_form"):
@@ -559,7 +819,6 @@ def main():
             help="URL containing technical analysis data for the stock"
         )
         
-        # Add new field for share price history
         price_history_url = st.text_input(
             "Share Price History URL (Optional)",
             value="",
@@ -582,27 +841,6 @@ def main():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         base_filename = f"{stock_symbol.replace('.', '_')}_{timestamp}"
         
-        # Try to get basic stock information from yfinance
-        stock_info = get_stock_info(stock_symbol)
-        if stock_info:
-            scraped_data["stock_info"] = stock_info
-            
-            # Display basic stock information
-            st.subheader("Basic Stock Information")
-            info_col1, info_col2, info_col3 = st.columns(3)
-            
-            with info_col1:
-                st.metric("Current Price", f"₹{stock_info.get('currentPrice', 'N/A')}")
-            
-            with info_col2:
-                market_cap = stock_info.get('marketCap', 'N/A')
-                if market_cap != 'N/A':
-                    market_cap = f"₹{market_cap/10000000:.2f} Cr" if market_cap > 10000000 else f"₹{market_cap:,}"
-                st.metric("Market Cap", market_cap)
-            
-            with info_col3:
-                st.metric("P/E Ratio", stock_info.get('trailingPE', 'N/A'))
-        
         # Scrape financial data if URL provided
         if financials_url:
             with st.expander("Financial Data Scraping Results", expanded=True):
@@ -610,47 +848,74 @@ def main():
                 
                 # Use Selenium to handle JavaScript-rendered content
                 soup, html_content = scrape_with_selenium(financials_url)
-                
+
                 if soup:
-                    # Save HTML for debugging
-                    # html_filename = f"debug_{base_filename}_financials.html"
-                    # with open(html_filename, 'w', encoding='utf-8') as f:
-                    #     f.write(html_content)
-                    # st.success(f"Saved raw HTML to {html_filename} for debugging")
-                    
                     # Extract financial tables
                     financial_data = extract_financial_tables(soup)
                     scraped_data["financial_data"] = financial_data
+                        
+                    # Remove unwanted fields from all tables
+                    for category in financial_data:
+                        if isinstance(financial_data[category], dict):
+                            for table_name, table_data in financial_data[category].items():
+                                # Filter rows that contain unwanted fields
+                                filtered_rows = []
+                                for row in table_data["rows"]:
+                                    if row and not any(unwanted in row[0] for unwanted in 
+                                                    ["earnings_transcripts", "results_pdf", "result_notes", "Annual_Reports"]):
+                                        filtered_rows.append(row)
+                                
+                                table_data["rows"] = filtered_rows
                     
                     # Create tabs for different financial sections
                     fin_tabs = st.tabs(["Quarterly Results", "Annual Results", "Balance Sheet", "Financial Ratios", "Cash Flow"])
                     
-                    # Quarterly Results
+                    # Display each section in its tab (implementation of each tab)
+                                        # Quarterly Results
+                    # In the quarterly tab display code
                     with fin_tabs[0]:
                         if financial_data["quarterly"]:
                             for table_name, table_data in financial_data["quarterly"].items():
                                 st.write(f"**{table_name}**")
+                                
+                                # Extract and clean up headers and rows
                                 if table_data["headers"] and table_data["rows"]:
                                     try:
                                         # Filter out graph columns
-                                        headers = [h for h in table_data["headers"] if 'graph' not in h.lower()]
+                                        headers = []
+                                        for h in table_data["headers"]:
+                                            clean_h = h.strip()
+                                            if not ('graph' in clean_h.lower()):
+                                                headers.append(clean_h)
+                                        
+                                        # Process rows
                                         rows = []
                                         for row in table_data["rows"]:
+                                            # Skip metadata rows
+                                            if not row or len(row) < 2:
+                                                continue
+                                            if any(indicator in row[0] for indicator in ["POSITIVE", "NEGATIVE", "Notes", "Earnings Transcripts", "Results PDF"]):
+                                                continue
+                                            
                                             # Filter row to match headers length
                                             filtered_row = []
                                             for i, h in enumerate(table_data["headers"]):
-                                                if 'graph' not in h.lower() and i < len(row):
+                                                if not ('graph' in h.lower()) and i < len(row):
                                                     filtered_row.append(row[i])
-                                            if filtered_row:
+                                            
+                                            if filtered_row and len(filtered_row) > 1:
                                                 rows.append(filtered_row)
-                                                
+                                        
                                         if headers and rows:
+                                            # Create dataframe with the cleaned data
                                             df = pd.DataFrame(rows, columns=headers)
                                             st.dataframe(df)
+                                        else:
+                                            st.warning(f"No valid data found in {table_name} after filtering")
                                     except Exception as e:
-                                        st.error(f"Error displaying table: {e}")
-                        else:
-                            st.info("No quarterly data found")
+                                        st.error(f"Error displaying table: {str(e)}")
+                            else:
+                                st.info("No quarterly data found in the provided URL")
                     
                     # Annual Results
                     with fin_tabs[1]:
@@ -759,6 +1024,9 @@ def main():
                                         st.error(f"Error displaying table: {e}")
                         else:
                             st.info("No cash flow data found")
+                else:
+                    st.error("Failed to retrieve financial data. Please check the URL and try again.")
+                    st.info("You can still proceed with other sections if available.")
         
         # Scrape technical data if URL provided
         # Scrape technical data if URL provided
@@ -771,10 +1039,10 @@ def main():
                 
                 if soup:
                     # Save HTML for debugging
-                    html_filename = f"debug_{base_filename}_technicals.html"
-                    with open(html_filename, 'w', encoding='utf-8') as f:
-                        f.write(html_content)
-                    st.success(f"Saved raw HTML to {html_filename} for debugging")
+                    # html_filename = f"debug_{base_filename}_technicals.html"
+                    # with open(html_filename, 'w', encoding='utf-8') as f:
+                    #     f.write(html_content)
+                    # st.success(f"Saved raw HTML to {html_filename} for debugging")
                     
                     # Extract technical indicators
                     technical_data = extract_technical_indicators(soup)
@@ -1008,61 +1276,209 @@ def main():
                             st.info("No volume analysis data found")
                     
                     # Pivot Points Tab
+                    # Pivot Points Tab
                     with tech_tabs[5]:
                         if technical_data["pivot_points"]:
                             st.subheader("Pivot Points")
                             
-                            # Create columns for resistances and supports
-                            res_col, pivot_col, supp_col = st.columns(3)
+                            # Check if we have a nested structure with methods
+                            methods = list(technical_data["pivot_points"].keys())
                             
-                            with res_col:
-                                st.subheader("Resistance Levels")
-                                for level in ["R3", "R2", "R1"]:
-                                    if level in technical_data["pivot_points"]:
-                                        st.markdown(f"**{level}:** ₹{technical_data['pivot_points'][level]}")
-                            
-                            with pivot_col:
-                                st.subheader("Pivot Point")
-                                if "PP" in technical_data["pivot_points"]:
-                                    st.markdown(f"**PP:** ₹{technical_data['pivot_points']['PP']}")
-                            
-                            with supp_col:
-                                st.subheader("Support Levels")
-                                for level in ["S1", "S2", "S3"]:
-                                    if level in technical_data["pivot_points"]:
-                                        st.markdown(f"**{level}:** ₹{technical_data['pivot_points'][level]}")
-                            
-                            # Display price vs pivot levels if current price is available
-                            # Display price vs pivot levels if current price is available
-                            if technical_data["current_price"]:
-                                st.subheader("Price Location")
-                                current_price = float(technical_data["current_price"].replace(',', ''))
+                            # Create tabs for each method if we have multiple methods
+                            if len(methods) > 1:
+                                pivot_tabs = st.tabs(methods)
                                 
-                                pivot_levels = {}
-                                for level, value in technical_data["pivot_points"].items():
+                                # Display each method's pivot points in its own tab
+                                for i, method in enumerate(methods):
+                                    with pivot_tabs[i]:
+                                        method_data = technical_data["pivot_points"][method]
+                                        
+                                        # Display pivots in columns
+                                        res_col, pivot_col, supp_col = st.columns(3)
+                                        
+                                        with res_col:
+                                            st.subheader("Resistance Levels")
+                                            for level in ["R3", "R2", "R1"]:
+                                                if level in method_data:
+                                                    st.markdown(f"**{level}:** ₹{method_data[level]}")
+                                        
+                                        with pivot_col:
+                                            st.subheader("Pivot Point")
+                                            if "PP" in method_data:
+                                                st.markdown(f"**PP:** ₹{method_data['PP']}")
+                                        
+                                        with supp_col:
+                                            st.subheader("Support Levels")
+                                            for level in ["S1", "S2", "S3"]:
+                                                if level in method_data:
+                                                    st.markdown(f"**{level}:** ₹{method_data[level]}")
+                                        
+                                        # Display price comparison for this method
+                                        if technical_data["current_price"]:
+                                            st.subheader("Price Location")
+                                            
+                                            try:
+                                                # Convert current price to float
+                                                current_price = float(technical_data["current_price"].replace(',', ''))
+                                                
+                                                # Process pivot levels for this method
+                                                pivot_levels = {}
+                                                for level, value in method_data.items():
+                                                    try:
+                                                        pivot_levels[level] = float(value.replace(',', ''))
+                                                    except ValueError:
+                                                        st.warning(f"Could not parse pivot value: {value}")
+                                                
+                                                # Determine price location
+                                                if pivot_levels:
+                                                    above_levels = []
+                                                    below_levels = []
+                                                    at_levels = []
+                                                    
+                                                    # Define a small tolerance (0.1% of price)
+                                                    tolerance = current_price * 0.001
+                                                    
+                                                    for level, value in pivot_levels.items():
+                                                        if current_price > value + tolerance:
+                                                            above_levels.append(level)
+                                                        elif current_price < value - tolerance:
+                                                            below_levels.append(level)
+                                                        else:
+                                                            at_levels.append(level)
+                                                    
+                                                    if above_levels:
+                                                        st.markdown(f"**Price is above:** {', '.join(above_levels)}")
+                                                    if at_levels:
+                                                        st.markdown(f"**Price is at/near:** {', '.join(at_levels)}")
+                                                    if below_levels:
+                                                        st.markdown(f"**Price is below:** {', '.join(below_levels)}")
+                                                else:
+                                                    st.warning("No valid pivot levels found for comparison")
+                                                    
+                                            except Exception as e:
+                                                st.error(f"Error processing pivot points: {str(e)}")
+                                                if debug_mode:
+                                                    import traceback
+                                                    st.error(f"Traceback: {traceback.format_exc()}")
+                            else:
+                                # For single method or flat structure, show directly
+                                # Determine what data structure we have
+                                if methods and isinstance(technical_data["pivot_points"][methods[0]], dict):
+                                    # We have a nested structure with one method
+                                    method_data = technical_data["pivot_points"][methods[0]]
+                                    
+                                    # Display columns
+                                    res_col, pivot_col, supp_col = st.columns(3)
+                                    
+                                    with res_col:
+                                        st.subheader("Resistance Levels")
+                                        for level in ["R3", "R2", "R1"]:
+                                            if level in method_data:
+                                                st.markdown(f"**{level}:** ₹{method_data[level]}")
+                                    
+                                    with pivot_col:
+                                        st.subheader("Pivot Point")
+                                        if "PP" in method_data:
+                                            st.markdown(f"**PP:** ₹{method_data['PP']}")
+                                    
+                                    with supp_col:
+                                        st.subheader("Support Levels")
+                                        for level in ["S1", "S2", "S3"]:
+                                            if level in method_data:
+                                                st.markdown(f"**{level}:** ₹{method_data[level]}")
+                                else:
+                                    # We have a flat structure (old format)
+                                    res_col, pivot_col, supp_col = st.columns(3)
+                                    
+                                    with res_col:
+                                        st.subheader("Resistance Levels")
+                                        for level in ["R3", "R2", "R1"]:
+                                            if level in technical_data["pivot_points"]:
+                                                st.markdown(f"**{level}:** ₹{technical_data['pivot_points'][level]}")
+                                    
+                                    with pivot_col:
+                                        st.subheader("Pivot Point")
+                                        if "PP" in technical_data["pivot_points"]:
+                                            st.markdown(f"**PP:** ₹{technical_data['pivot_points']['PP']}")
+                                    
+                                    with supp_col:
+                                        st.subheader("Support Levels")
+                                        for level in ["S1", "S2", "S3"]:
+                                            if level in technical_data["pivot_points"]:
+                                                st.markdown(f"**{level}:** ₹{technical_data['pivot_points'][level]}")
+                                
+                                # Display price comparison
+                                if technical_data["current_price"]:
+                                    st.subheader("Price Location")
+                                    
                                     try:
-                                        pivot_levels[level] = float(value.replace(',', ''))
-                                    except ValueError:
-                                        # Skip values that can't be converted to float
-                                        st.warning(f"Could not parse pivot value: {value}")
-                                        continue
-                                
-                                # Only proceed if we have valid pivot levels
-                                if pivot_levels:
-                                    # Determine where price is relative to pivot levels
-                                    above_levels = []
-                                    below_levels = []
-                                    
-                                    for level, value in pivot_levels.items():
-                                        if current_price > value:
-                                            above_levels.append(level)
+                                        # Convert current price to float
+                                        current_price = float(technical_data["current_price"].replace(',', ''))
+                                        
+                                        # Determine the structure of pivot_points
+                                        pivot_levels = {}
+                                        
+                                        if methods and isinstance(technical_data["pivot_points"][methods[0]], dict):
+                                            # Nested structure
+                                            method_data = technical_data["pivot_points"][methods[0]]
+                                            for level, value in method_data.items():
+                                                try:
+                                                    pivot_levels[level] = float(value.replace(',', ''))
+                                                except ValueError:
+                                                    st.warning(f"Could not parse pivot value: {value}")
                                         else:
-                                            below_levels.append(level)
-                                    
-                                    if above_levels:
-                                        st.markdown(f"**Price is above:** {', '.join(above_levels)}")
-                                    if below_levels:
-                                        st.markdown(f"**Price is below:** {', '.join(below_levels)}")
+                                            # Flat structure
+                                            for level, value in technical_data["pivot_points"].items():
+                                                if isinstance(value, str):
+                                                    # Check if the value might be concatenated
+                                                    if value.count('.') > 1:
+                                                        # Extract first decimal number
+                                                        decimal_matches = re.findall(r'(\d+\.\d+)', value)
+                                                        if decimal_matches:
+                                                            try:
+                                                                pivot_levels[level] = float(decimal_matches[0])
+                                                            except ValueError:
+                                                                st.warning(f"Could not parse pivot value: {value}")
+                                                    else:
+                                                        try:
+                                                            pivot_levels[level] = float(value.replace(',', ''))
+                                                        except ValueError:
+                                                            st.warning(f"Could not parse pivot value: {value}")
+                                        
+                                        # Determine price location
+                                        if pivot_levels:
+                                            above_levels = []
+                                            below_levels = []
+                                            at_levels = []
+                                            
+                                            # Define a small tolerance (0.1% of price)
+                                            tolerance = current_price * 0.001
+                                            
+                                            for level, value in pivot_levels.items():
+                                                if current_price > value + tolerance:
+                                                    above_levels.append(level)
+                                                elif current_price < value - tolerance:
+                                                    below_levels.append(level)
+                                                else:
+                                                    at_levels.append(level)
+                                            
+                                            if above_levels:
+                                                st.markdown(f"**Price is above:** {', '.join(above_levels)}")
+                                            if at_levels:
+                                                st.markdown(f"**Price is at/near:** {', '.join(at_levels)}")
+                                            if below_levels:
+                                                st.markdown(f"**Price is below:** {', '.join(below_levels)}")
+                                        else:
+                                            st.warning("No valid pivot levels found for comparison")
+                                            
+                                    except Exception as e:
+                                        st.error(f"Error processing pivot points: {str(e)}")
+                                        if debug_mode:
+                                            st.error(f"Debug info - pivot_points data: {technical_data['pivot_points']}")
+                                            import traceback
+                                            st.error(f"Traceback: {traceback.format_exc()}")
+                                else:
+                                    st.info("Current price information not available for comparison")
                         else:
                             st.info("No pivot point data found")
         
@@ -1236,6 +1652,10 @@ def main():
                                 st.error(f"Error creating chart: {e}")
                         else:
                             st.info("No data available for charting")
+            # After processing is complete
+            if debug_mode:
+                st.write("🔍 **DEBUG:** Data scraping complete")
+                st.write(f"🔍 **DEBUG:** Data saved to file: {json_filename}")
         
         # Save all scraped data to JSON file
         json_filename = f"{base_filename}_all_data.json"
